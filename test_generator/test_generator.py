@@ -33,7 +33,7 @@ WINV_TXT      = open("WINV.txt","w")
 # -------------------------------------------------------------------------- TXT
 
 # Pre-defined parameter set
-PC = 0 # 0: generate parameters / 1: use pre-defined parameter set
+PC = 1 # 0: generate parameters / 1: use pre-defined parameter set
 
 # Number of Processing Elements
 P = 8
@@ -47,8 +47,8 @@ w_inv   = 0
 n_inv   = 0
 
 if PC:
-    N, K, q, psi = 1024, 19, 520193, 98
-    #N, K, q, psi = 1024, 27, 132120577, 73993
+    #N, K, q, psi = 1024, 19, 520193, 98
+    N, K, q, psi = 1024, 27, 134215681, 282116 #This is what we want to use
     #N, K, q, psi = 1024, 29, 463128577, 61961
     #N, K, q, psi = 2048, 30, 618835969, 327404
     #N, K, q, psi = 2048, 37, 137438691329, 22157790
@@ -59,6 +59,8 @@ if PC:
     #N, K, q, psi = 16384, 49, 562949951881217, 45092463253
     #N, K, q, psi = 16384, 50, 1125899903500289, 68423600398
     #N, K, q, psi = 32768, 55, 36028797009985537, 5947090524825
+    #PALISADE: 134215681
+    #THIS    : 132120577
 
     psi_inv = modinv(psi,q)
     w       = pow(psi,2,q)
@@ -69,7 +71,7 @@ if PC:
     PE      = P*2
 else:
     # Input parameters
-    N, K = 256, 13
+    #N, K = 256, 13
     #N, K = 256, 23
     #N, K = 512, 14
     #N, K = 1024, 14
@@ -77,12 +79,15 @@ else:
     #N, K = 2048, 30
     #N, K = 4096, 60
 
+    #PALISADEPARMS
+    N, K, q = 1024, 27, 134215681
+    PALISADE = True
     while(1):
-        q = generate_large_prime(K)
-        # check q = 1 (mod 2n or n)
-        while (not ((q % (2*N)) == 1)):
+        if not PALISADE:
             q = generate_large_prime(K)
-
+            # check q = 1 (mod 2n or n)
+            while (not ((q % (2*N)) == 1)):
+                q = generate_large_prime(K)
         # generate NTT parameters
         for i in range(2,q-1):
             if pow(i,2*N,q) == 1:

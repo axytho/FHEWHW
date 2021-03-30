@@ -36,7 +36,7 @@ def modinv(a, m):
 
 # Bit-Reverse integer
 def intReverse(a,n):
-    b = ('{:0'+str(n)+'b}').format(a)
+    b = ('{:0'+str(n)+'b}').format(a) # "{0:b} means print in binary
     return int(b[::-1],2)
 
 # Bit-Reversed index
