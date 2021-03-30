@@ -19,7 +19,7 @@ limitations under the License.
 module NTTN_test();
 
 parameter HP = 5;
-parameter FP = (2*HP);
+parameter FP = (2*HP); //10
 
 reg                       clk,reset;
 reg                       load_w;
@@ -46,13 +46,13 @@ reg [`DATA_SIZE_ARB-1:0] intt_pout [0:`RING_SIZE-1];
 
 initial begin
 	// ntt
-	$readmemh("test/PARAM.txt"    , params);
-	$readmemh("test/W.txt"        , w);
-	$readmemh("test/WINV.txt"     , winv);
-	$readmemh("test/NTT_DIN.txt"  , ntt_pin);
-	$readmemh("test/NTT_DOUT.txt" , ntt_pout);
-	$readmemh("test/INTT_DIN.txt" , intt_pin);
-	$readmemh("test/INTT_DOUT.txt", intt_pout);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/W.txt"        , w);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/WINV.txt"     , winv);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/NTTDATAPALISADE_IN.txt"  , ntt_pin);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/NTTDATAPALISADE_OUT.txt" , ntt_pout);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/INTT_DIN.txt" , intt_pin);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/INTT_DOUT.txt", intt_pout);
 end
 
 // ---------------------------------------------------------------- TEST case

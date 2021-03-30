@@ -22,9 +22,9 @@ limitations under the License.
 // -- n: RING_SIZE
 // -- B: PE_NUMBER
 
-`define DATA_SIZE_ARB   14
-`define RING_SIZE       512
-`define PE_NUMBER       1
+`define DATA_SIZE_ARB   29
+`define RING_SIZE       1024
+`define PE_NUMBER       8
 
 // ------------------------------------------------
 // Parameters for integer multiplication
