@@ -1,0 +1,27 @@
+%
+% Sjabloon voor de Master of Science in de ingenieurswetenschappen: elektrotechniek
+%
+%%%%%%%%%%% Wijzig niets boven deze regel %%%%%%%%%%
+% Wijzig hieronder eventueel de optie
+% ea -> optie Energiesystemen en automatisatie
+% ec -> optie Elektronica en chipontwerp
+% is -> optie Information Systems and Signal Processing
+% sn -> optie ICT Security and Networks
+\documentclass[master=elt,masteroption=ea]{kulemt}
+%
+% Indien je UTF-8 karakters gebruikt, verwijder "% " uit de volgende lijn
+\setup{% inputenc=utf8,
+% Vul de titel van jouw masterproef hieronder in tussen { en }.
+title={Beste masterproef ooit al geschreven},
+%
+% Vul hieronder namen in, steeds Voornaam Naam.
+% Indien meerdere auteurs, assessoren, assistenten, scheidt hun namen met "\and ".
+author={Een Auteur\and Tweede Auteur},
+promotor={Prof.\,dr.\,ir.\ Weet Beter},
+assessor={Ir.\,W. Eetveel\and W. Eetrest},
+assistant={Ir.\ A.~Assistent \and D.~Vriend}}
+%
+%%%%%%%%% Wijzig niets onder deze regel %%%%%%%%
+\setup{coverpageonly}
+\begin{document}
+\end{document}
