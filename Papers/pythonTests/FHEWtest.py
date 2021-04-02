@@ -26,12 +26,12 @@ for i in range(8):
     for j in range(2):
         for l in range(N):
             secretKey[i][j][l] = int(SecretHex[8*N*j+N*i+l], 16)
-
+#print(hex(secretKey[2][1][4]))
 for j in range(2):
     for k in range(N):
         result[0][j][k] = int(ResultHex[j*N*8+k], 16) #accumulator contains the same 1024 repeated values by accident but whatever
 
-
+print(ResultHex[0])
 resultAccumulator = FHEW.addToACAP(N, modulus, omega, psi, secretKey, accumulator)
 #print(result[0][0][0], result[0][1][0])
 for j in range(2):

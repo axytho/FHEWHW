@@ -16,7 +16,7 @@ def ForwardTransformToBitReverse(element, modulus, psi):
     t = n
     m=1
     omegaReversed = omegaBitReversed(psi, n, modulus)
-    print(len(omegaReversed))
+    #print(len(omegaReversed))
     while m < n:
         t = int(t/2)
         for i in range(0,m):
@@ -125,6 +125,9 @@ def IterativeForwardNTT(arrayIn, P, W, R, DEBUG_MODE_NTT):
     for idx in range(N):
         arrayOut[idx] = arrayIn[idx]
 
+
+
+
     #########################################################
     if DEBUG_MODE_NTT:
         A_ntt_interm_1.write("------------------------------ input: \n")
@@ -180,7 +183,6 @@ def IterativeForwardNTT(arrayIn, P, W, R, DEBUG_MODE_NTT):
         A_ntt_interm_1.close()
         A_ntt_interm_2.close()
     #########################################################
-
     return arrayOut
 
 def intReverse(a,n):
@@ -196,33 +198,47 @@ def indexReverse(a,r):
         b[rev_idx] = a[i]
     return b
 
-NTTFile = open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/TESTVECTOR.txt", 'r')
+NTTFile = open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/DCT_IN.txt", 'r')
 #NTTFile = open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/NTTDATAPALISADE_IN.txt", 'r')
 NTTHex = NTTFile.readlines()
-PALISADEFile = open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/ACCUMULATOR.txt", 'r')
+PALISADEFile = open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/DCT.txt", 'r')
 #PALISADEFile = open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/NTTDATAPALISADE_OUT.txt", 'r')
 PALISADEHex = PALISADEFile.readlines()
 NTTPoly =[]
 PALISADE =[]
+DCT_IN = []
+DCT_OUT = []
 for k in range(1024):
     #print(hex)
     NTTPoly.append(int(NTTHex[k], 16))
     #print(int(hex, 16))
 for k in range(1024):
     PALISADE.append(int(PALISADEHex[k], 16))
+for k in range(1024*8):
+    DCT_IN.append(int(NTTHex[k], 16))
+    DCT_OUT.append(int(PALISADEHex[k], 16))
 modulus = 134215681
 psi = 282116
 newPolyN = list()
 for i in range(1024):
     newPolyN.append( pow(282116, i, modulus)* NTTPoly[i] % modulus)
 
+psiMert = IterativeForwardNTT(list(newPolyN), modulus, 133754304, 200000000, False)
+
+#[print(hex(element)) for element in psiMert]
+
+#[print(hex(poly)) for poly in newPolyN]
+#[print("Index: ", i , "element:" ,hex(newPolyN[i])) for i in range(1024)]
 transform = ntt(list(NTTPoly), modulus)
 Jyun = nttJyun()
 transformJyun = Jyun.ntt(list(NTTPoly), modulus, len(NTTPoly), 133754304)
 transformJyun2 = Jyun.ntt(list(NTTPoly), modulus, len(NTTPoly), 282116)
 transformMert = IterativeForwardNTT(list(NTTPoly), modulus, 133754304, 200000000, False)
 transformMertRev = indexReverse(transformMert,10)
+
 psiMert = IterativeForwardNTT(list(newPolyN), modulus, 133754304, 200000000, False)
+
+
 transformPalisade = ForwardTransformToBitReverse(list(NTTPoly), modulus, 282116)
 transformPalisadeRev = indexReverse(transformPalisade,10)
 r = Jyun.NthRootOfUnity(modulus, 1024)
@@ -230,7 +246,8 @@ transformJyun3 = Jyun.ntt(list(NTTPoly), modulus, len(NTTPoly), r)
 #print("Root of unity by Jyun: ", r)
 for i in range(len(NTTPoly)):
     #print("Index", i , "NTTMERT: ", hex(transformMertRev[i]), "NTTPalisadePython: ", hex(transformPalisadeRev[i]), " NTTPalisade: ", hex(PALISADE[i]), "Jyun: ", hex(transformJyun[i]), "Jyun2: ", hex(transformJyun[i]))
-    print("Index:", i, "NTTwithPsi:", hex(psiMert[i]),"PalisadePython:",   hex(transformPalisade[i]), "Palisade: ", hex(PALISADE[i]))
+    pass
+    #print("Index:", i, "NTTwithPsi:", hex(psiMert[i]),"PalisadePython:",   hex(transformPalisade[i]), "Palisade: ", hex(PALISADE[i]))
           #""Jyun3: ",hex(transformJyun3[i]),  " \n")
 
 w_inv   = modinv(133754304, modulus)
@@ -249,4 +266,5 @@ for i in range(1024):
 
 for i in range(len(NTTPoly)):
     #print("Index", i , "NTTMERT: ", hex(transformMertRev[i]), "NTTPalisadePython: ", hex(transformPalisadeRev[i]), " NTTPalisade: ", hex(PALISADE[i]), "Jyun: ", hex(transformJyun[i]), "Jyun2: ", hex(transformJyun[i]))
-    print("Index:", i, "NTT manual changed:", hex(rawMertInvGood[i]), "NTTwithPsi:", hex(transformMertChanged[i]),"PalisadePython:",   hex(pythonPalisade[i]), "Palisade: ", hex(NTTPoly[i]))
+    pass
+    #print("Index:", i, "NTT manual changed:", hex(rawMertInvGood[i]), "NTTwithPsi:", hex(transformMertChanged[i]),"PalisadePython:",   hex(pythonPalisade[i]), "Palisade: ", hex(NTTPoly[i]))

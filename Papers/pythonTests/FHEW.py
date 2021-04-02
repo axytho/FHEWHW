@@ -1,4 +1,5 @@
 import math
+import NTTMYTEST
 
 def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
     assert(pow(psi,2,modulus)==rootOfUnity)
@@ -20,34 +21,54 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
 
 
     dct = signedDigitDecompose(ctEvaluation,N, modulus, baseG)
-    #CORRECT!
-    evaluateDCT = [N*[0] for _ in range(2*digitsG)]
+    #print([abs(NTTMYTEST.NTTPoly[i] - dct[0][i]) for i in range(N)])
+    #print([ j for (i,j) in zip([abs(NTTMYTEST.NTTPoly[i] - dct[0][i]) for i in range(N)],range(N)) if i > 0 ])
+    #[print(hex(element)) for element in dct[0]]#CORRECT!
+    modifiedDCT = [N*[0] for _ in range(2*digitsG)]
+    evaluateDCT = [N * [0] for _ in range(2 * digitsG)]
     for j in range(2*digitsG):
         for i in range(N):
-            evaluateDCT[j][i] = pow(psi, i, modulus) * dct[j][i] % modulus
-        evaluateDCT[j] = IterativeForwardNTT(list(dct[j]), modulus, rootOfUnity)
-    [print(hex(element)) for element in evaluateDCT[1]]
+            modifiedDCT[j][i] = pow(psi, i, modulus) * dct[j][i] % modulus
+        evaluateDCT[j] = IterativeForwardNTT(list(modifiedDCT[j]), modulus, 133754304)
+
+    #[print("Index: ", i , "element:" ,hex(evaluateDCT[0][i])) for i in range(N)] #CORRECT
+    #print(dct[1][0], NTTMYTEST.SIGNED_IN[2048])
+    #for k in range(8):#range(digitsG*2):
+        #print(sum([abs(NTTMYTEST.DCT[1024*k+i] - evaluateDCT[k][i]) for i in range(N)]))
+        #print(sum([abs(NTTMYTEST.DCT_IN[1024 * k + i] - dct[k][i]) for i in range(N)]))
+        #print([j for (i, j) in zip([abs(NTTMYTEST.SIGNED_IN[1024 * k + i] - ctEvaluation[k][i]) for i in range(N)], range(N)) if i > 0])
+        #print([j for (i, j) in
+               #zip([abs(NTTMYTEST.DCT_OUT[1024 * k + i] - evaluateDCT[k][i]) for i in range(N)], range(N)) if i > 0])
+
+    #print([ j for (i,j) in zip([abs(NTTMYTEST.PALISADE[i] - evaluateDCT[0][i]) for i in range(N)],range(N)) if i > 0 ])
     for j in range(2):
         for l in range(digitsG*2):
             for m in range(N):
-                accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[j][m] * secretKeyInput[l][j][m]) % modulus
+               # if (j==0 and l ==1 and m ==0):
+               #     print(accumulator[0][j][m], evaluateDCT[j][m], secretKeyInput[l][j][m],
+               #           (accumulator[0][j][m] + evaluateDCT[j][m] * secretKeyInput[l][j][m]) % modulus )
+                accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * secretKeyInput[l][j][m]) % modulus
     return accumulator
+
+
 
 
 def signedDigitDecompose(ct,N, modulus, baseG):
     #baseG = 7
     decomposedCt= [N*[0] for _ in range(math.ceil(math.log2(modulus)/baseG)*2)]
     d = 0
+    Qhalf = math.floor(modulus >> 1)
     for j in range(2):
         for k in range(N):
             t = ct[j][k]
-            if (t < modulus/2):
+
+            if (t < Qhalf):
                 d += t
             else:
-                d = t-modulus
+                d += t-modulus
             for l in range(math.ceil(math.log2(modulus)/baseG)):
                 r = d % 2**baseG
-                if (r > 2**(baseG-1)):
+                if (r > 2**(baseG-1)-1):
                     r -= 2**baseG
                 d -= r
                 d >>= baseG
@@ -55,6 +76,7 @@ def signedDigitDecompose(ct,N, modulus, baseG):
                     decomposedCt[j + 2*l][k] += r
                 else:
                     decomposedCt[j + 2 * l][k] += r + modulus
+            d = 0
     return decomposedCt
 
 
