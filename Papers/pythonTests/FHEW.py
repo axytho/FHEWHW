@@ -79,6 +79,32 @@ def signedDigitDecompose(ct,N, modulus, baseG):
             d = 0
     return decomposedCt
 
+def signedDigitDecomposeHWSTYLE(ct,N, modulus, baseG):
+    #baseG = 7
+    decomposedCt= [N*[0] for _ in range(math.ceil(math.log2(modulus)/baseG)*2)]
+    d = 0
+    Qhalf = math.floor(modulus >> 1)
+    for j in range(2):
+        for k in range(N):
+            t = ct[j][k]
+            tSelect = (t - modulus//2) < 0
+            tMinusQ = t - modulus
+            if (tSelect == 1):
+                tOut = tMinusQ
+            elif (tSelect == 0):
+                tOut = t
+            else:
+                print("SHOULDN4T HAPPENB")
+                raise
+            rLowest = tOut % 128
+            rSelectLow = r -
+
+            decomposedCt[j][k]
+            decomposedCt[j+2][k]
+            decomposedCt[j+4][k]
+            decomposedCt[j+6][k]
+
+    return decomposedCt
 
 def IterativeForwardNTT(arrayIn, P, W):
     arrayOut = [0] * len(arrayIn)
