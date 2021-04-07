@@ -16,7 +16,7 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
     ctEvaluation = [list() for _ in range(2)]
     modified = [list() for _ in range(2)]
     for j in range(2):
-        modified[j] = IterativeInverseNTTMODIFIED(list(ct[j]) , modulus, psi_inv)
+        modified[j] = IterativeInverseNTTHardware(list(ct[j]) , modulus, psi_inv)
 
 
 
@@ -216,6 +216,44 @@ def IterativeInverseNTTMODIFIED(arrayIn, P, psiInverse):
     for i in range(N):
         arrayOut[i] = (arrayOut[i] * N_inv) % P #divide by N mod P
     return arrayOut
+
+def IterativeInverseNTTHardware(arrayIn, P, psiInverse):
+    arrayOut = [0] * len(arrayIn)
+    N = len(arrayIn)
+    v = int(math.log(N, 2))
+    arrayOut = indexReverse(list(arrayIn), v)
+
+
+
+
+    for i in range(0, v):
+        for j in range(0, (2 ** i)):
+            for k in range(0, (2 ** (v - i - 1))):
+                s = j * (2 ** (v - i)) + k
+                t = s + (2 ** (v - i - 1))
+                index = ((1 + 2 * k) % N) << i
+                w = pow(psiInverse, index ,  P)
+
+
+                as_temp = arrayOut[s]
+                at_temp = arrayOut[t]
+
+                arrayOut[s] = (as_temp + at_temp) % P
+                arrayOut[t] = ((as_temp - at_temp) * w) % P
+
+
+    N_inv = modinv(N, P)
+    for i in range(N):
+        arrayOut[i] = (arrayOut[i] * N_inv) % P #divide by N mod P
+    return indexReverse(list(arrayOut), v)
+
+def omegaBitReversed(psi, N,q):
+    #bitinverse is a reversible operation
+    omegaNormal = N * [0]
+    for i in range(N):
+        omegaNormal[i] = pow(psi, i, q)
+    return indexReverse(omegaNormal, math.floor(math.log2(N)))
+
 def PalisadeInverseTransform(element, modulus, psi):
     result = list(element)
     n = 1024
