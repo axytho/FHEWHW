@@ -86,7 +86,7 @@ initial begin: LOAD_DATA
     load_w = 1;
     #FP;
     load_w = 0;
-
+            // ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)))
 	for(k=0; k<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); k=k+1) begin
 		din = w[k];
 		#FP;

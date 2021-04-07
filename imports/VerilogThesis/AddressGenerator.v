@@ -19,11 +19,11 @@ limitations under the License.
 module AddressGenerator (input                                       clk,reset,
                          input                                       start,
                          output reg [`RING_DEPTH-`PE_DEPTH+1:0]      raddr0,
-                         output reg [`RING_DEPTH-`PE_DEPTH+1:0]      waddr0,waddr1,
+                         output reg [`RING_DEPTH-`PE_DEPTH+1:0]      waddr0,waddr1,//7 bits of adressing
                          output reg                                  wen0  ,wen1  ,
                          output reg                                  brsel0,brsel1,
                          output reg                                  brselen0,brselen1,
-                         output reg [2*`PE_NUMBER*(`PE_DEPTH+1)-1:0] brscramble0,
+                         output reg [2*`PE_NUMBER*(`PE_DEPTH+1)-1:0] brscramble0,//2*32*6 bits of adressing
                          output reg [`RING_DEPTH-`PE_DEPTH+2:0]      raddr_tw,
                          output reg [4:0]                            stage_count,
                          output reg                                  ntt_finished);
@@ -83,7 +83,7 @@ always @(posedge clk or posedge reset) begin
     end
 end
 
-// --------------------------------------------------------------------------- WAIT OPERATION
+// --------------------------------------------------------------------------- WAIT OPERATION (15 CYCLES)
 
 always @(posedge clk or posedge reset) begin
     if(reset) begin
@@ -100,7 +100,9 @@ always @(posedge clk or posedge reset) begin
     end
 end
 
-// --------------------------------------------------------------------------- c_stage & c_loop
+// --------------------------------------------------------------------------- c_stage & c_loop 
+// simply keep the limits equal to 9 for depth and 15 for 32 PE's or 1 for N=8 (i.e. 2 loops)
+// with 2 PE's or 3 (i.e. 4 loops) for N=8 with 1 PE.
 
 always @(posedge clk or posedge reset) begin
     if(reset) begin
@@ -131,17 +133,17 @@ always @(posedge clk or posedge reset) begin
         end
         else begin
             // ---------------------------- c_stage
-            if((state == 2'd2) && (c_wait == c_wait_limit) && (c_stage == c_stage_limit))
+            if((state == 2'd2) && (c_wait == c_wait_limit) && (c_stage == c_stage_limit)) // reset stage (total reset of everything because NTT is done)
                 c_stage <= 0;
-            else if((state == 2'd2) && (c_wait == c_wait_limit))
+            else if((state == 2'd2) && (c_wait == c_wait_limit)) //once we're done waiting, advance to the next stage
                 c_stage <= c_stage + 1;
             else
                 c_stage <= c_stage;
 
             // ---------------------------- c_loop
-            if((state == 2'd2) && (c_wait == c_wait_limit))
+            if((state == 2'd2) && (c_wait == c_wait_limit)) //reset once we're done waiting for the next stage
                 c_loop <= 0;
-            else if((state == 2'd1) && (c_loop < c_loop_limit))
+            else if((state == 2'd1) && (c_loop < c_loop_limit)) // run next part in the loop
                 c_loop <= c_loop + 1;
             else
                 c_loop <= c_loop;
@@ -150,42 +152,52 @@ always @(posedge clk or posedge reset) begin
 end
 
 // --------------------------------------------------------------------------- twiddle factors
-wire [`RING_DEPTH-`PE_DEPTH+2:0] c_tw_temp;
-assign c_tw_temp = (c_loop_limit>>c_stage);
+// These are to be bitreversed and generated in a completely different way
+// but first we check how they generate them right now with the algorithm given
+wire [`RING_DEPTH-`PE_DEPTH+2:0] c_tw_temp;//5/6 bits on PE=2/1
+// loop_limit is 15,
+assign c_tw_temp = (c_loop_limit>>c_stage);//value = 1/3 >> by the stage (I don't quite understand why you'd take that large a size for this)
 
 always @(posedge clk or posedge reset) begin
     if(reset) begin
-        c_tw <= 0;
+        c_tw <= 0; //outside reset or start
     end
     else begin
         if(start) begin
             c_tw <= 0;
         end
         else begin
-            if((state == 2'd1) && (c_loop != c_loop_limit)) begin
-                if(c_stage == 0) begin
-                    if(c_loop[0] == 0)
-                        c_tw <= (((c_tw + ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage))) & c_loop_limit);
-                    else
-                        c_tw <= (((c_tw + 1 - ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage))) & c_loop_limit);
+            if((state == 2'd1) && (c_loop != c_loop_limit)) begin//if we're currently going through the loop
+                if(c_stage == 0) begin//if this is the first loop
+                    if(c_loop[0] == 0)// and we're in an even cycle
+                    // If 10-5-2 = 3 then we have +8 for the twiddle read adress output and -7 for odd ones
+                    // The final result is mod 16, which makes senses as this is the max value of the loop (see k in python)
+                        c_tw <= (((c_tw + ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage))) & c_loop_limit); //c_tw += 01/10 & 01/11  i.e. c_tw += 1/2 mod loop_limit 
+                    else 
+                        c_tw <= (((c_tw + 1 - ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage))) & c_loop_limit); // for odd values, it is c_tw += 0 or -1 mod looplim
                 end
-                else if(c_stage >= (`RING_DEPTH-`PE_DEPTH-1)) begin
-                    c_tw <= c_tw;
-                end
+                else if(c_stage >= (`RING_DEPTH-`PE_DEPTH-1)) begin //stage_limit is RING_DEPTH-1
+                    c_tw <= c_tw;// if we get to the point where 1 >= (N//2*PE) >> j or in other words 2**j >= N/(2*PE) or cstage >= (`RING_DEPTH-`PE_DEPTH-1)
+                end // we do our +1 at the end of our loop anyway, so it's fine.
                 else begin
-                    if(c_loop[0] == 0) begin
-                        c_tw <= c_tw + ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage)
+                    if(c_loop[0] == 0) begin//if even then:
+                    //C_tw += (8 >> stage) - (2**(x-1) if the last x digits are all one with x starting at 4 and going to 0)
+                    // this only happens once and it only happens at the last stage. It shouldn't actually happen when c_loop[0] ==0
+                        c_tw <= c_tw + ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage) // 2**(i-1)*k, the i comes from the stage
                               - (((c_loop & c_tw_temp) == c_tw_temp) ? (((c_loop & c_tw_temp)>>1)+1) : 0);
+                              // so the second part of this statement is as a matter of fact useless.
                     end
-                    else begin
+                    else begin//c_tw -= 7 >>stage - idem
                         c_tw <= (c_tw + 1) - ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage)
                               - (((c_loop & c_tw_temp) == c_tw_temp) ? (((c_loop & c_tw_temp)>>1)+1) : 0);
+                              // The reason for the second part is to ensure that the entire adressing run-over repeats itself
+                              // as many times as necessary.
                     end
                 end
             end
-            else if((state == 2'd2) && (c_wait == c_wait_limit) && (c_stage == c_stage_limit))
+            else if((state == 2'd2) && (c_wait == c_wait_limit) && (c_stage == c_stage_limit)) // Full Reset
                 c_tw <= 0;
-            else if((state == 2'd2) && (c_wait == c_wait_limit)) begin
+            else if((state == 2'd2) && (c_wait == c_wait_limit)) begin // next stage
                 c_tw <= c_tw+1;
             end
             else begin
@@ -195,7 +207,7 @@ always @(posedge clk or posedge reset) begin
     end
 end
 
-// --------------------------------------------------------------------------- raddr (1 cc delayed)
+// --------------------------------------------------------------------------- raddr (1 cc delayed) (DO NOT BITREVERSE)
 
 wire [`RING_DEPTH-`PE_DEPTH-1:0] raddr_temp;
 assign raddr_temp = ((`RING_DEPTH-`PE_DEPTH-1) - (c_stage+1));
@@ -217,6 +229,10 @@ always @ (posedge clk or posedge reset) begin
             else if((state == 2'd1) && (c_loop <= c_loop_limit)) begin
                 if(c_stage < (`RING_DEPTH-`PE_DEPTH-1)) begin
                     if(~c_loop[0])
+                    // +1 because c_loop, + 0 most of the time until and then 4+curreent index as soon as we hit 8 and then +2,4,6,8
+                    //so fist raddr =0,8,1,9,2,10,3,11
+                    // then 0, 4, 1,5, 2,6,3,7, 8,12,9,13,10,14,11,15
+                    // then 0,2,1,3, 4,6,5,7,...
                         raddr <= (c_loop >> 1) + ((c_loop >> (raddr_temp+1)) << raddr_temp);
                     else
                         raddr <= (1 << raddr_temp) + (c_loop >> 1) + ((c_loop >> (raddr_temp+1)) << raddr_temp);
@@ -236,7 +252,7 @@ always @ (posedge clk or posedge reset) begin
     end
 end
 
-// --------------------------------------------------------------------------- waddr (1 cc delayed)
+// --------------------------------------------------------------------------- waddr (1 cc delayed) (SIMPLY BITINVERSE AND YOU'RE DONE)
 
 wire [`RING_DEPTH-`PE_DEPTH-1:0] waddr_temp;
 assign waddr_temp = ((`RING_DEPTH-`PE_DEPTH-1) - (c_stage+1));
@@ -261,6 +277,10 @@ always @ (posedge clk or posedge reset) begin
             end
             else if((state == 2'd1) && (c_loop <= c_loop_limit)) begin
                 if(c_stage < (`RING_DEPTH-`PE_DEPTH-1)) begin
+                 // +1 because c_loop, + 0 most of the time until and then 4+curreent index as soon as we hit 8 and then +2,4,6,8
+                //so fist raddr =0,8,1,9,2,10,3,11
+                // then 0, 4, 1,5, 2,6,3,7, 8,12,9,13,10,14,11,15
+                // then 0,2,1,3, 4,6,5,7,...
                     waddre <= (c_loop >> 1) + ((c_loop >> (waddr_temp+1)) << waddr_temp);
                     waddro <= (c_loop >> 1) + ((c_loop >> (waddr_temp+1)) << waddr_temp) + (1 << waddr_temp);
                 end
@@ -296,7 +316,7 @@ always @(posedge clk or posedge reset) begin
     else begin
         if(state == 2'd1) begin
             wen     <= 1;
-            brsel   <= c_loop[0];
+            brsel   <= c_loop[0]; //select even or odd bram alternatingly
             brselen <= 1;
         end
         else begin
@@ -312,18 +332,18 @@ end
 wire [`PE_DEPTH:0] brscrambled_temp;
 wire [`PE_DEPTH:0] brscrambled_temp2;
 wire [`PE_DEPTH:0] brscrambled_temp3;
-assign brscrambled_temp  = (`PE_NUMBER >> (c_stage-(`RING_DEPTH-`PE_DEPTH-1)));
-assign brscrambled_temp2 = (`PE_DEPTH - (c_stage-(`RING_DEPTH-`PE_DEPTH-1)));
-assign brscrambled_temp3 = ((`PE_DEPTH+1) - (c_stage-(`RING_DEPTH-`PE_DEPTH-1)));
+assign brscrambled_temp  = (`PE_NUMBER >> (c_stage-(`RING_DEPTH-`PE_DEPTH-1)));// 2**5 >> (stage  - 4)
+assign brscrambled_temp2 = (`PE_DEPTH - (c_stage-(`RING_DEPTH-`PE_DEPTH-1))); // 5- (stage - 4) = 9 - stage
+assign brscrambled_temp3 = ((`PE_DEPTH+1) - (c_stage-(`RING_DEPTH-`PE_DEPTH-1))); // 10-stage
 
 always @(posedge clk or posedge reset) begin: B_BLOCK
     integer n;
-    for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1
+    for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1 //64 BRAMS
         if(reset) begin
-            brscramble[(`PE_DEPTH+1)*n+:(`PE_DEPTH+1)] <= 0;
+            brscramble[(`PE_DEPTH+1)*n+:(`PE_DEPTH+1)] <= 0;//Set the brams from 
         end
         else begin
-            if(c_stage >= (`RING_DEPTH-`PE_DEPTH-1)) begin
+            if(c_stage >= (`RING_DEPTH-`PE_DEPTH-1)) begin // for all brRAM's from 6*n to 
                 brscramble[(`PE_DEPTH+1)*n+:(`PE_DEPTH+1)] <= (brscrambled_temp*n[0]) +
                                                               (((n>>1)<<1) & (brscrambled_temp-1)) +
                                                               ((n>>(brscrambled_temp2+1))<<(brscrambled_temp3)) +
@@ -354,7 +374,7 @@ end
 
 // -------------------- read signals
 wire [`RING_DEPTH-`PE_DEPTH+2:0] c_tw_w;
-
+//ShifrtReg mainly generates a delay equal to the .SHIFT variable
 ShiftReg #(.SHIFT(1),.DATA(`RING_DEPTH-`PE_DEPTH+3)) sr00(clk,reset,c_tw,c_tw_w);
 
 always @(posedge clk or posedge reset) begin

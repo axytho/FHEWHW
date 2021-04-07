@@ -236,17 +236,20 @@ always @(posedge clk or posedge reset) begin: TW_BLOCK
             tr[n] <= 0;
         end
         else begin
-            if((state == 3'd1) && (sys_cntr < ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH))) begin
-                te[n] <= (n == (sys_cntr & ((1 << `PE_DEPTH)-1)));
+            if((state == 3'd1) && (sys_cntr < ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH))) begin // for (16+8+4+2+1+1+1+1+1+1 = 36  * PE elements)
+            //i.e. for every stage in the thing
+                te[n] <= (n == (sys_cntr & ((1 << `PE_DEPTH)-1)));//standard way of writing a value away to a certain n every clock cycle (not super efficient)
                 tw[n][`RING_DEPTH-`PE_DEPTH+3]   <= 0;
-                tw[n][`RING_DEPTH-`PE_DEPTH+2:0] <= (sys_cntr >> `PE_DEPTH);
+                tw[n][`RING_DEPTH-`PE_DEPTH+2:0] <= (sys_cntr >> `PE_DEPTH); // for every BRAM, write one once every 32 clock cycles.
                 ti[n] <= din;
                 tr[n] <= 0;
-            end
-            else if((state == 3'd1) && (sys_cntr < (((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1))) begin
+            end// now we load the inverse twiddle factors
+            else if((state == 3'd1) && (sys_cntr < (((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1))) begin //for the second half
+                                //enable at (sys_cntr - 36 * 32)  mod 32 (which makes sense)
                 te[n] <= (n == ((sys_cntr-((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)) & ((1 << `PE_DEPTH)-1)));
-                tw[n][`RING_DEPTH-`PE_DEPTH+3]   <= 1;
-                tw[n][`RING_DEPTH-`PE_DEPTH+2:0] <= ((sys_cntr-((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)) >> `PE_DEPTH);
+                tw[n][`RING_DEPTH-`PE_DEPTH+3]   <= 1; //write the inverse adresses, and write them as (sys_cntr - 32*36) // 32
+                tw[n][`RING_DEPTH-`PE_DEPTH+2:0] <= ((sys_cntr-((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)) >> `PE_DEPTH);//so write once
+                // every 32 clock cycles.
                 ti[n] <= din;
                 tr[n] <= 0;
             end
@@ -254,7 +257,7 @@ always @(posedge clk or posedge reset) begin: TW_BLOCK
                 te[n] <= 0;
                 tw[n] <= 0;
                 ti[n] <= 0;
-                tr[n] <= {ntt_intt,raddr_tw};
+                tr[n] <= {ntt_intt,raddr_tw};// send it to EVERY PE (so how we write it in is simportant obviously)
             end
             else begin
                 te[n] <= 0;
@@ -300,13 +303,13 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
         else begin
             if((state == 3'd2)) begin // input data
                 if(sys_cntr < (`RING_SIZE >> 1)) begin
-                    pe[n] <= (n == ((sys_cntr & ((1 << `PE_DEPTH)-1)) << 1));
-                    pw[n] <= (sys_cntr >> `PE_DEPTH);
+                    pe[n] <= (n == ((sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)); //only even n's
+                    pw[n] <= (sys_cntr >> `PE_DEPTH); //write the first 512 values to these even n's (note that these are the BRAM0's.
                     pi[n] <= din;
                     pr[n] <= 0;
                 end
                 else begin
-                    pe[n] <= (n == (((sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)+1));
+                    pe[n] <= (n == (((sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)+1));// only odd n's
                     pw[n] <= ((sys_cntr-(`RING_SIZE >> 1)) >> `PE_DEPTH);
                     pi[n] <= din;
                     pr[n] <= 0;

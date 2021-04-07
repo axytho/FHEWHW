@@ -21,14 +21,15 @@ limitations under the License.
 // -- K: DATA_SIZE_ARB
 // -- n: RING_SIZE
 // -- B: PE_NUMBER
-
-`define DATA_SIZE_ARB   29
+`define MODULUS         134215681
+`define DATA_SIZE_ARB   27
 `define RING_SIZE       1024
-`define PE_NUMBER       8
+`define PE_NUMBER       32
 
 // ------------------------------------------------
 // Parameters for integer multiplication
 
+`define MODULUSHALF     (`MODULUS >> 1)
 `define DATA_SIZE       (1 << ($clog2(`DATA_SIZE_ARB)))
 `define DATA_SIZE_DEPTH ($clog2(`DATA_SIZE))
 
