@@ -1,0 +1,22 @@
+First, python:
+
+
+W's come in groups on 10 (see the comments for the rest)
+
+
+Split up into 4 parts:
+1) INTT
+2) Signed decompose
+3) writeback to BRAM of NTT and NTT
+4- accumulate and writeback to BRAM of INTT
+
+and then we're done.
+
+MOST IMPORTANT FACT: GOES AS FOLLOWS;
+
+(0,512)
+(256, 768)
+(32, 512+32)
+(256+32, 768+32)
+... etc
+(this is for the first PE block, for the others just add the PE num

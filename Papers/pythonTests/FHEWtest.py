@@ -38,12 +38,43 @@ for j in range(2):
         result[0][j][k] = int(ResultHex[j * N * 8 + k],
                               16)  # accumulator contains the same 1024 repeated values by accident but whatever
 
-print(ResultHex[0])
+
+
 resultAccumulator = FHEW.addToACAP(N, modulus, omega, psi, secretKey, accumulator)
 # print(result[0][0][0], result[0][1][0])
+def smallDecompose(t, modulus):
+    result = list()
+    d=0
+    baseG = 7
+    Qhalf= modulus >> 1
+    print(hex(t), hex(Qhalf))
+    if (t < Qhalf):
+        d += t
+    else:
+        d += t - modulus
+    #if (1):
+    #    print("THISTOO", hex(d))
+    for l in range(4):
+        r = d % 2 ** baseG
+
+        if (r > 2 ** (baseG - 1) - 1):
+            r -= 2 ** baseG
+
+        d -= r
+
+        d >>= baseG
+        if (r >= 0):
+            result.append(hex(r))
+        else:
+            result.append(hex(r + modulus))
+    return result
+
+
+#print(smallDecompose(97734392, modulus))
 for j in range(2):
     for k in range(N):
-        print("Index: ", j * N + k, "Python: ", resultAccumulator[0][j][k], "Palisade: ", result[0][j][k])
-print([j for (i, j) in
-       zip([abs(resultAccumulator[0][i % 2][i // 2] - result[0][i % 2][i // 2]) for i in range(2 * N)], range(2 * N)) if
-       i > 0])
+        pass
+        #print("Index: ", j * N + k, "Python: ", resultAccumulator[0][j][k], "Palisade: ", result[0][j][k])
+#print([j for (i, j) in
+#       zip([abs(resultAccumulator[0][i % 2][i // 2] - result[0][i % 2][i // 2]) for i in range(2 * N)], range(2 * N)) if
+#       i > 0])

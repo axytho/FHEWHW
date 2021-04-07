@@ -5,6 +5,7 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
     assert(pow(psi,2,modulus)==rootOfUnity)
     baseG = 7
     w_inv = modinv(rootOfUnity, modulus)
+    psi_inv = pow(psi, 2**(N*2)-1, modulus) #correct
     digitsG = math.ceil(math.log2(modulus)/baseG)
     ct = list(accumulator[0])
     #[print(hex(element)) for element in ct[0]]
@@ -13,14 +14,23 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
     #for i in range(2*N,N,-1):
         #ct[i] *= pow(psi, i, q)
     ctEvaluation = [list() for _ in range(2)]
+    modified = [list() for _ in range(2)]
+    for j in range(2):
+        modified[j] = IterativeInverseNTTMODIFIED(list(ct[j]) , modulus, psi_inv)
+
+
+
     for j in range(2):
         ctEvaluation[j] = indexReverse(IterativeInverseNTT(list(indexReverse(list(ct[j]), 10)), modulus, w_inv), 10)
         for a,b in zip(range(2 * N, N, -1), range(N)):
             ctEvaluation[j][b] = (pow(psi, a, modulus) * ctEvaluation[j][b]) % modulus
-            #print(hex(ctEvaluation[j][b]))
+    print([j for (i, j) in
+           zip([abs(modified[0][i] - ctEvaluation[0][i]) for i in range(N)], range(N)) if i > 0])
+    #print(hex(ctEvaluation[1][0]))
 
 
     dct = signedDigitDecompose(ctEvaluation,N, modulus, baseG)
+    #print(hex(dct[0][0]), hex(dct[2][0]), hex(dct[4][0]), hex(dct[6][0]))
     #print([abs(NTTMYTEST.NTTPoly[i] - dct[0][i]) for i in range(N)])
     #print([ j for (i,j) in zip([abs(NTTMYTEST.NTTPoly[i] - dct[0][i]) for i in range(N)],range(N)) if i > 0 ])
     #[print(hex(element)) for element in dct[0]]#CORRECT!
@@ -62,23 +72,29 @@ def signedDigitDecompose(ct,N, modulus, baseG):
         for k in range(N):
             t = ct[j][k]
 
+
             if (t < Qhalf):
                 d += t
             else:
                 d += t-modulus
+      #      if (j==0 and k==0):
+      #          print("THIS", hex(d))
             for l in range(math.ceil(math.log2(modulus)/baseG)):
                 r = d % 2**baseG
                 if (r > 2**(baseG-1)-1):
                     r -= 2**baseG
                 d -= r
                 d >>= baseG
+            #    if ((j+2*l == 2) and (k==0)):
+            #        print("NOT TWICE", l)
+            #        print(hex(r), hex(r+modulus))
                 if (r>=0):
                     decomposedCt[j + 2*l][k] += r
                 else:
                     decomposedCt[j + 2 * l][k] += r + modulus
             d = 0
     return decomposedCt
-
+"""
 def signedDigitDecomposeHWSTYLE(ct,N, modulus, baseG):
     #baseG = 7
     decomposedCt= [N*[0] for _ in range(math.ceil(math.log2(modulus)/baseG)*2)]
@@ -97,7 +113,13 @@ def signedDigitDecomposeHWSTYLE(ct,N, modulus, baseG):
                 print("SHOULDN4T HAPPENB")
                 raise
             rLowest = tOut % 128
-            rSelectLow = r -
+            rSelectLow = (rLowest - 64) < 0
+            rLowMinusBasePlusModulus = rLowest + (modulus - 128)
+            if (rSelectLow):
+                rLowWriteback = rLowMinusBasePlusModulus
+            else:
+                rLowWriteback = rLowest
+
 
             decomposedCt[j][k]
             decomposedCt[j+2][k]
@@ -105,7 +127,7 @@ def signedDigitDecomposeHWSTYLE(ct,N, modulus, baseG):
             decomposedCt[j+6][k]
 
     return decomposedCt
-
+"""
 def IterativeForwardNTT(arrayIn, P, W):
     arrayOut = [0] * len(arrayIn)
     N = len(arrayIn)
@@ -160,6 +182,66 @@ def IterativeInverseNTT(arrayIn, P, W):
     for i in range(N):
         arrayOut[i] = (arrayOut[i] * N_inv) % P #divide by N mod P
     return arrayOut
+
+#DIT == Cooley Tukey, DIF == Gentleman Sande, this is the latter
+def IterativeInverseNTTMODIFIED(arrayIn, P, psiInverse):
+    arrayOut = [0] * len(arrayIn)
+    N = len(arrayIn)
+
+    for idx in range(N):
+        arrayOut[idx] = arrayIn[idx]
+
+
+    v = int(math.log(N, 2))
+
+    for i in range(0, v):
+        for j in range(0, (2 ** i)):
+            for k in range(0, (2 ** (v - i - 1))):
+                s = j * (2 ** (v - i)) + k
+                t = s + (2 ** (v - i - 1))
+                sBitReversed = intReverse(s, v)
+                tBitReversed = intReverse(t, v)
+                index = (1 + 2 * k) << i
+                w = pow(psiInverse, index ,  P)
+
+
+                as_temp = arrayOut[sBitReversed]
+                at_temp = arrayOut[tBitReversed]
+
+                arrayOut[sBitReversed] = (as_temp + at_temp) % P
+                arrayOut[tBitReversed] = ((as_temp - at_temp) * w) % P
+
+
+    N_inv = modinv(N, P)
+    for i in range(N):
+        arrayOut[i] = (arrayOut[i] * N_inv) % P #divide by N mod P
+    return arrayOut
+def PalisadeInverseTransform(element, modulus, psi):
+    result = list(element)
+    n = 1024
+    t = 1
+    m=n
+    omegaReversed = omegaBitReversed(pow(psi,2*n-1, modulus), n, modulus)
+    while m > 1:
+        j1 = 0
+        h = m >> 1
+        for i in range(0,h):
+            j2 = j1 + t - 1
+            indexOmega = h + i
+            S = omegaReversed[indexOmega]
+            for j in range(j1, j2+1):
+                U = result[j]
+                V = result[j+t]
+                result[j] = (U+V) % modulus
+                result[j+t] = (U-V)*S % modulus
+            j1 = j1 + 2*t
+        #for loop
+        m >>= 1
+        t <<= 1
+    N_inv = modinv(n, modulus)
+    for i in range(n):
+        result[i] = (result[i] * N_inv) % modulus  # divide by N mod P
+    return result
 
 def modinv(a, m):
     g, x, y = egcd(a, m)
