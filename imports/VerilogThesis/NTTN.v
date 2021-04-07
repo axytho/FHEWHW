@@ -51,6 +51,7 @@ reg [2:0] state;
 
 reg [`RING_DEPTH+3:0] sys_cntr;
 
+
 reg [`DATA_SIZE_ARB-1:0]q;
 reg [`DATA_SIZE_ARB-1:0]n_inv;
 
@@ -167,7 +168,7 @@ always @(posedge clk or posedge reset) begin
                 state <= 3'd0;
             sys_cntr <= 0;
         end
-        3'd1: begin
+        3'd1: begin //should be done only once in our entire NTT
             if(sys_cntr == ((((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1)+2-1)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
@@ -177,8 +178,8 @@ always @(posedge clk or posedge reset) begin
                 sys_cntr <= sys_cntr + 1;
             end
         end
-        3'd2: begin
-            if(sys_cntr == (`RING_SIZE-1)) begin
+        3'd2: begin //only run at the start, afterwards the bit reversing must be done while writing away.
+            if(sys_cntr == (`RING_SIZE-1)) begin //because it takes 1024 cycles, so we really don't want to do this every time
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -281,12 +282,19 @@ always @(posedge clk or posedge reset) begin
 end
 
 // ---------------------------------------------------------------- load data & other data operations
-
+// ### is the symbol for code that I write, and commented code will have a hashtag in from of it
 wire [`RING_DEPTH-`PE_DEPTH-1:0] addrout;
 assign addrout = (sys_cntr >> (`PE_DEPTH+1));
 
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast;
-assign inttlast = (sys_cntr & ((`RING_SIZE >> (`PE_DEPTH+1))-1));
+assign inttlast = (sys_cntr & ((`RING_SIZE >> (`PE_DEPTH+1))-1)); //counter mod 16
+//###
+reg [`RING_DEPTH:0] reverse_sys_cntr;
+integer i;
+//###
+always @*
+for(i=0;i<`RING_DEPTH;i=i+1)
+    reverse_sys_cntr[i] = sys_cntr[`RING_DEPTH-i-1];
 
 wire [`RING_DEPTH+3:0]           sys_cntr_d;
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast_d;
@@ -302,20 +310,22 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
         end
         else begin
             if((state == 3'd2)) begin // input data
-                if(sys_cntr < (`RING_SIZE >> 1)) begin
-                    pe[n] <= (n == ((sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)); //only even n's
-                    pw[n] <= (sys_cntr >> `PE_DEPTH); //write the first 512 values to these even n's (note that these are the BRAM0's.
+            // ###
+                if(reverse_sys_cntr < (`RING_SIZE >> 1)) begin
+                    pe[n] <= (n == ((reverse_sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)); //only even n's
+                    pw[n] <= (reverse_sys_cntr >> `PE_DEPTH); //write the first 512 values to these even n's (note that these are the BRAM0's.)
                     pi[n] <= din;
                     pr[n] <= 0;
                 end
                 else begin
-                    pe[n] <= (n == (((sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)+1));// only odd n's
-                    pw[n] <= ((sys_cntr-(`RING_SIZE >> 1)) >> `PE_DEPTH);
+                    pe[n] <= (n == (((reverse_sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)+1));// only odd n's
+                    pw[n] <= ((reverse_sys_cntr-(`RING_SIZE >> 1)) >> `PE_DEPTH);// write them to the BRAM1
                     pi[n] <= din;
                     pr[n] <= 0;
-                end
+                end // ### 
             end
             else if(state == 3'd3) begin // NTT operations
+            //writeback is split into 2 stages: in the first stage we write 
                 if(stage_count < (`RING_DEPTH - `PE_DEPTH - 1)) begin
                     if(brselen0) begin
                         if(brsel0 == 0) begin
@@ -370,7 +380,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     pw[n] <= waddr0;
                     pi[n] <= ASout[brscramble[(`PE_DEPTH+1)*n+:(`PE_DEPTH+1)]];
                 end
-                else begin
+                else begin// this is what you're going to want: when stage_cout == RING_DEPTH -1
                     pe[n] <= wen0;
                     pw[n] <= waddr0;
                     pi[n] <= ASout[n];
@@ -457,8 +467,9 @@ always @(posedge clk or posedge reset) begin: NT_BLOCK
             MULin[n] <= 0;
         end
         else begin
-            if(state == 3'd5) begin
-                if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH+1)))) begin
+            if(state == 3'd5) begin //If we're doing the multiplication with 1/N
+                if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH+1)))) begin // should take 2 + 16 cycles to read everything and write it back with
+                // 1 delay.
                     NTTin[2*n+0] <= po[2*n+0];
                     NTTin[2*n+1] <= 0;
                 end
@@ -466,13 +477,13 @@ always @(posedge clk or posedge reset) begin: NT_BLOCK
                     NTTin[2*n+0] <= po[2*n+1];
                     NTTin[2*n+1] <= 0;
                 end
-                else begin
+                else begin //again, this is the standard operation
                     NTTin[2*n+0] <= po[2*n+0];
                     NTTin[2*n+1] <= po[2*n+1];
                 end
                 MULin[n] <= n_inv;
             end
-            else begin
+            else begin //standard operation, mainly in state 3.
                 NTTin[2*n+0] <= po[2*n+0];
                 NTTin[2*n+1] <= po[2*n+1];
                 MULin[n] <= to[n];

@@ -18,7 +18,7 @@ limitations under the License.
 
 module AddressGenerator (input                                       clk,reset,
                          input                                       start,
-                         output reg [`RING_DEPTH-`PE_DEPTH+1:0]      raddr0,
+                         output reg [`RING_DEPTH-`PE_DEPTH+1:0]      raddr0,//7 bits of adressing
                          output reg [`RING_DEPTH-`PE_DEPTH+1:0]      waddr0,waddr1,//7 bits of adressing
                          output reg                                  wen0  ,wen1  ,
                          output reg                                  brsel0,brsel1,
@@ -285,8 +285,9 @@ always @ (posedge clk or posedge reset) begin
                     waddro <= (c_loop >> 1) + ((c_loop >> (waddr_temp+1)) << waddr_temp) + (1 << waddr_temp);
                 end
                 else begin
-                    waddre <= c_loop;
-                    waddro <= c_loop;
+                    waddre <= c_loop; //data selection is taken over by the scramble, and we just read stuff straight in.
+                    waddro <= c_loop; // we just shift the entire BRAM from one to another, and which BRAM is taken is determined by 
+                    // BRAM scramble
                 end
             end
             else begin
@@ -317,7 +318,7 @@ always @(posedge clk or posedge reset) begin
         if(state == 2'd1) begin
             wen     <= 1;
             brsel   <= c_loop[0]; //select even or odd bram alternatingly
-            brselen <= 1;
+            brselen <= 1;// will get split into 2 signals, one which is delayed after the other
         end
         else begin
             wen     <= 0;
@@ -340,10 +341,15 @@ always @(posedge clk or posedge reset) begin: B_BLOCK
     integer n;
     for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1 //64 BRAMS
         if(reset) begin
-            brscramble[(`PE_DEPTH+1)*n+:(`PE_DEPTH+1)] <= 0;//Set the brams from 
+            brscramble[(`PE_DEPTH+1)*n+:(`PE_DEPTH+1)] <= 0;//Set the brams from 6*N:6*n+6 to zero (and since we do this for all n)
+            //this is effectively a total reset, but it's nice to do because it gives us 
         end
         else begin
-            if(c_stage >= (`RING_DEPTH-`PE_DEPTH-1)) begin // for all brRAM's from 6*n to 
+            if(c_stage >= (`RING_DEPTH-`PE_DEPTH-1)) begin // for all brRAM bits from 6*n to 6n+6
+            // set the 6 bits of the scramble equal to
+            // 0-5 : 0 + 0 + 0 + 0 = 0
+            // 1-6 : 2**5 >> (stage - 4) + 0 +0+0 = 32
+            // 
                 brscramble[(`PE_DEPTH+1)*n+:(`PE_DEPTH+1)] <= (brscrambled_temp*n[0]) +
                                                               (((n>>1)<<1) & (brscrambled_temp-1)) +
                                                               ((n>>(brscrambled_temp2+1))<<(brscrambled_temp3)) +
