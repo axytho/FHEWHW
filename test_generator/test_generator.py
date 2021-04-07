@@ -36,7 +36,7 @@ WINV_TXT      = open("WINV.txt","w")
 PC = 1 # 0: generate parameters / 1: use pre-defined parameter set
 
 # Number of Processing Elements
-P = 8
+P = 32
 
 # Generate parameters
 q       = 0
@@ -177,12 +177,35 @@ for i in range(N):
     INTT_DIN_TXT.write(hex(A_rev[i]).replace("L","")[2:]+"\n")
     INTT_DOUT_TXT.write(hex(A_rec[i]).replace("L","")[2:]+"\n")
 
-# Print TWs to txt
-for j in range(int(log(N, 2))):
-    for k in range(1 if (((N//PE)>>j) < 1) else ((N//PE)>>j)):
-        for i in range(P):
-            w_pow = (((P<<j)*k + (i<<j)) % (N//2))
-            W_TXT.write(hex(((w**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
-            WINV_TXT.write(hex(((w_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+# Print TWs to txt PEinPython = 2*PE !!!
+noToBr = False
+if noToBr:
+    for j in range(int(log(N, 2))):
+        for k in range(1 if (((N//PE)>>j) < 1) else ((N//PE)>>j)): #floor to 1 so becomes (AND PEinPython = 2*PE !!!) 16, 8, 4, 2, 1, 1, 1, 1,...
+            for i in range(P):
+                #0,32,64,...until you reach 512 for the zeroth stage + 1* PE number
+                #then 0, 64, 128, 192, ... for the first stage + 2*PE number
+                # 0, 128 + 8 * PE number, etc, until there's no real point in it left because it's all the same.
+                # the second loop of the python algorith gets ingored in this generation, to save on BRAM space I guess
+                w_pow = (((P<<j)*k + (i<<j)) % (N//2))
+                W_TXT.write(hex(((w**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+                WINV_TXT.write(hex(((w_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+else:
+    for j in range(int(log(N, 2))):
+        for k in range(1 if (((N//PE)>>j) < 1) else ((N//PE)>>j)): #floor to 1 so becomes (AND PEinPython = 2*PE !!!) 16, 8, 4, 2, 1, 1, 1, 1,...
+            for i in range(P):
+                w_pow = (((P<<j)*(2*k) + ((2*i+1)<<j)) % (N))
+                print(w_pow)
+                W_TXT.write(hex(((psi**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+                WINV_TXT.write(hex(((w_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
 
 # --------------------------------------------------------------------------
+#For every stage:
+# for k in range(16):
+#      power = 32*k+currentPEBlock (gives l for stage 1 indeed, going from 0 to 512
+# for k in range(8):
+#      power = 64*k+2*currentPEBlock (same thing except I don't understand the division by N//2 unless that's just a way
+# of guaranteeing that there are no problems since
+#
+# for k inrange(4):
+#       power = 128*k + 4*currentPEBlock
