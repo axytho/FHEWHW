@@ -197,7 +197,7 @@ else:
                 w_pow = (((P<<j)*(2*k) + ((2*i+1)<<j)) % (N))
                 print(w_pow)
                 W_TXT.write(hex(((psi**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
-                WINV_TXT.write(hex(((w_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+                WINV_TXT.write(hex(((psi_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
 
 # --------------------------------------------------------------------------
 #For every stage:
