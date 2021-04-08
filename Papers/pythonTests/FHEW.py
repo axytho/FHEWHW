@@ -17,7 +17,12 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
     modified = [list() for _ in range(2)]
     for j in range(2):
         modified[j] = IterativeInverseNTTHardware(list(ct[j]) , modulus, psi_inv)
-
+    ModifiedNTT = open(
+        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/MODIFIED.txt",
+        'w')
+    for k in range(N):
+        bitReversedModified= indexReverse(modified[0], 10)
+        ModifiedNTT.write(hex(bitReversedModified[k]).replace("L", "")[2:] + "\n")
 
 
     for j in range(2):
