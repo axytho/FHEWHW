@@ -36,7 +36,8 @@ module NTTN   (input                           clk,reset,
                input                           start_intt,
                input [`DATA_SIZE_ARB-1:0]      din,
                output reg                      done,
-               output reg [`DATA_SIZE_ARB-1:0] dout
+               output [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut
+               // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
 // ---------------------------------------------------------------- connections
 
@@ -289,7 +290,7 @@ assign addrout = (sys_cntr >> (`PE_DEPTH+1));
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast;
 assign inttlast = (sys_cntr & ((`RING_SIZE >> (`PE_DEPTH+1))-1)); //counter mod 16
 //###
-reg [`RING_DEPTH:0] reverse_sys_cntr;
+reg [`RING_DEPTH-1:0] reverse_sys_cntr;
 integer i;
 //###
 always @*
