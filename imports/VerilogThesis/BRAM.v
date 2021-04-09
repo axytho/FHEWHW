@@ -24,6 +24,8 @@ module BRAM #(parameter DLEN = 32, HLEN=9)
             input      [HLEN-1:0] raddr,
             output reg [DLEN-1:0] dout);
 // bram
+// if you want storage for the secret key, write "distributed" see the BRAM help files.
+// try synthesizing the entire secret key storage.
 (* ram_style="block" *) reg [DLEN-1:0] blockram [(1<<HLEN)-1:0];
 
 // write operation

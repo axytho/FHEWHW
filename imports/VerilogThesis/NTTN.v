@@ -36,7 +36,7 @@ module NTTN   (input                           clk,reset,
                input                           start_intt,
                input [`DATA_SIZE_ARB-1:0]      din,
                output reg                      done,
-               output [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut
+               output reg [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut//###
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
 // ---------------------------------------------------------------- connections
@@ -199,7 +199,7 @@ always @(posedge clk or posedge reset) begin
             sys_cntr <= 0;
         end
         3'd4: begin
-            if(sys_cntr == (`RING_SIZE+1)) begin
+            if(sys_cntr == ((`RING_SIZE >> (`PE_DEPTH+1)) + `STAGE_DELAY)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -392,7 +392,8 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 pe[n] <= 0;
                 pw[n] <= 0;
                 pi[n] <= 0;
-                pr[n] <= {2'b10,addrout};
+                //###pr[n] <= {2'b10,addrout};
+                pr[n] <= {2'b10,inttlast};//###
             end
             else if(state == 3'd5) begin // last stage of intt
                 if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH+1))) begin
@@ -440,19 +441,22 @@ end
 wire [`PE_DEPTH:0] coefout;
 assign coefout = (sys_cntr-2);
 
-always @(posedge clk or posedge reset) begin
-    if(reset) begin
-        done <= 0;
-        dout <= 0;
-    end
-    else begin
-        if(state == 3'd4) begin
-            done <= (sys_cntr == 1) ? 1 : 0;
-            dout <= po[coefout];
+always @(posedge clk or posedge reset) begin: OUT_BLOCK
+integer n;
+    for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1
+        if(reset) begin
+            done <= 0;
+            bramOut <= 0;
         end
         else begin
-            done <= 0;
-            dout <= 0;
+            if(state == 3'd4) begin
+                done <= (sys_cntr == 1) ? 1 : 0;
+                bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n];
+            end
+            else begin
+                done <= 0;
+                bramOut <= 0;
+            end
         end
     end
 end
