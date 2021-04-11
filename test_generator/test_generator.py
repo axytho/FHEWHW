@@ -190,14 +190,27 @@ if noToBr:
                 w_pow = (((P<<j)*k + (i<<j)) % (N//2))
                 W_TXT.write(hex(((w**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
                 WINV_TXT.write(hex(((w_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+
+
+
 else:
-    for j in range(int(log(N, 2))):
-        for k in range(1 if (((N//PE)>>j) < 1) else ((N//PE)>>j)): #floor to 1 so becomes (AND PEinPython = 2*PE !!!) 16, 8, 4, 2, 1, 1, 1, 1,...
-            for i in range(P):
+    W_TXTLIST = list()
+    W_INV_TXTLIST = list()
+    for i in range(P):
+        filenameW = "W_{0}.txt"
+        filenameW_inv = "W_INV_{0}.txt"
+        W_TXTLIST.append(open(filenameW.format(i), "w"))
+        W_INV_TXTLIST.append(open(filenameW_inv.format(i), "w"))
+
+    for i in range(P): #PUT THIS IN THE FIRST SO THAT THE ORDER IS REVERSED AND WE CAN LOAD IT IN AS RAM TO SIMPLIFY
+        # THE INTERFACE
+        for j in range(int(log(N, 2))):
+            for k in range(1 if (((N//PE)>>j) < 1) else ((N//PE)>>j)): #floor to 1 so becomes (AND PEinPython = 2*PE !!!) 16, 8, 4, 2, 1, 1, 1, 1,...
+
                 w_pow = (((P<<j)*(2*k) + ((2*i+1)<<j)) % (N))
                 print(w_pow)
-                W_TXT.write(hex(((psi**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
-                WINV_TXT.write(hex(((psi_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+                W_TXTLIST[i].write(hex(((psi**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+                W_INV_TXTLIST[i].write(hex(((psi_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
 
 # --------------------------------------------------------------------------
 #For every stage:
