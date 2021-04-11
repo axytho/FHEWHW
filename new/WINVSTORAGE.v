@@ -30,9 +30,8 @@ initial begin
 //NOT SO FAST, NEEDS TO BE DONE SEPERATELY BECAUSE SEPERATE BRAMS
 // SO YOURE GOING TO HAVE TO MAKE THE W FILES INDIVIDUALLY IF YOU WANT TO DO THIS
 
- $sformat(filename, "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/WWINVFOLDER/W_INV_%0d.txt", PE_NO);
-
- $readmemh(filename,  blockram);
+ $readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/WINV.txt"   
+        ,  blockram,  (((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)*PE_NO, (((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)*(PE_NO + 1) - 1);
         //(1<<HLEN)-1
         //((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)-1
 end
