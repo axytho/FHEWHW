@@ -35,6 +35,7 @@ module NTTN   (input                           clk,reset,
                input                           start,
                input                           start_intt,
                input [`DATA_SIZE_ARB-1:0]      din,
+               input  [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn,
                output reg                      done,
                output reg [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut//###
                // ###output reg [`DATA_SIZE_ARB-1:0] dout

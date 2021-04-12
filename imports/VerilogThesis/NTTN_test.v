@@ -27,6 +27,7 @@ reg                       load_data;
 reg                       start;
 reg                       start_intt;
 reg  [`DATA_SIZE_ARB-1:0] din;
+wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn;
 wire                      done;
 wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut;
 
@@ -238,6 +239,7 @@ NTTN uut    (clk,reset,
              start,
              start_intt,
              din,
+             bramIn,
              done,
              bramOut);
 
