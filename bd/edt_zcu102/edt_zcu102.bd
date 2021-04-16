@@ -7,8 +7,7 @@
       "name": "edt_zcu102",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
       "synth_flow_mode": "Hierarchical",
-      "tool_version": "2020.2",
-      "validated": "true"
+      "tool_version": "2020.2"
     },
     "design_tree": {
       "zynq_ultra_ps_e_0": "",
@@ -22,7 +21,7 @@
       "rst_ps8_0_99M": ""
     },
     "interface_ports": {
-      "dip_switches_8bits": {
+      "gpio_rtl": {
         "mode": "Master",
         "vlnv": "xilinx.com:interface:gpio_rtl:1.0"
       }
@@ -1173,11 +1172,17 @@
         "xci_path": "ip\\edt_zcu102_axi_gpio_0_0\\edt_zcu102_axi_gpio_0_0.xci",
         "inst_hier_path": "axi_gpio_0",
         "parameters": {
+          "C_ALL_INPUTS": {
+            "value": "1"
+          },
+          "C_GPIO_WIDTH": {
+            "value": "8"
+          },
           "C_IS_DUAL": {
             "value": "0"
           },
           "GPIO_BOARD_INTERFACE": {
-            "value": "dip_switches_8bits"
+            "value": "Custom"
           },
           "USE_BOARD_FLOW": {
             "value": "true"
@@ -1344,16 +1349,16 @@
               }
             },
             "interface_nets": {
-              "auto_pc_to_s00_couplers": {
-                "interface_ports": [
-                  "M_AXI",
-                  "auto_pc/M_AXI"
-                ]
-              },
               "auto_ds_to_auto_pc": {
                 "interface_ports": [
                   "auto_ds/M_AXI",
                   "auto_pc/S_AXI"
+                ]
+              },
+              "auto_pc_to_s00_couplers": {
+                "interface_ports": [
+                  "M_AXI",
+                  "auto_pc/M_AXI"
                 ]
               },
               "s00_couplers_to_auto_ds": {
@@ -1430,10 +1435,10 @@
       }
     },
     "interface_nets": {
-      "axi_gpio_0_GPIO": {
+      "axi_interconnect_0_M00_AXI": {
         "interface_ports": [
-          "dip_switches_8bits",
-          "axi_gpio_0/GPIO"
+          "axi_interconnect_0/M00_AXI",
+          "axi_gpio_0/S_AXI"
         ]
       },
       "zynq_ultra_ps_e_0_M_AXI_HPM0_FPD": {
@@ -1442,10 +1447,10 @@
           "axi_interconnect_0/S00_AXI"
         ]
       },
-      "axi_interconnect_0_M00_AXI": {
+      "axi_gpio_0_GPIO": {
         "interface_ports": [
-          "axi_interconnect_0/M00_AXI",
-          "axi_gpio_0/S_AXI"
+          "gpio_rtl",
+          "axi_gpio_0/GPIO"
         ]
       }
     },

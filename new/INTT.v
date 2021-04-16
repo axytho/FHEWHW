@@ -29,12 +29,13 @@ limitations under the License.
 // * modular reduction is not optimized
 // * wait state is not optimized
 
-module INTTN   (input                           clk,reset,
+module NTTN   (input                           clk,reset,
                input                           load_w,
                input                           load_data,
                input                           start,
                input                           start_intt,
                input [`DATA_SIZE_ARB-1:0]      din,
+               input  [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn,
                output reg                      done,
                output reg [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut//###
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
@@ -63,11 +64,11 @@ reg [`RING_DEPTH-`PE_DEPTH+1:0] pw [(2*`PE_NUMBER)-1:0];
 reg [`RING_DEPTH-`PE_DEPTH+1:0] pr [(2*`PE_NUMBER)-1:0];
 reg [0:0]                       pe [(2*`PE_NUMBER)-1:0];
 
-
+reg [`DATA_SIZE_ARB-1:0]        ti [`PE_NUMBER-1:0];
 wire[`DATA_SIZE_ARB-1:0]        to [`PE_NUMBER-1:0];
-
+reg [`RING_DEPTH-`PE_DEPTH+3:0] tw [`PE_NUMBER-1:0];
 reg [`RING_DEPTH-`PE_DEPTH+3:0] tr [`PE_NUMBER-1:0];
-
+reg [0:0]                       te [`PE_NUMBER-1:0];
 
 // control signals
 wire [`RING_DEPTH-`PE_DEPTH+1:0]      raddr;
@@ -99,7 +100,7 @@ generate
     for(k=0; k<`PE_NUMBER ;k=k+1) begin: BRAM_GEN_BLOCK
         BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd00(clk,pe[2*k+0],pw[2*k+0],pi[2*k+0],pr[2*k+0],po[2*k+0]);
         BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd01(clk,pe[2*k+1],pw[2*k+1],pi[2*k+1],pr[2*k+1],po[2*k+1]);
-        WINVSTORAGE #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+4), .PE_NO(k)) bt00(clk,tr[k],to[k]);
+        BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+4)) bt00(clk,te[k],tw[k],ti[k],tr[k],to[k]);
     end
 endgenerate
 
@@ -232,10 +233,12 @@ always @(posedge clk or posedge reset) begin: TW_BLOCK
     integer n;
     for(n=0; n < (`PE_NUMBER); n=n+1) begin: LOOP_1
         if(reset) begin
+            te[n] <= 0;
+            tw[n] <= 0;
+            ti[n] <= 0;
             tr[n] <= 0;
         end
         else begin
-        /*
             if((state == 3'd1) && (sys_cntr < ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH))) begin // for (16+8+4+2+1+1+1+1+1+1 = 36  * PE elements)
             //i.e. for every stage in the thing
                 te[n] <= (n == (sys_cntr & ((1 << `PE_DEPTH)-1)));//standard way of writing a value away to a certain n every clock cycle (not super efficient)
@@ -248,32 +251,37 @@ always @(posedge clk or posedge reset) begin: TW_BLOCK
                                 //enable at (sys_cntr - 36 * 32)  mod 32 (which makes sense)
                 te[n] <= (n == ((sys_cntr-((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)) & ((1 << `PE_DEPTH)-1)));
                 tw[n][`RING_DEPTH-`PE_DEPTH+3]   <= 1; //write the inverse adresses, and write them as (sys_cntr - 32*36) // 32
-                tw[n][`RING_DEPTH-`PE_DEPTH+2:0] <= ((sys_cntr-((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)) >> `PE_DEPTH);//so change write
-                //adress  once every 32 clock cycles.
+                tw[n][`RING_DEPTH-`PE_DEPTH+2:0] <= ((sys_cntr-((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)) >> `PE_DEPTH);//so write once
+                // every 32 clock cycles.
                 ti[n] <= din;
                 tr[n] <= 0;
-            end*/
-            if(state == 3'd3) begin // NTT operations
-
-                //tr[n] <= {ntt_intt,raddr_tw};// send it to EVERY PE (so how we write it in is simportant obviously)
-                tr[n] <= {1'b0,raddr_tw}; // always inverse NTT
+            end
+            else if(state == 3'd3) begin // NTT operations
+                te[n] <= 0;
+                tw[n] <= 0;
+                ti[n] <= 0;
+                tr[n] <= {ntt_intt,raddr_tw};// send it to EVERY PE (so how we write it in is simportant obviously)
             end
             else begin
-
+                te[n] <= 0;
+                tw[n] <= 0;
+                ti[n] <= 0;
                 tr[n] <= 0;
             end
         end
     end
 end
 
-reg [`DATA_SIZE_ARB-1:0] params    [0:7];
-initial begin
-$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params);
-q <= params[1];
- n_inv <= params[6];
+always @(posedge clk or posedge reset) begin
+    if(reset) begin
+        q     <= 0;
+        n_inv <= 0;
+    end
+    else begin
+        q     <= ((state == 3'd1) && (sys_cntr == ((((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1)+2-2))) ? din : q;
+        n_inv <= ((state == 3'd1) && (sys_cntr == ((((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1)+2-1))) ? din : n_inv;
+    end
 end
-
-
 
 // ---------------------------------------------------------------- load data & other data operations
 // ### is the symbol for code that I write, and commented code will have a hashtag in from of it
