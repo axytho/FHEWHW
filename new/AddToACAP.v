@@ -156,7 +156,7 @@ end
 
 // ---------------------------------------------------------------- UUT
 
-NTTN uut    (clk,reset,
+INTT uut    (clk,reset,
              load_w,
              load_data,
              start,

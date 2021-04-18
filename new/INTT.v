@@ -29,10 +29,9 @@ limitations under the License.
 // * modular reduction is not optimized
 // * wait state is not optimized
 
-module NTTN   (input                           clk,reset,
+module INTT   (input                           clk,reset,
                input                           load_w,
                input                           load_data,
-               input                           start,
                input                           start_intt,
                input [`DATA_SIZE_ARB-1:0]      din,
                input  [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn,
@@ -41,6 +40,10 @@ module NTTN   (input                           clk,reset,
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
 // ---------------------------------------------------------------- connections
+
+//HARDCODE
+wire start;
+assign start = 0;
 
 // parameters & control
 reg [2:0] state;

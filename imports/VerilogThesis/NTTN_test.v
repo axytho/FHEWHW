@@ -22,14 +22,19 @@ parameter HP = 5;
 parameter FP = (2*HP); //10
 
 reg                       clk,reset;
-reg                       load_w;
-reg                       load_data;
+reg                       load_w_ntt;
+reg                       load_w_intt;
+reg                       load_data_ntt;
+reg                       load_data_intt;
 reg                       start;
 reg                       start_intt;
-reg  [`DATA_SIZE_ARB-1:0] din;
+reg  [`DATA_SIZE_ARB-1:0] din_ntt;
+reg  [`DATA_SIZE_ARB-1:0] din_intt;
 wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn;
-wire                      done;
-wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut;
+wire                      done_ntt;
+wire                      done_intt;
+wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut_ntt;
+wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut_intt;
 
 // ---------------------------------------------------------------- CLK
 
@@ -74,42 +79,40 @@ initial begin: CLK_RESET_INIT
 	#1000;
 end
 
-initial begin: LOAD_DATA
-    load_w    = 0;
-    load_data = 0;
+initial begin: LOAD_DATA_NTT
+    load_w_ntt    = 0;
+    load_data_ntt = 0;
     start     = 0;
-    start_intt= 0;
-    din       = 0;
+    din_ntt       = 0;
 
     #1500;
 
     // load w
-    load_w = 1;
+    load_w_ntt = 1;
     #FP;
-    load_w = 0;
+    load_w_ntt = 0;
             // ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)))
-	for(k=0; k<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); k=k+1) begin
-		din = w[k];
+	for(k=0; k<(`RING_DEPTH<<((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH)); k=k+1) begin
+
+		din_ntt = w[k];
 		#FP;
 	end
-	for(k=0; k<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); k=k+1) begin
-		din = winv[k];
-		#FP;
-	end
-	din = params[1];
+	din_ntt = params[1];
 	#FP;
-	din = params[6];
+	din_ntt = params[6];
 	#FP;
 
 	#(5*FP);
 
-	// ---------- load data (ntt)
-	load_data = 1;
+	#(FP*(`RING_SIZE+10))
+
+	// ---------- load data (intt)
+	load_data_ntt = 1;
     #FP;
-    load_data = 0;
+    load_data_ntt = 0;
 
 	for(k=0; k<(`RING_SIZE); k=k+1) begin
-		din = ntt_pin[k];
+		din_ntt = ntt_pin[k];
 		#FP;
 	end
 
@@ -121,19 +124,55 @@ initial begin: LOAD_DATA
 	start = 0;
 	#FP;
 
-	while(done == 0)
+	while(done_ntt == 0)
 		#FP;
 	#FP;
 
-	#(FP*(`RING_SIZE+10))
+	#(FP*(`RING_SIZE+10));
 
-	// ---------- load data (intt)
-	load_data = 1;
+end
+
+initial begin: LOAD_DATA_INTT
+    load_w_intt    = 0;
+    load_data_intt = 0;
+    start_intt= 0;
+    din_intt       = 0;
+
+    #1500;
+    //wait before running the other so you have time to read both out
+    #(`RING_SIZE >> (`PE_DEPTH))
+
+    // load w
+    load_w_intt = 1;
     #FP;
-    load_data = 0;
+    load_w_intt = 0;
+            // ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)))
+	for(k=0; k<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); k=k+1) begin
+	
+		din_intt = 0;
+		#FP;
+	end
+	$display(k);
+	for(k=0; k<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); k=k+1) begin
+		din_intt = winv[k];
+		#FP;
+	end
+	din_intt = params[1];
+	#FP;
+	din_intt = params[6];
+	#FP;
+
+	#(5*FP);
+
+
+
+	// ---------- load data (ntt)
+	load_data_intt = 1;
+    #FP;
+    load_data_intt = 0;
 
 	for(k=0; k<(`RING_SIZE); k=k+1) begin
-		din = intt_pin[k];
+		din_intt = intt_pin[k];
 		#FP;
 	end
 
@@ -145,7 +184,7 @@ initial begin: LOAD_DATA
 	start_intt = 0;
 	#FP;
 
-	while(done == 0)
+	while(done_intt == 0)
 		#FP;
 	#FP;
 
@@ -168,14 +207,14 @@ initial begin: CHECK_RESULT
     #1500;
 
 	// wait result (ntt)
-	while(done == 0)
+	while(done_ntt == 0)
 		#FP;
 	#FP;
 
 	// Store output (ntt)
 	for(m=0; m<(`RING_SIZE >> (`PE_DEPTH+1)); m=m+1) begin
 	   for(n=0; n<(`PE_NUMBER << 1); n=n+1) begin
-		  ntt_nout[(`PE_NUMBER <<1)*m+n] = bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
+		  ntt_nout[(`PE_NUMBER <<1)*m+n] = bramOut_ntt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
         end
         #FP;
 	end
@@ -183,14 +222,14 @@ initial begin: CHECK_RESULT
 	#FP;
 
 	// wait result (intt)
-	while(done == 0)
+	while(done_intt == 0)
 		#FP;
 	#FP;
 
 	// Store output (intt)
 	for(m=0; m<(`RING_SIZE >> (`PE_DEPTH+1)); m=m+1) begin
        for(n=0; n<(`PE_NUMBER << 1); n=n+1) begin
-          intt_nout[(`PE_NUMBER <<1)*m+n] = bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
+          intt_nout[(`PE_NUMBER <<1)*m+n] = bramOut_intt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
         end
         #FP;
     end
@@ -234,13 +273,21 @@ end
 // ---------------------------------------------------------------- UUT
 
 NTTN uut    (clk,reset,
-             load_w,
-             load_data,
+             load_w_ntt,
+             load_data_ntt,
              start,
-             start_intt,
-             din,
+             din_ntt,
              bramIn,
-             done,
-             bramOut);
+             done_ntt,
+             bramOut_ntt);
+             
+INTT uut2    (clk,reset,
+                          load_w_intt,
+                          load_data_intt,
+                          start_intt,
+                          din_intt,
+                          bramIn,
+                          done_intt,
+                          bramOut_intt);
 
 endmodule

@@ -33,7 +33,6 @@ module NTTN   (input                           clk,reset,
                input                           load_w,
                input                           load_data,
                input                           start,
-               input                           start_intt,
                input [`DATA_SIZE_ARB-1:0]      din,
                input  [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn,
                output reg                      done,
@@ -41,6 +40,10 @@ module NTTN   (input                           clk,reset,
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
 // ---------------------------------------------------------------- connections
+
+//HARDCODE
+wire start_intt;
+assign start_intt = 0;
 
 // parameters & control
 reg [2:0] state;
@@ -110,7 +113,7 @@ generate
 	genvar m;
 
     for(m=0; m<`PE_NUMBER ;m=m+1) begin: NTT2_GEN_BLOCK
-        NTT2 nttu(clk,reset,
+        NTTCT2 nttu(clk,reset,
                   q,
 			      NTTin[2*m+0],NTTin[2*m+1],
 				  MULin[m],
