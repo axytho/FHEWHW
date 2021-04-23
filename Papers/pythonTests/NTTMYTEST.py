@@ -22,6 +22,7 @@ def ForwardTransformToBitReverse(element, modulus, psi):
         for i in range(0,m):
             j1 = 2*i*t
             j2 = j1 + t -1
+
             indexOmega = m + i
             S = omegaReversed[indexOmega]
             for j in range(j1, j2+1):

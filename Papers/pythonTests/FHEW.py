@@ -29,8 +29,8 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
         ctEvaluation[j] = indexReverse(IterativeInverseNTT(list(indexReverse(list(ct[j]), 10)), modulus, w_inv), 10)
         for a,b in zip(range(2 * N, N, -1), range(N)):
             ctEvaluation[j][b] = (pow(psi, a, modulus) * ctEvaluation[j][b]) % modulus
-    print([j for (i, j) in
-           zip([abs(modified[0][i] - ctEvaluation[0][i]) for i in range(N)], range(N)) if i > 0])
+    #print([j for (i, j) in
+    #       zip([abs(modified[0][i] - ctEvaluation[0][i]) for i in range(N)], range(N)) if i > 0])
     #print(hex(ctEvaluation[1][0]))
 
 
@@ -39,12 +39,31 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
     #print([abs(NTTMYTEST.NTTPoly[i] - dct[0][i]) for i in range(N)])
     #print([ j for (i,j) in zip([abs(NTTMYTEST.NTTPoly[i] - dct[0][i]) for i in range(N)],range(N)) if i > 0 ])
     #[print(hex(element)) for element in dct[0]]#CORRECT!
+
+    NTT_IN = open(
+        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_IN.txt",
+        'w')
+    for k in range(N):
+        NTT_IN.write(hex(dct[0][k]).replace("L", "")[2:] + "\n")
+
+
     modifiedDCT = [N*[0] for _ in range(2*digitsG)]
+    hwEvaluateDCT = [N * [0] for _ in range(2 * digitsG)]
     evaluateDCT = [N * [0] for _ in range(2 * digitsG)]
     for j in range(2*digitsG):
         for i in range(N):
             modifiedDCT[j][i] = pow(psi, i, modulus) * dct[j][i] % modulus
         evaluateDCT[j] = IterativeForwardNTT(list(modifiedDCT[j]), modulus, 133754304)
+        hwEvaluateDCT[j] = IterativeForwardCT(list(dct[j]), modulus, psi)
+    #[print("Index: ", i, "element:", hex(evaluateDCT[0][i]), "check", hex(hwEvaluateDCT[0][i])) for i in range(N)]
+    print([j for (i, j) in
+           zip([abs(evaluateDCT[0][i] - hwEvaluateDCT[0][i]) for i in range(N)], range(N)) if i > 0])
+
+    NTT_OUT = open(
+        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_OUT.txt",
+        'w')
+    for k in range(N):
+        NTT_OUT.write(hex(evaluateDCT[0][k]).replace("L", "")[2:] + "\n")
 
     #[print("Index: ", i , "element:" ,hex(evaluateDCT[0][i])) for i in range(N)] #CORRECT
     #print(dct[1][0], NTTMYTEST.SIGNED_IN[2048])
@@ -154,6 +173,41 @@ def IterativeForwardNTT(arrayIn, P, W):
 
                 arrayOut[s] = (as_temp + at_temp) % P
                 arrayOut[t] = ((as_temp - at_temp) * w) % P
+
+
+    return arrayOut
+
+
+def IterativeForwardCT(arrayIn, P, psi):
+    arrayOut = [0] * len(arrayIn)
+    N = len(arrayIn)
+    for idx in range(N):
+        arrayOut[idx] = arrayIn[idx]
+    v = int(math.log(N, 2))
+
+    # 0....
+    #
+    for i in range(0, v):
+
+        for j in range(0, (2 ** i)):
+            for k in range(0, (2 ** (v - i - 1))):
+                s = j * (2 ** (v - i)) + k
+                t = s + (2 ** (v - i - 1))
+
+
+                index = intReverse(2**i+j, v)
+                w = pow(psi, index, P)
+                as_temp = arrayOut[s]
+                temp = arrayOut[t]
+                at_temp = arrayOut[t] * w
+
+                arrayOut[s] = (as_temp + at_temp) % P
+                arrayOut[t] = ((as_temp - at_temp) ) % P
+
+                if (i==0 and j==0 and k==0):
+                    print(index)
+                    print(hex(as_temp), hex(temp), hex(at_temp % P), hex(arrayOut[s]), hex(arrayOut[t]))
+                    # you cannot compare w!!!
 
 
     return arrayOut
