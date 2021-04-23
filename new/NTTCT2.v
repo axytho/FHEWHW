@@ -24,7 +24,6 @@ module NTTCT2(input 					        clk,reset,
 			output reg [`DATA_SIZE_ARB-1:0] NTToutEVEN,NTToutODD);
 
 
-// first level registers
 wire [`DATA_SIZE_ARB-1:0] MULin0,MULin1;
 //wire [`DATA_SIZE_ARB-1:0] ADDreg;
 
@@ -60,14 +59,23 @@ assign msub_res = (msub[`DATA_SIZE_ARB] == 1'b0) ? msub[`DATA_SIZE_ARB-1:0] : ms
 
 
 
+// first level registers
 
 
 
-always @(*) begin
-    ADDout = madd_res;
-    SUBout = msub_res;
-
-    NTToutEVEN = madd_res;
+always @(posedge clk) begin
+    if(reset) begin
+        ADDout <= 0;
+        SUBout <= 0;
+    
+        NTToutEVEN <= 0;
+    end
+    else begin
+    
+        ADDout <= madd_res;
+        SUBout <= msub_res;
+        NTToutEVEN <= madd_res;
+    end
 end
 
 // second level registers (output)

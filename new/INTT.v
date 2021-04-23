@@ -103,7 +103,8 @@ generate
     for(k=0; k<`PE_NUMBER ;k=k+1) begin: BRAM_GEN_BLOCK
         BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd00(clk,pe[2*k+0],pw[2*k+0],pi[2*k+0],pr[2*k+0],po[2*k+0]);
         BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd01(clk,pe[2*k+1],pw[2*k+1],pi[2*k+1],pr[2*k+1],po[2*k+1]);
-        BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+4)) bt00(clk,te[k],tw[k],ti[k],tr[k],to[k]);
+        //###BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+4)) bt00(clk,te[k],tw[k],ti[k],tr[k],to[k]);
+        WINVSTORAGE #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+4), .PE_NO(k)) bt00(clk,tr[k],to[k]);
     end
 endgenerate
 

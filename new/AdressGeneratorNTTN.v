@@ -16,7 +16,7 @@ limitations under the License.
 
 `include "defines.v"
 
-module AddressGenerator (input                                       clk,reset,
+module AddressGeneratorNTTN (input                                       clk,reset,
                          input                                       start,
                          output reg [`RING_DEPTH-`PE_DEPTH+1:0]      raddr0,//7 bits of adressing
                          output reg [`RING_DEPTH-`PE_DEPTH+1:0]      waddr0,waddr1,//7 bits of adressing
@@ -157,7 +157,7 @@ end
 wire [`RING_DEPTH-`PE_DEPTH+2:0] c_tw_temp;//5/6 bits on PE=2/1
 // loop_limit is 15,
 assign c_tw_temp = (c_loop_limit>>c_stage);//value = 1/3 >> by the stage (I don't quite understand why you'd take that large a size for this)
-//15, 7, 3, 1, 0, 0, 0, 0, 
+
 always @(posedge clk or posedge reset) begin
     if(reset) begin
         c_tw <= 0; //outside reset or start
@@ -168,35 +168,17 @@ always @(posedge clk or posedge reset) begin
         end
         else begin
             if((state == 2'd1) && (c_loop != c_loop_limit)) begin//if we're currently going through the loop
-                if(c_stage == 0) begin//if this is the first loop: 0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15
-                    if(c_loop[0] == 0)// and we're in an even cycle
-                    // If 10-5-2 = 3 then we have +8 for the twiddle read adress output and -7 for odd ones
-                    // The final result is mod 16, which makes senses as this is the max value of the loop (see k in python)
-                        c_tw <= (((c_tw + ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage))) & c_loop_limit); //c_tw += 01/10 & 01/11  i.e. c_tw += 1/2 mod loop_limit 
-                    else 
-                        c_tw <= (((c_tw + 1 - ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage))) & c_loop_limit); // for odd values, it is c_tw += 0 or -1 mod looplim
-                end
-                else if(c_stage >= (`RING_DEPTH-`PE_DEPTH-1)) begin //stage_limit is RING_DEPTH-1
-                    c_tw <= c_tw;// if we get to the point where 1 >= (N//2*PE) >> j or in other words 2**j >= N/(2*PE) or cstage >= (`RING_DEPTH-`PE_DEPTH-1)
-                end // we do our +1 at the end of our loop anyway, so it's fine.
-                else begin
-                    //stage 2:
-                    // 16, 20, 17, 21, 18, 22, 19,23, 16, 20, 17, 21, (repeat)
+//if this is ANY first loop: 0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15
+// second loop: 16, 20, 17, 21, 18,22, 19,23, 24!!!
+                if((c_loop & c_tw_temp) == c_tw_temp)// in the first stage: c_loop = c_loop limit so not a problem
+                    c_tw <= c_tw + 1;
+                else if(c_loop[0] == 0)// and we're in an even cycle
+                // If 10-5-2 = 3 then we have +8 for the twiddle read adress output and -7 for odd ones
+                // The final result is mod 16, which makes senses as this is the max value of the loop (see k in python)
+                    c_tw <= (c_tw + ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage)); //c_tw += 01/10 & 01/11  i.e. c_tw += 1/2 mod loop_limit 
                 
-                    if(c_loop[0] == 0) begin//if even then:
-                    //C_tw += (8 >> stage) - (2**(x-1) if the last x digits are all one with x starting at 4 and going to 0)
-                    // this only happens once and it only happens at the last stage. It shouldn't actually happen when c_loop[0] ==0
-                        c_tw <= c_tw + ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage) // 2**(i-1)*k, the i comes from the stage
-                              - (((c_loop & c_tw_temp) == c_tw_temp) ? (((c_loop & c_tw_temp)>>1)+1) : 0);
-                              // so the second part of this statement is to repeat the same adresses
-                    end
-                    else begin//c_tw -= 7 >>stage - idem
-                        c_tw <= (c_tw + 1) - ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage)
-                              - (((c_loop & c_tw_temp) == c_tw_temp) ? (((c_loop & c_tw_temp)>>1)+1) : 0);
-                              // The reason for the second part is to ensure that the entire adressing run-over repeats itself
-                              // as many times as necessary.
-                    end
-                end
+                else
+                    c_tw <= (c_tw + 1 - ((1 << (`RING_DEPTH-`PE_DEPTH-2))>>c_stage)); // for odd values, it is c_tw += 0 or -1 mod looplim
             end
             else if((state == 2'd2) && (c_wait == c_wait_limit) && (c_stage == c_stage_limit)) // Full Reset
                 c_tw <= 0;
@@ -255,7 +237,7 @@ always @ (posedge clk or posedge reset) begin
     end
 end
 
-// --------------------------------------------------------------------------- waddr (1 cc delayed) (SIMPLY BITINVERSE AND YOU'RE DONE)
+// --------------------------------------------------------------------------- waddr (1 cc delayed) 
 
 wire [`RING_DEPTH-`PE_DEPTH-1:0] waddr_temp;
 assign waddr_temp = ((`RING_DEPTH-`PE_DEPTH-1) - (c_stage+1));
