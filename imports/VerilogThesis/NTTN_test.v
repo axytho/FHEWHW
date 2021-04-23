@@ -43,7 +43,7 @@ always #HP clk = ~clk;
 // ---------------------------------------------------------------- TXT data
 
 reg [`DATA_SIZE_ARB-1:0] params    [0:7];
-reg [`DATA_SIZE_ARB-1:0] w	 	   [0:((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)-1];
+reg [`DATA_SIZE_ARB-1:0] w	 	   [0:( `RING_DEPTH<<((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH) )-1];
 reg [`DATA_SIZE_ARB-1:0] winv	   [0:((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)-1];
 reg [`DATA_SIZE_ARB-1:0] ntt_pin   [0:`RING_SIZE-1];
 reg [`DATA_SIZE_ARB-1:0] ntt_pout  [0:`RING_SIZE-1];
@@ -55,8 +55,8 @@ initial begin
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params);
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/W.txt"        , w);
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/WINV.txt"     , winv);
-	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/NTT_DIN.txt"  , ntt_pin);
-	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/NTT_DOUT.txt" , ntt_pout);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_IN.txt"  , ntt_pin);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_OUT.txt" , ntt_pout);
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/ACCUMULATOR.txt" , intt_pin);
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/MODIFIED.txt", intt_pout);
 end
@@ -64,6 +64,7 @@ end
 // ---------------------------------------------------------------- TEST case
 
 integer k;
+integer d;
 
 initial begin: CLK_RESET_INIT
 	// clk & reset (150 cc)
@@ -92,7 +93,7 @@ initial begin: LOAD_DATA_NTT
     #FP;
     load_w_ntt = 0;
             // ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)))
-	for(k=0; k<(`RING_DEPTH<<((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH)); k=k+1) begin
+	for(k=0; k<(`RING_DEPTH<< ((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH) ); k=k+1) begin
 
 		din_ntt = w[k];
 		#FP;
@@ -104,9 +105,9 @@ initial begin: LOAD_DATA_NTT
 
 	#(5*FP);
 
-	#(FP*(`RING_SIZE+10))
 
-	// ---------- load data (intt)
+
+	// ---------- load data (ntt)
 	load_data_ntt = 1;
     #FP;
     load_data_ntt = 0;
@@ -147,14 +148,13 @@ initial begin: LOAD_DATA_INTT
     #FP;
     load_w_intt = 0;
             // ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)))
-	for(k=0; k<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); k=k+1) begin
+	for(d=0; d<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); d=d+1) begin
 	
 		din_intt = 0;
 		#FP;
 	end
-	$display(k);
-	for(k=0; k<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); k=k+1) begin
-		din_intt = winv[k];
+	for(d=0; d<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); d=d+1) begin
+		din_intt = winv[d];
 		#FP;
 	end
 	din_intt = params[1];
@@ -171,8 +171,8 @@ initial begin: LOAD_DATA_INTT
     #FP;
     load_data_intt = 0;
 
-	for(k=0; k<(`RING_SIZE); k=k+1) begin
-		din_intt = intt_pin[k];
+	for(d=0; d<(`RING_SIZE); d=d+1) begin
+		din_intt = intt_pin[d];
 		#FP;
 	end
 
@@ -206,20 +206,7 @@ initial begin: CHECK_RESULT
 	ei = 0;
     #1500;
 
-	// wait result (ntt)
-	while(done_ntt == 0)
-		#FP;
-	#FP;
 
-	// Store output (ntt)
-	for(m=0; m<(`RING_SIZE >> (`PE_DEPTH+1)); m=m+1) begin
-	   for(n=0; n<(`PE_NUMBER << 1); n=n+1) begin
-		  ntt_nout[(`PE_NUMBER <<1)*m+n] = bramOut_ntt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
-        end
-        #FP;
-	end
-
-	#FP;
 
 	// wait result (intt)
 	while(done_intt == 0)
@@ -234,6 +221,22 @@ initial begin: CHECK_RESULT
         #FP;
     end
 
+
+
+    	// wait result (ntt)
+    while(done_ntt == 0)
+        #FP;
+    #FP;
+
+    // Store output (ntt)
+    for(m=0; m<(`RING_SIZE >> (`PE_DEPTH+1)); m=m+1) begin
+       for(n=0; n<(`PE_NUMBER << 1); n=n+1) begin
+          ntt_nout[(`PE_NUMBER <<1)*m+n] = bramOut_ntt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
+        end
+        #FP;
+    end
+
+    #FP;
 	// Compare output with expected result (ntt)
 	for(m=0; m<(`RING_SIZE); m=m+1) begin
 		if(ntt_nout[m] == ntt_pout[m]) begin

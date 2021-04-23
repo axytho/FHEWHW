@@ -103,7 +103,7 @@ generate
     for(k=0; k<`PE_NUMBER ;k=k+1) begin: BRAM_GEN_BLOCK
         BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd00(clk,pe[2*k+0],pw[2*k+0],pi[2*k+0],pr[2*k+0],po[2*k+0]);
         BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd01(clk,pe[2*k+1],pw[2*k+1],pi[2*k+1],pr[2*k+1],po[2*k+1]);
-        BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+4)) bt00(clk,te[k],tw[k],ti[k],tr[k],to[k]);
+        BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH-1 +`RING_DEPTH_DEPTH)) bt00(clk,te[k],tw[k],ti[k],tr[k],to[k]);//160 values
     end
 endgenerate
 
@@ -124,7 +124,7 @@ endgenerate
 
 // ---------------------------------------------------------------- control unit
 
-AddressGenerator ag(clk,reset,
+AddressGeneratorNTTN ag(clk,reset,
                     (start | start_intt),
                     raddr,
                     waddr0,waddr1,
@@ -174,7 +174,7 @@ always @(posedge clk or posedge reset) begin
             sys_cntr <= 0;
         end
         3'd1: begin //should be done only once in our entire NTT
-            if(sys_cntr == ((((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1)+2-1)) begin
+            if(sys_cntr == ((`RING_DEPTH<< ((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH))+2-1)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -242,28 +242,19 @@ always @(posedge clk or posedge reset) begin: TW_BLOCK
             tr[n] <= 0;
         end
         else begin
-            if((state == 3'd1) && (sys_cntr < ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH))) begin // for (16+8+4+2+1+1+1+1+1+1 = 36  * PE elements)
+            if( (state == 3'd1) && (sys_cntr < (`RING_DEPTH<< ((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH))) ) begin // for (16+8+4+2+1+1+1+1+1+1 = 36  * PE elements)
             //i.e. for every stage in the thing
                 te[n] <= (n == (sys_cntr & ((1 << `PE_DEPTH)-1)));//standard way of writing a value away to a certain n every clock cycle (not super efficient)
-                tw[n][`RING_DEPTH-`PE_DEPTH+3]   <= 0;
-                tw[n][`RING_DEPTH-`PE_DEPTH+2:0] <= (sys_cntr >> `PE_DEPTH); // for every BRAM, write one once every 32 clock cycles.
+                tw[n] <= (sys_cntr >> `PE_DEPTH); // for every BRAM, write one once every 32 clock cycles.
                 ti[n] <= din;
                 tr[n] <= 0;
             end// now we load the inverse twiddle factors
-            else if((state == 3'd1) && (sys_cntr < (((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1))) begin //for the second half
-                                //enable at (sys_cntr - 36 * 32)  mod 32 (which makes sense)
-                te[n] <= (n == ((sys_cntr-((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)) & ((1 << `PE_DEPTH)-1)));
-                tw[n][`RING_DEPTH-`PE_DEPTH+3]   <= 1; //write the inverse adresses, and write them as (sys_cntr - 32*36) // 32
-                tw[n][`RING_DEPTH-`PE_DEPTH+2:0] <= ((sys_cntr-((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)) >> `PE_DEPTH);//so write once
-                // every 32 clock cycles.
-                ti[n] <= din;
-                tr[n] <= 0;
-            end
+
             else if(state == 3'd3) begin // NTT operations
                 te[n] <= 0;
                 tw[n] <= 0;
                 ti[n] <= 0;
-                tr[n] <= {ntt_intt,raddr_tw};// send it to EVERY PE (so how we write it in is simportant obviously)
+                tr[n] <= raddr_tw;// send it to EVERY PE (so how we write it in is simportant obviously)
             end
             else begin
                 te[n] <= 0;
@@ -281,8 +272,8 @@ always @(posedge clk or posedge reset) begin
         n_inv <= 0;
     end
     else begin
-        q     <= ((state == 3'd1) && (sys_cntr == ((((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1)+2-2))) ? din : q;
-        n_inv <= ((state == 3'd1) && (sys_cntr == ((((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1)+2-1))) ? din : n_inv;
+        q     <= ((state == 3'd1) && (sys_cntr == ((`RING_DEPTH<< ((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH))+2-2))) ? din : q;
+        n_inv <= ((state == 3'd1) && (sys_cntr == ((`RING_DEPTH<< ((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH))+2-1))) ? din : n_inv;
     end
 end
 
@@ -294,12 +285,7 @@ assign addrout = (sys_cntr >> (`PE_DEPTH+1));
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast;
 assign inttlast = (sys_cntr & ((`RING_SIZE >> (`PE_DEPTH+1))-1)); //counter mod 16
 //###
-reg [`RING_DEPTH-1:0] reverse_sys_cntr;
-integer i;
-//###
-always @*
-for(i=0;i<`RING_DEPTH;i=i+1)
-    reverse_sys_cntr[i] = sys_cntr[`RING_DEPTH-i-1];
+
 
 wire [`RING_DEPTH+3:0]           sys_cntr_d;
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast_d;
@@ -316,15 +302,15 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
         else begin
             if((state == 3'd2)) begin // input data
             // ###
-                if(reverse_sys_cntr < (`RING_SIZE >> 1)) begin
-                    pe[n] <= (n == ((reverse_sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)); //only even n's
-                    pw[n] <= (reverse_sys_cntr >> `PE_DEPTH); //write the first 512 values to these even n's (note that these are the BRAM0's.)
+                if(sys_cntr < (`RING_SIZE >> 1)) begin
+                    pe[n] <= (n == ((sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)); //only even n's
+                    pw[n] <= (sys_cntr >> `PE_DEPTH); //write the first 512 values to these even n's (note that these are the BRAM0's.)
                     pi[n] <= din;
                     pr[n] <= 0;
                 end
                 else begin
-                    pe[n] <= (n == (((reverse_sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)+1));// only odd n's
-                    pw[n] <= ((reverse_sys_cntr-(`RING_SIZE >> 1)) >> `PE_DEPTH);// write them to the BRAM1
+                    pe[n] <= (n == (((sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)+1));// only odd n's
+                    pw[n] <= ((sys_cntr-(`RING_SIZE >> 1)) >> `PE_DEPTH);// write them to the BRAM1
                     pi[n] <= din;
                     pr[n] <= 0;
                 end // ### 
