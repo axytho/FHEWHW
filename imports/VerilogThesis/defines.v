@@ -26,7 +26,6 @@ limitations under the License.
 `define RING_SIZE       1024
 `define PE_NUMBER       32
 `define NTT_NUMBER      4
-
 // ------------------------------------------------
 // Parameters for integer multiplication
 
@@ -38,7 +37,7 @@ limitations under the License.
 `define CSA_LEVEL       ((`DATA_SIZE > 16) ? (`GENERIC*`GENERIC-2) : 0)
 
 `define INTMUL_DELAY    3
-
+`define BITREVERSE_DELAY    3
 // ------------------------------------------------
 // Works for K between 9-bit to 64-bit
 // Parameters for modular reduction
