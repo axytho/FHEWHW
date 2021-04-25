@@ -33,8 +33,8 @@ reg  [`DATA_SIZE_ARB-1:0] din_intt;
 wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn;
 wire                      done_ntt;
 wire                      done_intt;
-wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut_ntt;
-wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut_intt;
+wire [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut_ntt;
+wire [(`DATA_SIZE_ARB *`PE_NUMBER)-1:0] bramOut_intt;
 
 // ---------------------------------------------------------------- CLK
 
@@ -214,9 +214,9 @@ initial begin: CHECK_RESULT
 	#FP;
 
 	// Store output (intt)
-	for(m=0; m<(`RING_SIZE >> (`PE_DEPTH+1)); m=m+1) begin
-       for(n=0; n<(`PE_NUMBER << 1); n=n+1) begin
-          intt_nout[(`PE_NUMBER <<1)*m+n] = bramOut_intt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
+	for(m=0; m<(`RING_SIZE >> (`PE_DEPTH)); m=m+1) begin
+       for(n=0; n<(`PE_NUMBER); n=n+1) begin
+          intt_nout[(`PE_NUMBER)*m+n] = bramOut_intt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
         end
         #FP;
     end
@@ -229,9 +229,9 @@ initial begin: CHECK_RESULT
     #FP;
 
     // Store output (ntt)
-    for(m=0; m<(`RING_SIZE >> (`PE_DEPTH+1)); m=m+1) begin
-       for(n=0; n<(`PE_NUMBER << 1); n=n+1) begin
-          ntt_nout[(`PE_NUMBER <<1)*m+n] = bramOut_ntt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
+    for(m=0; m<(`RING_SIZE >> (`PE_DEPTH)); m=m+1) begin
+       for(n=0; n<(`PE_NUMBER); n=n+1) begin
+          ntt_nout[(`PE_NUMBER)*m+n] = bramOut_ntt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
         end
         #FP;
     end
@@ -285,11 +285,12 @@ NTTN uut    (clk,reset,
              bramOut_ntt);
              
 INTT uut2    (clk,reset,
-                          load_w_intt,
+                          load_bram,
                           load_data_intt,
                           start_intt,
                           din_intt,
                           bramIn,
+                          write_addr_intt,
                           done_intt,
                           bramOut_intt);
 

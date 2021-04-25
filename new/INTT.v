@@ -30,13 +30,14 @@ limitations under the License.
 // * wait state is not optimized
 
 module INTT   (input                           clk,reset,
-               input                           load_w,
+               input                           load_bram,
                input                           load_data,
                input                           start_intt,
                input [`DATA_SIZE_ARB-1:0]      din,
-               input  [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn,
+               input  [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn,
+               input [(4 *`PE_NUMBER)-1:0] write_addr_intt,
                output reg                      done,
-               output reg [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut//###
+               output reg [(`DATA_SIZE_ARB *`PE_NUMBER)-1:0] bramOut//###
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
 // ---------------------------------------------------------------- connections
@@ -139,6 +140,11 @@ AddressGenerator ag(clk,reset,
                     );
 
 // ---------------------------------------------------------------- ntt/intt
+reg [`DATA_SIZE_ARB-1:0] params    [0:7];
+initial begin
+	// params
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params);
+end
 
 always @(posedge clk or posedge reset) begin
     if(reset) begin
@@ -164,7 +170,7 @@ always @(posedge clk or posedge reset) begin
     else begin
         case(state)
         3'd0: begin
-            if(load_w)
+            if(load_bram)
                 state <= 3'd1;
             else if(load_data)
                 state <= 3'd2;
@@ -175,7 +181,7 @@ always @(posedge clk or posedge reset) begin
             sys_cntr <= 0;
         end
         3'd1: begin //should be done only once in our entire NTT
-            if(sys_cntr == ((((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1)+2-1)) begin
+            if(sys_cntr == (`PE_DEPTH)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -204,7 +210,7 @@ always @(posedge clk or posedge reset) begin
             sys_cntr <= 0;
         end
         3'd4: begin
-            if(sys_cntr == ((`RING_SIZE >> (`PE_DEPTH+1)) + `STAGE_DELAY)) begin
+            if(sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + 1)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -243,7 +249,7 @@ always @(posedge clk or posedge reset) begin: TW_BLOCK
             tr[n] <= 0;
         end
         else begin
-            if((state == 3'd1) && (sys_cntr < ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH))) begin // for (16+8+4+2+1+1+1+1+1+1 = 36  * PE elements)
+      /*###      if((state == 3'd1) && (sys_cntr < ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH))) begin // for (16+8+4+2+1+1+1+1+1+1 = 36  * PE elements)
             //i.e. for every stage in the thing
                 te[n] <= (n == (sys_cntr & ((1 << `PE_DEPTH)-1)));//standard way of writing a value away to a certain n every clock cycle (not super efficient)
                 tw[n][`RING_DEPTH-`PE_DEPTH+3]   <= 0;
@@ -259,12 +265,13 @@ always @(posedge clk or posedge reset) begin: TW_BLOCK
                 // every 32 clock cycles.
                 ti[n] <= din;
                 tr[n] <= 0;
-            end
-            else if(state == 3'd3) begin // NTT operations
+            end */
+            /*else */if(state == 3'd3) begin // NTT operations
                 te[n] <= 0;
                 tw[n] <= 0;
                 ti[n] <= 0;
-                tr[n] <= {ntt_intt,raddr_tw};// send it to EVERY PE (so how we write it in is simportant obviously)
+                tr[n] <= raddr_tw;
+                //###tr[n] <= {ntt_intt,raddr_tw};// send it to EVERY PE (so how we write it in is simportant obviously)
             end
             else begin
                 te[n] <= 0;
@@ -282,8 +289,8 @@ always @(posedge clk or posedge reset) begin
         n_inv <= 0;
     end
     else begin
-        q     <= ((state == 3'd1) && (sys_cntr == ((((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1)+2-2))) ? din : q;
-        n_inv <= ((state == 3'd1) && (sys_cntr == ((((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)<<1)+2-1))) ? din : n_inv;
+        q     <= params[1];
+        n_inv <= params[6];
     end
 end
 
@@ -294,6 +301,16 @@ assign addrout = (sys_cntr >> (`PE_DEPTH+1));
 
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast;
 assign inttlast = (sys_cntr & ((`RING_SIZE >> (`PE_DEPTH+1))-1)); //counter mod 16
+
+wire [`RING_DEPTH-`PE_DEPTH-2:0] read_out_bram [2*`PE_NUMBER-1:0];
+generate
+genvar n_bram;
+for (n_bram = 0; n_bram < (2*`PE_NUMBER); n_bram= n_bram + 1) begin
+    assign read_out_bram[n_bram] = ((n_bram>>2) + (inttlast)) & ((`RING_SIZE >> (`PE_DEPTH+1))-1);
+end
+endgenerate
+
+
 //###
 reg [`RING_DEPTH-1:0] reverse_sys_cntr;
 integer i;
@@ -308,6 +325,7 @@ wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast_d;
 always @(posedge clk or posedge reset) begin: DT_BLOCK
     integer n;
     for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1
+        
         if(reset) begin
             pe[n] <= 0;
             pw[n] <= 0;
@@ -315,6 +333,16 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
             pr[n] <= 0;
         end
         else begin
+            if((state == 3'd1)) begin // input data from BRAM
+                // ###
+                pe[n] <= (n[1] == sys_cntr[4]); //only even n's
+                pw[n] <= write_addr_intt[4*{n[5:2], n[0]}+:4]; //write the first 512 values to these even n's (note that these are the BRAM0's.)
+                pi[n] <= bramIn[{n[5:2], n[0]}*`DATA_SIZE_ARB+:`DATA_SIZE_ARB];
+                pr[n] <= 0;
+
+                end
+        
+        
             if((state == 3'd2)) begin // input data
             // ###
                 if(reverse_sys_cntr < (`RING_SIZE >> 1)) begin
@@ -398,8 +426,14 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 pw[n] <= 0;
                 pi[n] <= 0;
                 //###pr[n] <= {2'b10,addrout};
-                pr[n] <= {2'b10,inttlast};//###
+                pr[n] <= {3'b100, read_out_bram[n]}; //OVER HERE!!!!
             end
+            
+            
+            
+            
+            
+            
             else if(state == 3'd5) begin // last stage of intt
                 if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH+1))) begin
                     if(n[0] == 0) begin
@@ -448,15 +482,20 @@ assign coefout = (sys_cntr-2);
 
 always @(posedge clk or posedge reset) begin: OUT_BLOCK
 integer n;
-    for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1
+    for(n=0; n < (`PE_NUMBER); n=n+1) begin: LOOP_1
         if(reset) begin
             done <= 0;
             bramOut <= 0;
         end
         else begin
-            if(state == 3'd4) begin
-                done <= (sys_cntr == 1) ? 1 : 0;
-                bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n];
+            if(state == 3'd4) begin//there are 2 parts to this state
+                done <= (sys_cntr == 1);
+                if (sys_cntr < (`PE_NUMBER >> 1) + 1) begin
+                    bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n<< 1];//first even PE's
+                end else begin
+                    bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[(n<< 1) + 1];//then odd PE's
+                end
+                //then the others
             end
             else begin
                 done <= 0;

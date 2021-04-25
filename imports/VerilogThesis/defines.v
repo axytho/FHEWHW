@@ -25,6 +25,7 @@ limitations under the License.
 `define DATA_SIZE_ARB   27
 `define RING_SIZE       1024
 `define PE_NUMBER       32
+`define NTT_NUMBER      4
 
 // ------------------------------------------------
 // Parameters for integer multiplication

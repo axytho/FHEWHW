@@ -30,13 +30,13 @@ limitations under the License.
 // * wait state is not optimized
 
 module NTTN   (input                           clk,reset,
-               input                           load_w,
+               input                           load_bram,
                input                           load_data,
                input                           start,
-               input [`DATA_SIZE_ARB-1:0]      din,
-               input  [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn,
+               input  [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn,
+               input [(4 *`PE_NUMBER)-1:0] write_addr_intt,
                output reg                      done,
-               output reg [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut//###
+               output reg [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut//###
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
 // ---------------------------------------------------------------- connections
@@ -103,7 +103,7 @@ generate
     for(k=0; k<`PE_NUMBER ;k=k+1) begin: BRAM_GEN_BLOCK
         BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd00(clk,pe[2*k+0],pw[2*k+0],pi[2*k+0],pr[2*k+0],po[2*k+0]);
         BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd01(clk,pe[2*k+1],pw[2*k+1],pi[2*k+1],pr[2*k+1],po[2*k+1]);
-        BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH-1 +`RING_DEPTH_DEPTH)) bt00(clk,te[k],tw[k],ti[k],tr[k],to[k]);//160 values
+        WSTORAGE #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+4), .PE_NO(k)) bt00(clk,tr[k],to[k]);//160 values
     end
 endgenerate
 
@@ -138,6 +138,11 @@ AddressGeneratorNTTN ag(clk,reset,
                     );
 
 // ---------------------------------------------------------------- ntt/intt
+reg [`DATA_SIZE_ARB-1:0] params    [0:7];
+initial begin
+	// params
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params);
+end
 
 always @(posedge clk or posedge reset) begin
     if(reset) begin
@@ -163,7 +168,7 @@ always @(posedge clk or posedge reset) begin
     else begin
         case(state)
         3'd0: begin
-            if(load_w)
+            if(load_bram)
                 state <= 3'd1;
             else if(load_data)
                 state <= 3'd2;
@@ -174,7 +179,7 @@ always @(posedge clk or posedge reset) begin
             sys_cntr <= 0;
         end
         3'd1: begin //should be done only once in our entire NTT
-            if(sys_cntr == ((`RING_DEPTH<< ((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH))+2-1)) begin
+            if(sys_cntr == (`PE_DEPTH)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -203,7 +208,7 @@ always @(posedge clk or posedge reset) begin
             sys_cntr <= 0;
         end
         3'd4: begin
-            if(sys_cntr == ((`RING_SIZE >> (`PE_DEPTH+1)) + `STAGE_DELAY)) begin
+            if(sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + 1)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -242,15 +247,7 @@ always @(posedge clk or posedge reset) begin: TW_BLOCK
             tr[n] <= 0;
         end
         else begin
-            if( (state == 3'd1) && (sys_cntr < (`RING_DEPTH<< ((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH))) ) begin // for (16+8+4+2+1+1+1+1+1+1 = 36  * PE elements)
-            //i.e. for every stage in the thing
-                te[n] <= (n == (sys_cntr & ((1 << `PE_DEPTH)-1)));//standard way of writing a value away to a certain n every clock cycle (not super efficient)
-                tw[n] <= (sys_cntr >> `PE_DEPTH); // for every BRAM, write one once every 32 clock cycles.
-                ti[n] <= din;
-                tr[n] <= 0;
-            end// now we load the inverse twiddle factors
-
-            else if(state == 3'd3) begin // NTT operations
+            if(state == 3'd3) begin // NTT operations
                 te[n] <= 0;
                 tw[n] <= 0;
                 ti[n] <= 0;
@@ -272,8 +269,8 @@ always @(posedge clk or posedge reset) begin
         n_inv <= 0;
     end
     else begin
-        q     <= ((state == 3'd1) && (sys_cntr == ((`RING_DEPTH<< ((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH))+2-2))) ? din : q;
-        n_inv <= ((state == 3'd1) && (sys_cntr == ((`RING_DEPTH<< ((`RING_DEPTH-`PE_DEPTH-1)+`PE_DEPTH))+2-1))) ? din : n_inv;
+        q     <= params[1];
+        n_inv <= params[6];
     end
 end
 
@@ -300,6 +297,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
             pr[n] <= 0;
         end
         else begin
+        /*
             if((state == 3'd2)) begin // input data
             // ###
                 if(sys_cntr < (`RING_SIZE >> 1)) begin
@@ -315,7 +313,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     pr[n] <= 0;
                 end // ### 
             end
-            else if(state == 3'd3) begin // NTT operations
+            else */if(state == 3'd3) begin // NTT operations
             //writeback is split into 2 stages: in the first stage we write 
                 if(stage_count < (`RING_DEPTH - `PE_DEPTH - 1)) begin
                     if(brselen0) begin

@@ -25,7 +25,7 @@ limitations under the License.
 `define DATA_SIZE_ARB   27
 `define RING_SIZE       1024
 `define PE_NUMBER       32
-
+`define NTT_NUMBER      4
 // ------------------------------------------------
 // Parameters for integer multiplication
 
@@ -43,6 +43,7 @@ limitations under the License.
 // Parameters for modular reduction
 
 `define RING_DEPTH      ($clog2(`RING_SIZE))
+`define RING_DEPTH_DEPTH ($clog2(`RING_DEPTH))
 `define W_SIZE          ((`RING_DEPTH)+1)
 `define L_SIZE          ((`DATA_SIZE_ARB > `W_SIZE) ? ((`DATA_SIZE_ARB > (`W_SIZE * 2)) ? ((`DATA_SIZE_ARB > (`W_SIZE * 3)) ? ((`DATA_SIZE_ARB > (`W_SIZE * 4)) ? ((`DATA_SIZE_ARB > (`W_SIZE * 5)) ? ((`DATA_SIZE_ARB > (`W_SIZE * 6)) ? ((`DATA_SIZE_ARB > (`W_SIZE * 7)) ? 8 : 7) : 6) : 5) : 4) : 3) : 2) : 1)
 
