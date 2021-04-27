@@ -28,7 +28,7 @@ output reg [`PE_NUMBER*`PE_NUMBER-1:0] data_out
 
     );
 reg [`PE_NUMBER*`PE_NUMBER-1:0] data_out_reg;
-reg [3:0] cycleDelay;
+//reg [3:0] cycleDelay;
 always @(posedge clk or posedge reset) begin
     if (reset) begin
         data_out <= 0;
@@ -56,7 +56,6 @@ end
 
 always @(posedge clk) begin: BITREVERSE_BLOCK
     integer n;
-    integer k;
     for(n=0; n < (`PE_NUMBER); n=n+1) begin: LOOP_1 
         if (reset) begin
             data_out_reg[(`DATA_SIZE_ARB*n)+:`DATA_SIZE_ARB] <= 0;
@@ -65,11 +64,11 @@ always @(posedge clk) begin: BITREVERSE_BLOCK
             //data_out[(`DATA_SIZE_ARB*( (((n[4:1]+cycleDelay) & 4'b1000) >> 3) +((n[4:1]+cycleDelay) & 4'b100) >> 1)+  ((n[4:1]+cycleDelay) & 4'b100) << 1)+ ((n[4:1]+cycleDelay) & 4'b100) << 3)))+:`DATA_SIZE_ARB] = data_in_array[n];
              //k = ((((((n[4:1]+cycleDelay) & 4'b1000) >> 3) +(((n[4:1]+cycleDelay) & 4'b100) >> 1)+  (((n[4:1]+cycleDelay) & 4'b10) << 1)+ (((n[4:1]+cycleDelay) & 4'b1) << 3)) << 1) + n[0]);
              //data_indices[n] <= ((((((n[4:1]+cycle[3:0]) & 4'b1000) >> 3) +(((n[4:1]+cycle) & 4'b100) >> 1)+  (((n[4:1]+cycle) & 4'b10) << 1)+ (((n[4:1]+cycle) & 4'b1) << 3)) << 1) + n[0]);
-             data_out_reg[(`PE_NUMBER*((((((n[4:1]+cycle) & 4'b1000) >> 3) +(((n[4:1]+cycle) & 4'b100) >> 1)+  (((n[4:1]+cycle) & 4'b10) << 1)+ (((n[4:1]+cycle) & 4'b1) << 3)) << 1) + n[0]))+:`PE_NUMBER] <= {1'b0,n[1], n[2], n[3], n[4],data_in_array[n]};
+             data_out_reg[(`PE_NUMBER*(((((n[3:0]+cycle) & 4'b1000) >> 3) +(((n[3:0]+cycle) & 4'b100) >> 1)+  (((n[3:0]+cycle) & 4'b10) << 1)+ (((n[3:0]+cycle) & 4'b1) << 3)) + (n[4]  << 4)))+:`PE_NUMBER] <= {1'b0,n[0], n[1], n[2], n[3],data_in_array[n]};
         end
     end
 end
-wire [3:0] subtraction;
+//wire [3:0] subtraction;
 
  
    

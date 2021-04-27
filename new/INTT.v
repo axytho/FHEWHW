@@ -30,13 +30,13 @@ limitations under the License.
 // * wait state is not optimized
 
 module INTT   (input                           clk,reset,
-               input                           load_bram,
-               input                           load_data,
-               input                           start_intt,
-               input [`DATA_SIZE_ARB-1:0]      din,
-               input  [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn,
-               input [(4 *`PE_NUMBER)-1:0] write_addr_intt,
-               output reg                      done,
+               input                           load_bram, //loads from 64 27 bit wires
+               input                           start_full,//## runs bitreverse/intt/bitreverse
+               input                           load_data,//loads from single wire
+               input                           start_intt,// run intt/bitreverse
+               input [`DATA_SIZE_ARB-1:0]      din,// single input
+               input  [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn, //large input
+               output reg                      done, //done, triggered when writing away in 64 27 bit values
                output reg [(2*`DATA_SIZE_ARB *`PE_NUMBER)-1:0] inttOut//###
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
@@ -56,7 +56,7 @@ reg [2:0] state;
 // 5: last stage of intt
 
 reg [`RING_DEPTH+3:0] sys_cntr;
-
+wire [(4 *`PE_NUMBER)-1:0] write_addr_intt;
 
 reg [`DATA_SIZE_ARB-1:0]q;
 reg [`DATA_SIZE_ARB-1:0]n_inv;
@@ -86,7 +86,7 @@ wire [`RING_DEPTH-`PE_DEPTH+2:0]      raddr_tw;
 wire [4:0]                       stage_count;
 wire                             ntt_finished;
 
-reg                              ntt_intt; // ntt:0 -- intt:1
+reg                              half_full; // ntt:0 -- intt:1
 
 // pu
 reg [`DATA_SIZE_ARB-1:0] NTTin [(2*`PE_NUMBER)-1:0];
@@ -95,7 +95,9 @@ wire[`DATA_SIZE_ARB-1:0] ASout [(2*`PE_NUMBER)-1:0]; // ADD-SUB out  (no extra d
 wire[`DATA_SIZE_ARB-1:0] EOout [(2*`PE_NUMBER)-1:0]; // EVEN-ODD out
 
 reg [(`DATA_SIZE_ARB *`PE_NUMBER)-1:0] bramOut;
-wire [(`DATA_SIZE_ARB *`PE_NUMBER)-1:0] reversed_input;
+wire [(`PE_NUMBER *`PE_NUMBER)-1:0] reversed_input;
+wire [(`DATA_SIZE_ARB *`PE_NUMBER)-1:0] bram_in_from_reversed;
+
 // ---------------------------------------------------------------- BRAMs
 // 2*PE BRAMs for input-output polynomial
 // PE BRAMs for storing twiddle factors
@@ -150,17 +152,20 @@ end
 
 always @(posedge clk or posedge reset) begin
     if(reset) begin
-        ntt_intt <= 0;
+        half_full <= 0;
     end
     else begin
-        if(start)
-            ntt_intt <= 0;
-        else if(start_intt)
-            ntt_intt <= 1;
+        if(start_intt || state == 3'd3)//once we're in the execution, make sure we don't go back to execution
+            half_full <= 0;
+        else if(start_full)
+            half_full <= 1;
         else
-            ntt_intt <= ntt_intt;
+            half_full <= half_full;
     end
 end
+
+// --- 
+
 
 // ---------------------------------------------------------------- state machine & sys_cntr
 
@@ -182,8 +187,8 @@ always @(posedge clk or posedge reset) begin
                 state <= 3'd0;
             sys_cntr <= 0;
         end
-        3'd1: begin //should be done only once in our entire NTT
-            if(sys_cntr == (`PE_DEPTH)) begin
+        3'd1: begin //BRAM x64 readin
+            if(sys_cntr == (`PE_DEPTH>>1)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -192,7 +197,7 @@ always @(posedge clk or posedge reset) begin
                 sys_cntr <= sys_cntr + 1;
             end
         end
-        3'd2: begin //only run at the start, afterwards the bit reversing must be done while writing away.
+        3'd2: begin //only run at the start of addToACAP
             if(sys_cntr == (`RING_SIZE-1)) begin //because it takes 1024 cycles, so we really don't want to do this every time
                 state <= 3'd0;
                 sys_cntr <= 0;
@@ -203,16 +208,14 @@ always @(posedge clk or posedge reset) begin
             end
         end
         3'd3: begin
-            if(ntt_finished && (ntt_intt == 0))
-                state <= 3'd4;
-            else if(ntt_finished && (ntt_intt == 1))
+            if(ntt_finished)
                 state <= 3'd5;
             else
                 state <= 3'd3;
             sys_cntr <= 0;
         end
         3'd4: begin
-            if(sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + 1)) begin
+            if(sys_cntr == ((`RING_SIZE >> (`PE_DEPTH+1)) + 1)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -223,11 +226,25 @@ always @(posedge clk or posedge reset) begin
         end
         3'd5: begin
             if(sys_cntr == (((`RING_SIZE >> (`PE_DEPTH+1))<<1) + `INTMUL_DELAY+`MODRED_DELAY+`STAGE_DELAY)) begin
-                state <= 3'd4;
+                state <= 3'd6;
                 sys_cntr <= 0;
             end
             else begin
                 state <= 3'd5;
+                sys_cntr <= sys_cntr + 1;
+            end
+        end
+        3'd6: begin
+            if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && ~half_full) begin
+                state <= 3'd4;//readout
+                sys_cntr <= 0;
+            end
+            else if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && half_full)  begin
+                state <= 3'd3;//readout
+                sys_cntr <= 0;
+            end
+            else begin
+                state <= 3'd6;
                 sys_cntr <= sys_cntr + 1;
             end
         end
@@ -308,10 +325,26 @@ wire [`RING_DEPTH-`PE_DEPTH-2:0] read_out_bram [2*`PE_NUMBER-1:0];
 generate
 genvar n_bram;
 for (n_bram = 0; n_bram < (2*`PE_NUMBER); n_bram= n_bram + 1) begin
-    assign read_out_bram[n_bram] = ((n_bram>>2) + (inttlast)) & ((`RING_SIZE >> (`PE_DEPTH+1))-1);
+    assign read_out_bram[n_bram] = ((n_bram[4:1]) + (inttlast[3:0])) & ((`RING_SIZE >> (`PE_DEPTH+1))-1);
+end
+endgenerate
+generate
+genvar t;
+for (t=0; t<`PE_NUMBER; t=t+1) begin
+   assign write_addr_intt[4*t+:4] = reversed_input[(`PE_NUMBER *(t+1) - 5)+:4];
+   assign bram_in_from_reversed[(t*`DATA_SIZE_ARB)+:`DATA_SIZE_ARB] = reversed_input[(t*`PE_NUMBER)+:`DATA_SIZE_ARB];
 end
 endgenerate
 
+wire [`RING_DEPTH-`PE_DEPTH-2:0] cycle_bitreverse;
+assign cycle_bitreverse = inttlast[`RING_DEPTH-`PE_DEPTH-2:0] - 2'd2;
+
+bitReverse reverser (
+    clk, reset,
+    cycle_bitreverse,
+    bramOut,
+    reversed_input
+);
 
 //###
 reg [`RING_DEPTH-1:0] reverse_sys_cntr;
@@ -322,8 +355,9 @@ for(i=0;i<`RING_DEPTH;i=i+1)
     reverse_sys_cntr[i] = sys_cntr[`RING_DEPTH-i-1];
 
 wire [`RING_DEPTH+3:0]           sys_cntr_d;
-wire [`RING_DEPTH+3:0]           sys_cntr_bit_reverse_delayed;
+wire [`RING_DEPTH-`PE_DEPTH-1:0]           sys_cntr_bit_reverse_delayed;
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast_d;
+
 
 always @(posedge clk or posedge reset) begin: DT_BLOCK
     integer n;
@@ -336,20 +370,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
             pr[n] <= 0;
         end
         else begin
-            if((state == 3'd6)&& sys_cntr < 4) begin // input data from reverser
-                // ###
-                pe[n] <= 0; //first 0,1, 4,5, 8,9, etc...
-                pw[n] <= 0; //write to 00 from 10
-                pi[n] <= 0;
-                pr[n] <= {3'b100, read_out_bram[n]};
-            end
-            else if ((state == 3'd6) ) begin
-                pe[n] <= (n[1] == sys_cntr_bit_reverse_delayed[4]); //first 0,1, 4,5, 8,9, etc...
-                pw[n] <= write_addr_intt[4*{n[5:2], n[0]}+:4]; //write to 00 from 10
-                pi[n] <= reversed_input[{n[5:2], n[0]}*`DATA_SIZE_ARB+:`DATA_SIZE_ARB];
-                pr[n] <= {3'b100, read_out_bram[n]};
             
-            end
             
             if((state == 3'd1)) begin // input data from BRAM
                     // ###
@@ -361,7 +382,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
             end
         
         
-            if((state == 3'd2)) begin // input data
+            else if((state == 3'd2)) begin // input data
             // ###
                 if(reverse_sys_cntr < (`RING_SIZE >> 1)) begin
                     pe[n] <= (n == ((reverse_sys_cntr & ((1 << `PE_DEPTH)-1)) << 1)); //only even n's
@@ -402,7 +423,6 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                             pi[n] <= pi[n];
                         end
                     end
-
                     if(brselen1) begin
                         if(brsel1 == 0) begin
                             if(n[0] == 1) begin
@@ -439,6 +459,9 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 end
                 pr[n] <= raddr;
             end
+            
+            
+            
             else if(state == 3'd4) begin // output to
                 pe[n] <= 0;
                 pw[n] <= 0;
@@ -478,12 +501,31 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                         pi[n] <= 0;
                     end
                 end
+                
                 else begin
                     pe[n] <= 0;
                     pw[n] <= 0;
                     pi[n] <= 0;
                 end
                 pr[n] <= {2'b10,inttlast};
+            end
+            
+            
+            else if((state == 3'd6)) begin
+                if ((sys_cntr < `BITREVERSE_DELAY)) begin // input data from reverser
+                    // ###
+                    pe[n] <= 0; //first 0,1, 4,5, 8,9, etc...
+                    pw[n] <= 0; //write to 00 from 10
+                    pi[n] <= 0;
+                    pr[n] <= {3'b100, read_out_bram[n]};
+                end
+                else begin
+                    pe[n] <= (n[0] == sys_cntr_bit_reverse_delayed[4]); //first 0,2, 4,6, 8,10, etc...
+                    pw[n] <= write_addr_intt[4*n[5:1]+:4]; //write to 00 from 10
+                    pi[n] <= bram_in_from_reversed[n[5:1]*`DATA_SIZE_ARB+:`DATA_SIZE_ARB];
+                    pr[n] <= {3'b100, read_out_bram[n]};
+                
+                end
             end
             else begin
                 pe[n] <= 0;
@@ -499,15 +541,15 @@ end
 wire [`PE_DEPTH:0] coefout;
 assign coefout = (sys_cntr-2);
 
-always @(posedge clk or posedge reset) begin: REVERSE_BLOCK
+always @(*) begin: REVERSE_BLOCK
 integer n;
     for(n=0; n < (`PE_NUMBER); n=n+1) begin: LOOP_1
         if(reset) begin
             bramOut <= 0;
         end
         else begin
-            if(state == 3'd4) begin//there are 2 parts to this state
-                if (sys_cntr < (`PE_NUMBER >> 1) + 1) begin
+            if(state == 3'd6 && sys_cntr > 1) begin//there are 2 parts to this state
+                if (sys_cntr < (`PE_NUMBER >> 1) + 2) begin
                     bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n<< 1];//first even PE's
                 end else begin
                     bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[(n<< 1) + 1];//then odd PE's
@@ -521,30 +563,25 @@ integer n;
     end
 end
 
-bitReverse reverser (
-    clk, reset,
-    cycle,
-    bramOut,
-    reversed_input,
-);
+
 
 always @(posedge clk or posedge reset) begin: OUT_BLOCK
 integer n;
     for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1
         if(reset) begin
             done <= 0;
-            bramOut <= 0;
+            inttOut <= 0;
         end
         else begin
-            if(state == 3'd4) begin//there are 2 parts to this state
+            if(state == 3'd4) begin//TODO: DELAY inttOut by 2, because memory and stuff
                 done <= (sys_cntr == 1);
-                bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n];//then odd PE's
+                inttOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n];
 
                 //then the others
             end
             else begin
                 done <= 0;
-                bramOut <= 0;
+                inttOut <= 0;
             end
         end
     end
@@ -587,7 +624,7 @@ always @(posedge clk or posedge reset) begin: NT_BLOCK
 end
 
 // --------------------------------------------------------------------------- delays
-ShiftReg #(.SHIFT(`BITREVERSE_DELAY),.DATA(`RING_DEPTH-`PE_DEPTH)) sr02(clk,reset,sys_cntr[`RING_DEPTH-`PE_DEPTH-1:0],sys_cntr_bit_reverse_delayed);
+ShiftReg #(.SHIFT(`BITREVERSE_DELAY+1),.DATA(`RING_DEPTH-`PE_DEPTH)) sr02(clk,reset,sys_cntr[`RING_DEPTH-`PE_DEPTH-1:0],sys_cntr_bit_reverse_delayed);
 ShiftReg #(.SHIFT(`INTMUL_DELAY+`MODRED_DELAY+`STAGE_DELAY-1),.DATA(`RING_DEPTH+4        )) sr00(clk,reset,sys_cntr,sys_cntr_d);
 ShiftReg #(.SHIFT(`INTMUL_DELAY+`MODRED_DELAY+`STAGE_DELAY-1),.DATA(`RING_DEPTH-`PE_DEPTH)) sr01(clk,reset,inttlast,inttlast_d);
 

@@ -30,11 +30,12 @@ reg                       start;
 reg                       start_intt;
 reg  [`DATA_SIZE_ARB-1:0] din_ntt;
 reg  [`DATA_SIZE_ARB-1:0] din_intt;
+reg                       start_full;
 wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn;
 wire                      done_ntt;
 wire                      done_intt;
-wire [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut_ntt;
-wire [(`DATA_SIZE_ARB *`PE_NUMBER)-1:0] bramOut_intt;
+wire [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut_ntt;
+wire [(2*`DATA_SIZE_ARB *`PE_NUMBER)-1:0] bramOut_intt;
 
 // ---------------------------------------------------------------- CLK
 
@@ -58,7 +59,7 @@ initial begin
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_IN.txt"  , ntt_pin);
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_OUT.txt" , ntt_pout);
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/ACCUMULATOR.txt" , intt_pin);
-	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/MODIFIED.txt", intt_pout);
+	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/RESULTINTT.txt", intt_pout);
 end
 
 // ---------------------------------------------------------------- TEST case
@@ -138,6 +139,7 @@ initial begin: LOAD_DATA_INTT
     load_data_intt = 0;
     start_intt= 0;
     din_intt       = 0;
+    start_full =0;
 
     #1500;
     //wait before running the other so you have time to read both out
@@ -148,15 +150,7 @@ initial begin: LOAD_DATA_INTT
     #FP;
     load_w_intt = 0;
             // ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)))
-	for(d=0; d<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); d=d+1) begin
-	
-		din_intt = 0;
-		#FP;
-	end
-	for(d=0; d<((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH); d=d+1) begin
-		din_intt = winv[d];
-		#FP;
-	end
+
 	din_intt = params[1];
 	#FP;
 	din_intt = params[6];
@@ -214,23 +208,23 @@ initial begin: CHECK_RESULT
 	#FP;
 
 	// Store output (intt)
-	for(m=0; m<(`RING_SIZE >> (`PE_DEPTH)); m=m+1) begin
-       for(n=0; n<(`PE_NUMBER); n=n+1) begin
-          intt_nout[(`PE_NUMBER)*m+n] = bramOut_intt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
+	for(m=0; m<(`RING_SIZE >> (`PE_DEPTH+1)); m=m+1) begin
+       for(n=0; n<(`PE_NUMBER<< 1); n=n+1) begin
+          intt_nout[(2*`PE_NUMBER)*m+n] = bramOut_intt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
         end
         #FP;
     end
 
 
-
+/*
     	// wait result (ntt)
     while(done_ntt == 0)
         #FP;
     #FP;
 
     // Store output (ntt)
-    for(m=0; m<(`RING_SIZE >> (`PE_DEPTH)); m=m+1) begin
-       for(n=0; n<(`PE_NUMBER); n=n+1) begin
+    for(m=0; m<(`RING_SIZE >> (`PE_DEPTH+1)); m=m+1) begin
+       for(n=0; n<(`PE_NUMBER << 1); n=n+1) begin
           ntt_nout[(`PE_NUMBER)*m+n] = bramOut_ntt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
         end
         #FP;
@@ -245,7 +239,7 @@ initial begin: CHECK_RESULT
 		else begin
 		    $display("NTT:  Index-%d -- Calculated:%d, Expected:%d",m,ntt_nout[m],ntt_pout[m]);
 		end
-	end
+	end */
 
 	// Compare output with expected result (intt)
 	for(m=0; m<(`RING_SIZE); m=m+1) begin
@@ -275,22 +269,22 @@ end
 
 // ---------------------------------------------------------------- UUT
 
-NTTN uut    (clk,reset,
+/*NTTN uut    (clk,reset,
              load_w_ntt,
              load_data_ntt,
              start,
              din_ntt,
              bramIn,
              done_ntt,
-             bramOut_ntt);
+             bramOut_ntt);*/
              
 INTT uut2    (clk,reset,
                           load_bram,
+                          start_full,
                           load_data_intt,
                           start_intt,
                           din_intt,
                           bramIn,
-                          write_addr_intt,
                           done_intt,
                           bramOut_intt);
 

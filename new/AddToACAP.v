@@ -67,13 +67,7 @@ reg                       load_w_ntt [`NTT_NUMBER-1:0];
  end
 endgenerate
 
-generate
-genvar t;
-for (t=0; t<`PE_NUMBER; t=t+1) begin
-   assign write_addr_intt[4*t+:4] = reverse_out_from_ntt[(`PE_NUMBER *(t+1) - 5)+:4];
-   assign bramIn[(t*`DATA_SIZE_ARB):+`DATA_SIZE_ARB] = reverse_out_from_ntt[(t*`DATA_SIZE_ARB):+`DATA_SIZE_ARB];
-end
-endgenerate
+
 
  always @(posedge clk or posedge reset) begin
                    if(reset) begin
