@@ -29,14 +29,15 @@ limitations under the License.
 // * modular reduction is not optimized
 // * wait state is not optimized
 
-module NTTN   (input                           clk,reset,
+module NTTN  #(parameter NTT_ID = 0) (input                           clk,reset,
                input                           load_bram,
-               input                           load_data,
                input                           start,
-               input  [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn,
-               input [(4 *`PE_NUMBER)-1:0] write_addr_intt,
+               input  [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn,
+               input  [(`PE_NUMBER*`DATA_SIZE_ARB)-1:0] secret_key,
+               input                           output_data_single, //trigers single output of data
                output reg                      done,
-               output reg [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut//###
+               output reg [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut,//###
+               output reg [`DATA_SIZE_ARB-1:0]                      dout//for single output at the end
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
 // ---------------------------------------------------------------- connections
@@ -170,16 +171,14 @@ always @(posedge clk or posedge reset) begin
         3'd0: begin
             if(load_bram)
                 state <= 3'd1;
-            else if(load_data)
-                state <= 3'd2;
             else if(start | start_intt)
                 state <= 3'd3;
             else
                 state <= 3'd0;
             sys_cntr <= 0;
         end
-        3'd1: begin //should be done only once in our entire NTT
-            if(sys_cntr == (`PE_DEPTH)) begin
+        3'd1: begin //BRAM x64 readin
+            if(sys_cntr == ((`PE_NUMBER>>1)-1)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -188,21 +187,10 @@ always @(posedge clk or posedge reset) begin
                 sys_cntr <= sys_cntr + 1;
             end
         end
-        3'd2: begin //only run at the start, afterwards the bit reversing must be done while writing away.
-            if(sys_cntr == (`RING_SIZE-1)) begin //because it takes 1024 cycles, so we really don't want to do this every time
-                state <= 3'd0;
-                sys_cntr <= 0;
-            end
-            else begin
-                state <= 3'd2;
-                sys_cntr <= sys_cntr + 1;
-            end
-        end
+
         3'd3: begin
-            if(ntt_finished && (ntt_intt == 0))
-                state <= 3'd4;
-            else if(ntt_finished && (ntt_intt == 1))
-                state <= 3'd5;
+            if(ntt_finished )
+                state <= 3'd5;//run secret_key
             else
                 state <= 3'd3;
             sys_cntr <= 0;
@@ -217,16 +205,40 @@ always @(posedge clk or posedge reset) begin
                 sys_cntr <= sys_cntr + 1;
             end
         end
-        3'd5: begin
+        3'd5: begin // repurposing this for secret key operations
             if(sys_cntr == (((`RING_SIZE >> (`PE_DEPTH+1))<<1) + `INTMUL_DELAY+`MODRED_DELAY+`STAGE_DELAY)) begin
-                state <= 3'd4;
+                //state <= 3'd4;
                 sys_cntr <= 0;
+                if(output_data_single == 0)
+                    state <= 3'd4;
+                else
+                    state <= 3'd6;
             end
             else begin
                 state <= 3'd5;
                 sys_cntr <= sys_cntr + 1;
             end
         end
+        3'd6: begin
+            if(sys_cntr == (`RING_SIZE+1)) begin
+                state <= 3'd0;
+                sys_cntr <= 0;
+            end
+            else begin
+                state <= 3'd6;
+                sys_cntr <= sys_cntr + 1;
+            end
+        end
+        3'd7: begin //SUM ALL (read in BRAM x64, and read out at the same time
+                    if(sys_cntr == ((`PE_NUMBER>>1)-1)) begin
+                        state <= 3'd0;
+                        sys_cntr <= 0;
+                    end
+                    else begin
+                        state <= 3'd1;
+                        sys_cntr <= sys_cntr + 1;
+                    end
+                end
         default: begin
             state <= 3'd0;
             sys_cntr <= 0;
@@ -239,7 +251,7 @@ end
 
 always @(posedge clk or posedge reset) begin: TW_BLOCK
     integer n;
-    for(n=0; n < (`PE_NUMBER); n=n+1) begin: LOOP_1
+    for(n=0; n < (`PE_NUMBER); n=n+1) begin: TWIDDLE_LOOP
         if(reset) begin
             te[n] <= 0;
             tw[n] <= 0;
@@ -297,6 +309,14 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
             pr[n] <= 0;
         end
         else begin
+        if((state == 3'd1)) begin // input data from BRAM
+                // ###
+            pe[n] <= 1'b1; //read everything fast
+            pw[n] <= inttlast;
+            pi[n] <= bramIn[n*`DATA_SIZE_ARB+:`DATA_SIZE_ARB];
+            pr[n] <= 0;
+
+        end
         /*
             if((state == 3'd2)) begin // input data
             // ###
@@ -312,8 +332,8 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     pi[n] <= din;
                     pr[n] <= 0;
                 end // ### 
-            end
-            else */if(state == 3'd3) begin // NTT operations
+            end */
+            else if(state == 3'd3) begin // NTT operations
             //writeback is split into 2 stages: in the first stage we write 
                 if(stage_count < (`RING_DEPTH - `PE_DEPTH - 1)) begin
                     if(brselen0) begin
@@ -381,7 +401,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 pw[n] <= 0;
                 pi[n] <= 0;
                 //###pr[n] <= {2'b10,addrout};
-                pr[n] <= {2'b10,inttlast};//###
+                pr[n] <= {2'b10,inttlast};//### correct in this case
             end
             else if(state == 3'd5) begin // last stage of intt
                 if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH+1))) begin
@@ -415,6 +435,12 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 end
                 pr[n] <= {2'b10,inttlast};
             end
+            else if(state == 3'd6) begin // output data
+                pe[n] <= 0;
+                pw[n] <= 0;
+                pi[n] <= 0;
+                pr[n] <= {2'b10,addrout};
+            end
             else begin
                 pe[n] <= 0;
                 pw[n] <= 0;
@@ -433,18 +459,38 @@ always @(posedge clk or posedge reset) begin: OUT_BLOCK
 integer n;
     for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1
         if(reset) begin
-            done <= 0;
             bramOut <= 0;
         end
         else begin
             if(state == 3'd4) begin
-                done <= (sys_cntr == 1) ? 1 : 0;
                 bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n];
             end
             else begin
-                done <= 0;
                 bramOut <= 0;
             end
+        end
+    end
+end
+
+
+
+always @(posedge clk or posedge reset) begin
+    if(reset) begin
+        done <= 0;
+        dout <= 0;
+    end
+    else begin
+        if(state == 3'd6) begin
+            done <= (sys_cntr == 1) ? 1 : 0;
+            dout <= po[coefout];
+        end
+        else if (state == 3'd4) begin
+            done <= (sys_cntr == 1) ? 1 : 0;
+            dout <= 0;
+        end
+        else begin
+            done <= 0;
+            dout <= 0;
         end
     end
 end
@@ -460,6 +506,7 @@ always @(posedge clk or posedge reset) begin: NT_BLOCK
             MULin[n] <= 0;
         end
         else begin
+        /*
             if(state == 3'd5) begin //If we're doing the multiplication with 1/N
                 if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH+1)))) begin // should take 2 + 16 cycles to read everything and write it back with
                 // 1 delay.
@@ -475,6 +522,23 @@ always @(posedge clk or posedge reset) begin: NT_BLOCK
                     NTTin[2*n+1] <= po[2*n+1];
                 end
                 MULin[n] <= n_inv;
+            end
+            */
+            if(state == 3'd5) begin //multiplication with secret key
+                if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH+1)))) begin // should take 2 + 16 cycles to read everything and write it back with
+                // 1 delay.
+                    NTTin[2*n+0] <= 0;
+                    NTTin[2*n+1] <= po[2*n+0];
+                end
+                else if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH)))) begin //if less than 32+2
+                    NTTin[2*n+0] <= 0;
+                    NTTin[2*n+1] <= po[2*n+1];
+                end
+                else begin //again, this is the standard operation (I think this needs to be done to ensure state 3 finishes succesfully??)
+                    NTTin[2*n+0] <= po[2*n+0];
+                    NTTin[2*n+1] <= po[2*n+1];
+                end
+                MULin[n] <= secret_key[`DATA_SIZE_ARB*n+:`DATA_SIZE_ARB];
             end
             else begin //standard operation, mainly in state 3.
                 NTTin[2*n+0] <= po[2*n+0];

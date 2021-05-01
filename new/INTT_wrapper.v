@@ -19,14 +19,14 @@ module INTT_wrapper #(parameter TX_SIZE = 32)(
     
     reg random_input;
     
-    reg                       load_w_intt;
+    reg                       start_full;
     reg                       load_data_intt;
     reg                       start_intt;
     reg  [`DATA_SIZE_ARB-1:0] din_intt;
-    wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramIn;
+    wire [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn;
     wire                      done_intt;
-    wire [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] bramOut_intt;
-    reg [(`DATA_SIZE_ARB * 2*`PE_NUMBER)-1:0] outputForSynth;
+    wire [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut_intt;
+    reg [(`DATA_SIZE_ARB * `PE_NUMBER)-1:0] outputForSynth;
 	
      assign done_to_pin = done_intt & outputForSynth[24*3];
 
@@ -37,13 +37,13 @@ module INTT_wrapper #(parameter TX_SIZE = 32)(
      begin
          if(reset) begin
                   din_intt <= 0;
-                  load_w_intt <= 1'b0;
+                  start_full <= 1'b0;
                   start_intt <= 1'b0;
                   outputForSynth <= 0;
          end
          else begin
             din_intt <= 27'hf2fffff;
-             load_w_intt <= 1'b0;
+             start_full <= 1'b0;
             start_intt <= 1'b1;
             outputForSynth <= bramOut_intt;
          end
@@ -55,7 +55,8 @@ module INTT_wrapper #(parameter TX_SIZE = 32)(
    
 
     INTT uut2    (clk,reset,
-                               load_w_intt,
+                                load_bram,
+                                start_full,
                                load_data_intt,
                                start_intt,
                                din_intt,

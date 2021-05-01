@@ -145,18 +145,7 @@ initial begin: LOAD_DATA_INTT
     //wait before running the other so you have time to read both out
     #(`RING_SIZE >> (`PE_DEPTH))
 
-    // load w
-    load_w_intt = 1;
-    #FP;
-    load_w_intt = 0;
-            // ((((1<<(`RING_DEPTH-`PE_DEPTH))-1)+`PE_DEPTH)<<`PE_DEPTH)))
 
-	din_intt = params[1];
-	#FP;
-	din_intt = params[6];
-	#FP;
-
-	#(5*FP);
 
 
 

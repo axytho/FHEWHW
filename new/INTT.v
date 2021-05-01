@@ -1,5 +1,6 @@
 /*
 Copyright 2020, Ahmet Can Mert <ahmetcanmert@sabanciuniv.edu>
+edited for use in FHEW by Jonas Bertels <jonas.bertels@kuleuven.be>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
