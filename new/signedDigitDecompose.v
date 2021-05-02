@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 `include "defines.v"
 
-module signedDigitDecompose(
+module signedDigitDecompose( //The only part which hasn't been parametrized yet
     //input clk
     input [`DATA_SIZE_ARB-1:0]  value_in,
     output [`DATA_SIZE_ARB-1:0] firstResult,

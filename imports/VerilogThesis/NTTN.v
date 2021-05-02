@@ -34,10 +34,9 @@ module NTTN  #(parameter NTT_ID = 0) (input                           clk,reset,
                input                           start,
                input  [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn,
                input  [(`PE_NUMBER*`DATA_SIZE_ARB)-1:0] secret_key,
-               input                           output_data_single, //trigers single output of data
                output reg                      done,
-               output reg [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut,//###
-               output reg [`DATA_SIZE_ARB-1:0]                      dout//for single output at the end
+               output reg [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut//###
+               //output reg [`DATA_SIZE_ARB-1:0]                      dout//for single output at the end
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
 // ---------------------------------------------------------------- connections
@@ -178,7 +177,7 @@ always @(posedge clk or posedge reset) begin
             sys_cntr <= 0;
         end
         3'd1: begin //BRAM x64 readin
-            if(sys_cntr == ((`PE_NUMBER>>1)-1)) begin
+            if(sys_cntr == (`RING_SIZE >>(`PE_DEPTH+1))) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -207,18 +206,14 @@ always @(posedge clk or posedge reset) begin
         end
         3'd5: begin // repurposing this for secret key operations
             if(sys_cntr == (((`RING_SIZE >> (`PE_DEPTH+1))<<1) + `INTMUL_DELAY+`MODRED_DELAY+`STAGE_DELAY)) begin
-                //state <= 3'd4;
+                state <= 3'd4;
                 sys_cntr <= 0;
-                if(output_data_single == 0)
-                    state <= 3'd4;
-                else
-                    state <= 3'd6;
             end
             else begin
                 state <= 3'd5;
                 sys_cntr <= sys_cntr + 1;
             end
-        end
+        end/*
         3'd6: begin
             if(sys_cntr == (`RING_SIZE+1)) begin
                 state <= 3'd0;
@@ -228,17 +223,20 @@ always @(posedge clk or posedge reset) begin
                 state <= 3'd6;
                 sys_cntr <= sys_cntr + 1;
             end
-        end
+        end*/
+        /*
         3'd7: begin //SUM ALL (read in BRAM x64, and read out at the same time
-                    if(sys_cntr == ((`PE_NUMBER>>1)-1)) begin
-                        state <= 3'd0;
-                        sys_cntr <= 0;
+                    if(sys_cntr == ((`PE_NUMBER>>1)-1+1)) begin
+                        if(output_data_single == 0)
+                            state <= 3'd4;
+                        else
+                            state <= 3'd6;
                     end
                     else begin
-                        state <= 3'd1;
+                        state <= 3'd7;
                         sys_cntr <= sys_cntr + 1;
                     end
-                end
+                end*/
         default: begin
             state <= 3'd0;
             sys_cntr <= 0;
@@ -435,12 +433,13 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 end
                 pr[n] <= {2'b10,inttlast};
             end
+            /*
             else if(state == 3'd6) begin // output data
                 pe[n] <= 0;
                 pw[n] <= 0;
                 pi[n] <= 0;
                 pr[n] <= {2'b10,addrout};
-            end
+            end*/
             else begin
                 pe[n] <= 0;
                 pw[n] <= 0;
@@ -474,26 +473,7 @@ end
 
 
 
-always @(posedge clk or posedge reset) begin
-    if(reset) begin
-        done <= 0;
-        dout <= 0;
-    end
-    else begin
-        if(state == 3'd6) begin
-            done <= (sys_cntr == 1) ? 1 : 0;
-            dout <= po[coefout];
-        end
-        else if (state == 3'd4) begin
-            done <= (sys_cntr == 1) ? 1 : 0;
-            dout <= 0;
-        end
-        else begin
-            done <= 0;
-            dout <= 0;
-        end
-    end
-end
+
 
 // ---------------------------------------------------------------- PU control
 
@@ -528,7 +508,7 @@ always @(posedge clk or posedge reset) begin: NT_BLOCK
                 if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH+1)))) begin // should take 2 + 16 cycles to read everything and write it back with
                 // 1 delay.
                     NTTin[2*n+0] <= 0;
-                    NTTin[2*n+1] <= po[2*n+0];
+                    NTTin[2*n+1] <= po[2*n+0];//0...31, 64...95, etc...
                 end
                 else if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH)))) begin //if less than 32+2
                     NTTin[2*n+0] <= 0;

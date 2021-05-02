@@ -37,8 +37,10 @@ module INTT   (input                           clk,reset,
                input                           start_intt,// run intt/bitreverse
                input [`DATA_SIZE_ARB-1:0]      din,// single input
                input  [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn, //large input
+               input                           output_data_single, //trigers single output of data
                output reg                      done, //done, triggered when writing away in 64 27 bit values
-               output reg [(2*`DATA_SIZE_ARB *`PE_NUMBER)-1:0] inttOut//###
+               output reg [(2*`DATA_SIZE_ARB *`PE_NUMBER)-1:0] inttOut,//###
+               output reg [`DATA_SIZE_ARB-1:0]                      dout//for single output at the end
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
 // ---------------------------------------------------------------- connections
@@ -178,19 +180,22 @@ always @(posedge clk or posedge reset) begin
     else begin
         case(state)
         3'd0: begin
-            if(load_bram)
+            if (output_data_single)
+                 state <= 3'd6;//read out single
+            else if(load_bram)
                 state <= 3'd1;
             else if(load_data)
                 state <= 3'd2;
             else if(start | start_intt)
                 state <= 3'd3;
+              
             else
                 state <= 3'd0;
             sys_cntr <= 0;
         end
         3'd1: begin //BRAM x64 readin
-            if(sys_cntr == (`PE_DEPTH>>1)) begin
-                state <= 3'd0;
+            if(sys_cntr == (`RING_SIZE >>(`PE_DEPTH+1))) begin
+                state <= 3'd0;                    
                 sys_cntr <= 0;
             end
             else begin
@@ -241,7 +246,17 @@ always @(posedge clk or posedge reset) begin
                 sys_cntr <= 0;
             end
             else if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && half_full)  begin
-                state <= 3'd3;//readout
+                state <= 3'd3;//execute
+                sys_cntr <= 0;
+            end
+            else begin
+                state <= 3'd6;
+                sys_cntr <= sys_cntr + 1;
+            end
+        end
+        3'd7: begin //read out the BRAM's in single file
+            if(sys_cntr == (`RING_SIZE+1)) begin
+                state <= 3'd0;
                 sys_cntr <= 0;
             end
             else begin
@@ -379,7 +394,6 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 pw[n] <= inttlast;
                 pi[n] <= bramIn[n*`DATA_SIZE_ARB+:`DATA_SIZE_ARB];
                 pr[n] <= 0;
-    
             end
         
         
@@ -528,6 +542,12 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 
                 end
             end
+            else if(state == 3'd7) begin // output data
+                pe[n] <= 0;
+                pw[n] <= 0;
+                pi[n] <= 0;
+                pr[n] <= {2'b10,addrout};
+            end
             else begin
                 pe[n] <= 0;
                 pw[n] <= 0;
@@ -574,7 +594,7 @@ integer n;
             inttOut <= 0;
         end
         else begin
-            if(state == 3'd4) begin//TODO: DELAY inttOut by 2, because memory and stuff
+            if(state == 3'd4 || state == 3'd6) begin//TODO: DELAY inttOut by 2, because memory and stuff
                 done <= (sys_cntr == 1);
                 inttOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n];
 
@@ -587,7 +607,19 @@ integer n;
         end
     end
 end
-
+always @(posedge clk or posedge reset) begin
+    if(reset) begin
+        dout <= 0;
+    end
+    else begin
+        if(state == 3'd6) begin
+            dout <= po[coefout];
+        end
+        else begin
+            dout <= 0;
+        end
+    end
+end
 // ---------------------------------------------------------------- PU control
 
 always @(posedge clk or posedge reset) begin: NT_BLOCK

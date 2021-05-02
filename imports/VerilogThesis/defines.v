@@ -29,6 +29,7 @@ limitations under the License.
 // ------------------------------------------------
 // Parameters for integer multiplication
 
+`define NTT_SUM_DELAY   ($clog2(`NTT_NUMBER))
 `define MODULUSHALF     (`MODULUS >> 1)
 `define DATA_SIZE       (1 << ($clog2(`DATA_SIZE_ARB)))
 `define DATA_SIZE_DEPTH ($clog2(`DATA_SIZE))

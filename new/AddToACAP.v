@@ -38,7 +38,7 @@ module AddToACAP(
                input [`RING_DEPTH-1:0]         read_out,
                output reg                      done,
                output [`DATA_SIZE_ARB-1:0] data_out//### WE SAVE SPACE AND ONLY OUTPUT 1 thing at a time? I think this makes sense
-               // ###output reg [`DATA_SIZE_ARB-1:0] dout
+               output [`]// ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
                
  reg [`RING_DEPTH+3:0] sys_cntr;
@@ -56,18 +56,19 @@ reg                        start_full;
  reg                       start_intt;
  reg                       done_acc;
   wire  [`DATA_SIZE_ARB-1:0] din_intt;
- wire  [`DATA_SIZE_ARB-1:0] dout_ntt[`NTT_NUMBER-1:0];
+ wire  [`DATA_SIZE_ARB-1:0] dout_intt;
  reg                       outputSingle;
  wire                      done_ntt [`NTT_NUMBER-1:0];
  wire                      done_intt;
  wire [(2* `DATA_SIZE_ARB *`PE_NUMBER)-1:0] decompose_in;
+  wire [(2* `DATA_SIZE_ARB *`PE_NUMBER)-1:0] bramIn_intt;
  wire [(2* `DATA_SIZE_ARB *`PE_NUMBER)-1:0] decompose_out [`NTT_NUMBER-1:0];
  reg [(2* `DATA_SIZE_ARB *`PE_NUMBER)-1:0] decompose_out_reg [`NTT_NUMBER-1:0];
  wire [(2* `DATA_SIZE_ARB *`PE_NUMBER)-1:0] bramOut_ntt [`NTT_NUMBER-1:0];
 
-
-
-
+wire [`NTT_NUMBER*2*`DATA_SIZE_ARB-1:0] add_input [2*`PE_NUMBER-1:0];
+wire [`DATA_SIZE_ARB-1:0] add_result [2*`PE_NUMBER-1:0];
+reg [`DATA_SIZE_ARB-1:0] add_result_reg [2*`PE_NUMBER-1:0];
 
 
  always @(posedge clk or posedge reset) begin
@@ -119,14 +120,10 @@ reg                        start_full;
                            end
                        end
                        3'd4: begin//run the ntt and check whether we're going for another run or whether we're outputting
-                           if(done_ntt[0] && done_acc) begin //because it takes 1024 cycles, so we really don't want to do this every 
-                                 state <= 3'd5;
+                           if(done_ntt[0]) begin //because it takes 1024 cycles, so we really don't want to do this every 
+                                 state <= 3'd6;
                                  sys_cntr <= 0;
                              end
-                           else if (done_ntt[0] && ~done_acc) begin
-                                 state <= 3'd6; 
-                                 sys_cntr <= 0;
-                           end
                              else begin
                                  state <= 3'd4;
                                  sys_cntr <= sys_cntr + 1;
@@ -144,9 +141,17 @@ reg                        start_full;
                          end                     
                        end
                        
-                       3'd6: begin//output data to intt agaiin
+                       3'd6: begin//output data to intt agaiin (go through addition)
                           if (sys_cntr == ((`RING_SIZE >> (`PE_DEPTH+1)) + `STAGE_DELAY)) begin
-                             state <= 3'd2;//we keep going until some bigger timer , output done too to help bigger counter understand we've
+                             if(done_acc) begin //because it takes 1024 cycles, so we really don't want to do this every 
+                                  state <= 3'd5;
+                                  sys_cntr <= 0;
+                             end
+                             else begin
+                                state <= 3'd2;
+                                sys_cntr <= 0;
+                             end
+                             state <= 3'd2;
                              sys_cntr <= 0;// finished one loop
                          end 
                          else begin
@@ -264,7 +269,7 @@ end
 // ---------------------------------------------------------------- UUT
 BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH)) ACCInput(clk,write_enable_bram,write_addr_input,data_in,read_addr_in,din_intt);
 
-BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH)) ACCOutput(clk,load_output,write_addr_output,dout_ntt[0],read_out,data_out);
+BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH)) ACCOutput(clk,load_output,write_addr_output,dout_intt,read_out,data_out);
 
 
 INTT inverse_ntt    (clk,reset,
@@ -273,24 +278,32 @@ INTT inverse_ntt    (clk,reset,
              load_data_intt,
              start_intt,
              din_intt,
-             bramOut_ntt[0],
+             bramIn_intt,
+             outputSingle,
              done_intt,
-             decompose_in);
+             decompose_in,
+             dout_intt);
     
              
 generate
 genvar k;
+genvar branch;
        for (k=0; k<(`PE_NUMBER*2); k=k+1) begin     
             signedDigitDecompose decompose ( //TODO: parametrize signedDec
             decompose_in[`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB],
             decompose_out[0][`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB],
             decompose_out[1][`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB],
             decompose_out[2][`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB],
-            decompose_out[3][`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB]);                                              
+            decompose_out[3][`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB]);
+            for (branch = 0; branch<`NTT_NUMBER; branch = branch + 1) begin
+                assign add_input[k][(branch*`NTT_NUMBER*`DATA_SIZE_ARB)+:(`NTT_NUMBER*`DATA_SIZE_ARB)] = bramOut_ntt[branch];
+            end
+            assign bramIn_intt[`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB] = add_result_reg[k];
+            resultAdder addition (add_input[k], add_result[k]);                                             
         end
 endgenerate
 
-always @(posedge clk or posedge reset) begin: REG_BLOCK
+always @(posedge clk or posedge reset) begin: REG_BLOCK_DECOMPOSE
     integer n;
     for (n=0; n<(`PE_NUMBER*2); n=n+1) begin  
            if (reset) begin
@@ -302,7 +315,17 @@ always @(posedge clk or posedge reset) begin: REG_BLOCK
     end
 end
 
-
+always @(posedge clk or posedge reset) begin: REG_BLOCK_ADDER
+    integer adder_int;
+    for (adder_int=0; adder_int<(`PE_NUMBER*2); adder_int=adder_int+1) begin  
+           if (reset) begin
+               add_result_reg[adder_int] <=0;
+           end
+           else begin
+               add_result_reg[adder_int] <= add_result[adder_int];
+           end
+    end
+end
 
 
 
@@ -313,10 +336,10 @@ genvar i;
                               load_data_ntt,
                               start_ntt,
                               decompose_out_reg[i],
-                              outputSingle,
+                              secret_key[(`DATA_SIZE_ARB*`PE_NUMBER)*i+:(`DATA_SIZE_ARB*`PE_NUMBER)],
                               done_ntt[i],
                               bramOut_ntt[i],
-                              dout_ntt[i]);
+                              );
     end
 endgenerate
 
