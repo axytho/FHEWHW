@@ -27,7 +27,7 @@ module AddToACAP(
                input                           clk,
                input                           reset,
                input                           write_enable_bram,  //keep it
-               input [`RING_DEPTH-1:0]         write_addr_input,
+               input [`RING_DEPTH+1-1:0]         write_addr_input, //11 bits, because we are working with RGSW b, with 2*1024 bits
                input [`DATA_SIZE_ARB-1:0]      data_in,
                input                           load_a, //
                input [`DATA_SIZE_ARB-1:0]      data_a,
@@ -35,14 +35,17 @@ module AddToACAP(
                input                           start_addToACAP,//does the whole homomorphic encryption
                input [`DATA_SIZE_ARB*`PE_NUMBER*`NTT_NUMBER-1:0] secret_key,  
                //input [(`DATA_SIZE_ARB * 4 * 2 *`PE_NUMBER)-1:0] key_in,
-               input [`RING_DEPTH-1:0]         read_out,
+               input [`RING_DEPTH+1-1:0]         read_out,
                output reg                      done,
-               output [`DATA_SIZE_ARB-1:0] data_out//### WE SAVE SPACE AND ONLY OUTPUT 1 thing at a time? I think this makes sense
-               output [`]// ###output reg [`DATA_SIZE_ARB-1:0] dout
+               output [`DATA_SIZE_ARB-1:0]    data_out,//### WE SAVE SPACE AND ONLY OUTPUT 1 thing at a time? I think this makes sense
+               output [`SECRET_ADDR_WIDTH-1:0] secret_addr
+               // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
                
  reg [`RING_DEPTH+3:0] sys_cntr;
  reg [2:0] state;
+ 
+
  
  wire [`RING_DEPTH-1:0]         write_addr_output;
  assign write_addr_output = (sys_cntr & (`RING_SIZE -1));
@@ -70,7 +73,9 @@ wire [`NTT_NUMBER*2*`DATA_SIZE_ARB-1:0] add_input [2*`PE_NUMBER-1:0];
 wire [`DATA_SIZE_ARB-1:0] add_result [2*`PE_NUMBER-1:0];
 reg [`DATA_SIZE_ARB-1:0] add_result_reg [2*`PE_NUMBER-1:0];
 
-
+reg notTheFirstTime;
+reg lastTime;
+ reg jState; //whether we are working with the first part of GSW or the second part;
  always @(posedge clk or posedge reset) begin
                    if(reset) begin
                        state <= 3'd0;
@@ -121,7 +126,12 @@ reg [`DATA_SIZE_ARB-1:0] add_result_reg [2*`PE_NUMBER-1:0];
                        end
                        3'd4: begin//run the ntt and check whether we're going for another run or whether we're outputting
                            if(done_ntt[0]) begin //because it takes 1024 cycles, so we really don't want to do this every 
-                                 state <= 3'd6;
+                                 if (notTheFirstTime) begin
+                                    state <= 3'd6;
+                                 end
+                                 else begin
+                                    state <= 3'd1; //rerunning state_1 because we need to run it for the second part of the ACC
+                                 end
                                  sys_cntr <= 0;
                              end
                              else begin
@@ -130,10 +140,14 @@ reg [`DATA_SIZE_ARB-1:0] add_result_reg [2*`PE_NUMBER-1:0];
                              end
                        end
                        
-                       3'd5: begin//means we're done and we're outputing data
+                       3'd5: begin//means we're (almost) done and we're outputing data
                            if (sys_cntr == (`RING_SIZE+1)) begin
-                              state <= 3'd0;
-                              sys_cntr <= 0;// finished one loop
+                               if (lastTime) begin
+                                  state <= 3'd0;
+                               end else begin
+                                  state <=3'd4;
+                               end    
+                               sys_cntr <= 0;// finished one loop
                           end 
                           else begin
                              state <= 3'd5;
@@ -261,15 +275,50 @@ always @(posedge clk or posedge reset) begin: OUTPUT_DATA //check whether we're 
  
 end
 
+
+always @(posedge clk or posedge reset) begin: FIRST_TIME_REG
+        if(reset) begin
+            notTheFirstTime <= 0;
+            jState <= 0;
+        end
+        else begin            
+            if (state == 3'd4 && done_ntt[0]) begin // input data from BRAM
+                notTheFirstTime <= 1'b1; // we force done for now to test whether it works
+                jState <= ~jState;
+            end
+            else  begin
+                notTheFirstTime <= notTheFirstTime;
+                jState <= jState;
+            end         
+       end
+ 
+end
+always @(posedge clk or posedge reset) begin: LAST_TIME_REG
+        if(reset) begin
+            lastTime <= 0;
+        end
+        else begin            
+            if (state == 3'd5 && (sys_cntr == (`RING_SIZE+1))) begin // input data from BRAM
+                lastTime <= 1'b1; // we force done for now to test whether it works
+            end
+            else  begin
+                lastTime <= lastTime;
+            end         
+       end
+ 
+end
+
+
+
 // ### important: we can (and should) initialize or weights from an external file https://studfile.net/preview/4643996/page:29/ instead of loading it in
 // ### actually no, that's a terrible idea
 // ### actually yes, it's a great idea, verilog is just terrible at the implementation of it.
 
 
 // ---------------------------------------------------------------- UUT
-BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH)) ACCInput(clk,write_enable_bram,write_addr_input,data_in,read_addr_in,din_intt);
+BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH+1)) ACCInput(clk,write_enable_bram,write_addr_input,data_in,{jState, read_addr_in},din_intt);
 
-BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH)) ACCOutput(clk,load_output,write_addr_output,dout_intt,read_out,data_out);
+BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH+1)) ACCOutput(clk,load_output,{jState, write_addr_output},dout_intt,read_out,data_out);
 
 
 INTT inverse_ntt    (clk,reset,
@@ -337,6 +386,7 @@ genvar i;
                               start_ntt,
                               decompose_out_reg[i],
                               secret_key[(`DATA_SIZE_ARB*`PE_NUMBER)*i+:(`DATA_SIZE_ARB*`PE_NUMBER)],
+                              jState,
                               done_ntt[i],
                               bramOut_ntt[i],
                               );

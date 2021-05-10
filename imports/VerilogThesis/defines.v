@@ -26,6 +26,13 @@ limitations under the License.
 `define RING_SIZE       1024
 `define PE_NUMBER       32
 `define NTT_NUMBER      4
+`define B_R             23
+`define LWE_SIZE        512
+
+//LWE params
+`define D_R              2 ///($rtoi($ceil(($clog2(`LWE_SIZE)/$clog2(`B_R)))))
+`define SECRET_KEY_SIZE (`B_R*`LWE_SIZE*`D_R*(`RING_DEPTH>>(`PE_NUMBER)<<1))
+`define SECRET_ADDR_WIDTH ($clog2(`SECRET_KEY_SIZE))
 // ------------------------------------------------
 // Parameters for integer multiplication
 

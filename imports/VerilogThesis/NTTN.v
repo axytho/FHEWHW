@@ -29,11 +29,13 @@ limitations under the License.
 // * modular reduction is not optimized
 // * wait state is not optimized
 
-module NTTN  #(parameter NTT_ID = 0) (input                           clk,reset,
+module NTTN   (input                           clk,reset,
                input                           load_bram,
                input                           start,
                input  [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn,
                input  [(`PE_NUMBER*`DATA_SIZE_ARB)-1:0] secret_key,
+               input                           jState,
+               input                           shiftEvenSecretJ1,
                output reg                      done,
                output reg [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut//###
                //output reg [`DATA_SIZE_ARB-1:0]                      dout//for single output at the end
@@ -64,7 +66,7 @@ reg [`DATA_SIZE_ARB-1:0]n_inv;
 reg [`DATA_SIZE_ARB-1:0]        pi [(2*`PE_NUMBER)-1:0];
 wire[`DATA_SIZE_ARB-1:0]        po [(2*`PE_NUMBER)-1:0];
 reg [`RING_DEPTH-`PE_DEPTH+1:0] pw [(2*`PE_NUMBER)-1:0];
-reg [`RING_DEPTH-`PE_DEPTH+1:0] pr [(2*`PE_NUMBER)-1:0];
+reg [`RING_DEPTH-`PE_DEPTH+2:0] pr [(2*`PE_NUMBER)-1:0];
 reg [0:0]                       pe [(2*`PE_NUMBER)-1:0];
 
 reg [`DATA_SIZE_ARB-1:0]        ti [`PE_NUMBER-1:0];
@@ -86,7 +88,10 @@ wire [4:0]                       stage_count;
 wire                             ntt_finished;
 
 reg                              ntt_intt; // ntt:0 -- intt:1
-
+wire                              writeToProduct;
+assign  writeToProduct = ((state==3'd5) || (state==3'd6));
+//wire  readFromProduct;
+//assign  readFromProduct= (state==3'd4);
 // pu
 reg [`DATA_SIZE_ARB-1:0] NTTin [(2*`PE_NUMBER)-1:0];
 reg [`DATA_SIZE_ARB-1:0] MULin [`PE_NUMBER-1:0];
@@ -101,8 +106,8 @@ generate
 	genvar k;
 
     for(k=0; k<`PE_NUMBER ;k=k+1) begin: BRAM_GEN_BLOCK
-        BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd00(clk,pe[2*k+0],pw[2*k+0],pi[2*k+0],pr[2*k+0],po[2*k+0]);
-        BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2)) bd01(clk,pe[2*k+1],pw[2*k+1],pi[2*k+1],pr[2*k+1],po[2*k+1]);
+        BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2+1)) bd00(clk,pe[2*k+0],{writeToProduct,pw[2*k+0]},pi[2*k+0],pr[2*k+0],po[2*k+0]);
+        BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+2+1)) bd01(clk,pe[2*k+1],{writeToProduct,pw[2*k+1]},pi[2*k+1],pr[2*k+1],po[2*k+1]);
         WSTORAGE #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH-`PE_DEPTH+4), .PE_NO(k)) bt00(clk,tr[k],to[k]);//160 values
     end
 endgenerate
@@ -213,7 +218,12 @@ always @(posedge clk or posedge reset) begin
                 state <= 3'd5;
                 sys_cntr <= sys_cntr + 1;
             end
-        end/*
+        end
+
+        
+        
+        
+        /*
         3'd6: begin
             if(sys_cntr == (`RING_SIZE+1)) begin
                 state <= 3'd0;
@@ -392,46 +402,142 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     pw[n] <= waddr0;
                     pi[n] <= ASout[n];
                 end
-                pr[n] <= raddr;
+                pr[n] <= {1'b0, raddr};
             end
             else if(state == 3'd4) begin // output data
-                pe[n] <= 0;
-                pw[n] <= 0;
-                pi[n] <= 0;
-                //###pr[n] <= {2'b10,addrout};
-                pr[n] <= {2'b10,inttlast};//### correct in this case
-            end
-            else if(state == 3'd5) begin // last stage of intt
-                if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH+1))) begin
-                    if(n[0] == 0) begin
-                        pe[n] <= 1;
-                        pw[n] <= {2'b10,inttlast_d};
-                        pi[n] <= ASout[n+1];
-                    end
-                    else begin
-                        pe[n] <= 0;
-                        pw[n] <= 0;
-                        pi[n] <= 0;
-                    end
-                end
-                else if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH))) begin
-                    if(n[0] == 1) begin
-                        pe[n] <= 1;
-                        pw[n] <= {2'b10,inttlast_d};
-                        pi[n] <= ASout[n];
-                    end
-                    else begin
-                        pe[n] <= 0;
-                        pw[n] <= 0;
-                        pi[n] <= 0;
-                    end
+                if (jState ==0) begin
+                    pe[n] <= 0;
+                    pw[n] <= 0;
+                    pi[n] <= 0;
+                    //###pr[n] <= {2'b10,addrout};
+                    pr[n] <= {4'b1010,inttlast[3:0]};//### correct in this case
                 end
                 else begin
                     pe[n] <= 0;
                     pw[n] <= 0;
                     pi[n] <= 0;
+                    //###pr[n] <= {2'b10,addrout};
+                    pr[n] <= {4'b1011,inttlast[3:0]};//### correct in this case                
+                
                 end
-                pr[n] <= {2'b10,inttlast};
+            end
+            else if(state == 3'd5) begin // last stage of intt
+                if (jState ==0) begin
+                    if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH+1))) begin
+                        if(n[0] == 0) begin
+                            pe[n+1] <= 1;
+                            pw[n+1] <= {3'b000,inttlast_d[3:0]};
+                            pi[n+1] <= ASout[n];//read the even result wich gives w*Odd
+                        end
+                        else begin
+                            pe[n-1] <= 0;
+                            pw[n-1] <= 0;
+                            pi[n-1] <= 0;
+                        end
+                    end
+                    else if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH))) begin
+                        if(n[0] == 1) begin
+                            pe[n-1] <= 1;
+                            pw[n-1] <= {3'b000,inttlast_d[3:0]};
+                            pi[n-1] <= ASout[n-1];
+                        end
+                        else begin
+                            pe[n+1] <= 0;
+                            pw[n+1] <= 0;
+                            pi[n+1] <= 0;
+                        end
+                    end
+                    if(sys_cntr_d < (2'd3*(`RING_SIZE >> (`PE_DEPTH+1)))) begin
+                        if(n[0] == 0) begin
+                            pe[n+1] <= 1;
+                            pw[n+1] <= {3'b001,inttlast_d[3:0]};
+                            pi[n+1] <= ASout[n];
+                        end
+                        else begin
+                            pe[n-1] <= 0;
+                            pw[n-1] <= 0;
+                            pi[n-1] <= 0;
+                        end
+                    end
+                    else if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH)-1)) begin
+                        if(n[0] == 1) begin
+                            pe[n-1] <= 1;
+                            pw[n-1] <= {3'b001,inttlast_d[3:0]};
+                            pi[n-1] <= ASout[n-1];
+                        end
+                        else begin
+                            pe[n+1] <= 0;
+                            pw[n+1] <= 0;
+                            pi[n+1] <= 0;
+                        end
+                    end
+                    else begin
+                        pe[n] <= 0;
+                        pw[n] <= 0;
+                        pi[n] <= 0;
+                    end
+                    pr[n] <= {3'b010,inttlast};//in the first one, it's indeed this simple, but not the second one
+                end
+                else begin //if jstate ==1
+                    if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH+1))) begin
+                        if(n[0] == 0) begin
+                            pr[n] <= {4'b0010,inttlast[3:0]};//Bram 0 still has to be multiplied, so read that from lower half of BRAM
+                            pe[n] <= 1;
+                            pw[n] <= {3'b010,inttlast_d[3:0]};
+                            pi[n] <= ASout[n];//read the even result wich gives w*Odd
+                        end
+                        else begin
+                            pr[n] <= {4'b1000,inttlast[3:0]};// BRAM1 is aded, but that's been stored
+                            pe[n] <= 0;
+                            pw[n] <= 0;
+                            pi[n] <= 0;
+                        end
+                    end
+                    else if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH))) begin
+                        if(n[0] == 1) begin
+                            pr[n] <= {4'b0010,inttlast[3:0]};//now BRAM 1 still has to be multiplied, which we find in the lower half
+                            pe[n] <= 1;
+                            pw[n] <= {3'b010,inttlast_d[3:0]};
+                            pi[n] <= ASout[n-1];
+                        end
+                        else begin
+                            pr[n] <= {4'b1000,inttlast[3:0]};
+                            pe[n] <= 0;
+                            pw[n] <= 0;
+                            pi[n] <= 0;
+                        end
+                    end
+                    if(sys_cntr_d < (2'd3*(`RING_SIZE >> (`PE_DEPTH+1)))) begin
+                        if(n[0] == 0) begin
+                            pe[n] <= 1;
+                            pw[n] <= {3'b011,inttlast_d[3:0]};
+                            pi[n] <= ASout[n];
+                        end
+                        else begin
+                            pe[n] <= 0;
+                            pw[n] <= 0;
+                            pi[n] <= 0;
+                        end
+                    end
+                    else if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH)-1)) begin
+                        if(n[0] == 1) begin
+                            pe[n] <= 1;
+                            pw[n] <= {3'b011,inttlast_d[3:0]};
+                            pi[n] <= ASout[n-1];
+                        end
+                        else begin
+                            pe[n] <= 0;
+                            pw[n] <= 0;
+                            pi[n] <= 0;
+                        end
+                    end
+                    else begin
+                        pe[n] <= 0;
+                        pw[n] <= 0;
+                        pi[n] <= 0;
+                    end
+                                    
+                end
             end
             /*
             else if(state == 3'd6) begin // output data
@@ -449,6 +555,8 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
         end
     end
 end
+
+
 
 // done signal & output data
 wire [`PE_DEPTH:0] coefout;
@@ -505,20 +613,38 @@ always @(posedge clk or posedge reset) begin: NT_BLOCK
             end
             */
             if(state == 3'd5) begin //multiplication with secret key
-                if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH+1)))) begin // should take 2 + 16 cycles to read everything and write it back with
-                // 1 delay.
-                    NTTin[2*n+0] <= 0;
-                    NTTin[2*n+1] <= po[2*n+0];//0...31, 64...95, etc...
+                if (jState ==0) begin
+                    if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH+1)))) begin // should take 2 + 16 cycles to read everything and write it back with
+                    // 1 delay.
+                        NTTin[2*n+0] <= 0;
+                        NTTin[2*n+1] <= po[2*n+0];//0...31, 64...95, etc...
+                    end
+                    else if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH)))) begin //if less than 32+2
+                        NTTin[2*n+0] <= 0;
+                        NTTin[2*n+1] <= po[2*n+1];
+                    end
+                    else begin //again, this is the standard operation, probably for the last 2 cycles of state 3 or something
+                        NTTin[2*n+0] <= po[2*n+0];
+                        NTTin[2*n+1] <= po[2*n+1];
+                    end
+                    MULin[n] <= secret_key[`DATA_SIZE_ARB*n+:`DATA_SIZE_ARB];
                 end
-                else if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH)))) begin //if less than 32+2
-                    NTTin[2*n+0] <= 0;
-                    NTTin[2*n+1] <= po[2*n+1];
+                else begin
+                    if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH+1)))) begin // should take 2 + 16 cycles to read everything and write it back with
+            // 1 delay.
+                        NTTin[2*n+0] <= po[2*n+1]; //even
+                        NTTin[2*n+1] <= po[2*n+0];//0...31, 64...95, etc...
+                    end
+                    else if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH)))) begin //if less than 32+2
+                        NTTin[2*n+0] <= po[2*n+0];
+                        NTTin[2*n+1] <= po[2*n+1];
+                    end
+                    else begin //again, this is the standard operation 
+                        NTTin[2*n+0] <= po[2*n+0];
+                        NTTin[2*n+1] <= po[2*n+1];
+                    end
+                    MULin[n] <= secret_key[`DATA_SIZE_ARB*n+:`DATA_SIZE_ARB];                                   
                 end
-                else begin //again, this is the standard operation (I think this needs to be done to ensure state 3 finishes succesfully??)
-                    NTTin[2*n+0] <= po[2*n+0];
-                    NTTin[2*n+1] <= po[2*n+1];
-                end
-                MULin[n] <= secret_key[`DATA_SIZE_ARB*n+:`DATA_SIZE_ARB];
             end
             else begin //standard operation, mainly in state 3.
                 NTTin[2*n+0] <= po[2*n+0];
