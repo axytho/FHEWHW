@@ -179,22 +179,22 @@ always @(posedge clk or posedge reset) begin
     end
     else begin
         case(state)
-        3'd0: begin
+        3'd0: begin // wait for command
             if (output_data_single)
-                 state <= 3'd6;//read out single
+                 state <= 3'd7;//read out single
             else if(load_bram)
-                state <= 3'd1;
+                state <= 3'd1;//read x64
             else if(load_data)
-                state <= 3'd2;
+                state <= 3'd2;//read single
             else if(start | start_intt)
-                state <= 3'd3;
+                state <= 3'd3;//execute
               
             else
                 state <= 3'd0;
             sys_cntr <= 0;
         end
         3'd1: begin //BRAM x64 readin
-            if(sys_cntr == (`RING_SIZE >>(`PE_DEPTH+1))) begin
+            if(sys_cntr == ((`RING_SIZE >>(`PE_DEPTH+1)) - 1)) begin
                 state <= 3'd0;                    
                 sys_cntr <= 0;
             end
@@ -220,7 +220,7 @@ always @(posedge clk or posedge reset) begin
                 state <= 3'd3;
             sys_cntr <= 0;
         end
-        3'd4: begin
+        3'd4: begin// read out x64
             if(sys_cntr == ((`RING_SIZE >> (`PE_DEPTH+1)) + 1)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
@@ -230,7 +230,7 @@ always @(posedge clk or posedge reset) begin
                 sys_cntr <= sys_cntr + 1;
             end
         end
-        3'd5: begin
+        3'd5: begin //multiply with 1/N
             if(sys_cntr == (((`RING_SIZE >> (`PE_DEPTH+1))<<1) + `INTMUL_DELAY+`MODRED_DELAY+`STAGE_DELAY)) begin
                 state <= 3'd6;
                 sys_cntr <= 0;
@@ -240,7 +240,7 @@ always @(posedge clk or posedge reset) begin
                 sys_cntr <= sys_cntr + 1;
             end
         end
-        3'd6: begin
+        3'd6: begin //bitReverse
             if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && ~half_full) begin
                 state <= 3'd4;//readout
                 sys_cntr <= 0;
@@ -260,7 +260,7 @@ always @(posedge clk or posedge reset) begin
                 sys_cntr <= 0;
             end
             else begin
-                state <= 3'd6;
+                state <= 3'd7;
                 sys_cntr <= sys_cntr + 1;
             end
         end
@@ -594,8 +594,8 @@ integer n;
             inttOut <= 0;
         end
         else begin
-            if(state == 3'd4 || state == 3'd6) begin//TODO: DELAY inttOut by 2, because memory and stuff
-                done <= (sys_cntr == 1);
+            if(state == 3'd4) begin//TODO: DELAY inttOut by 2, because memory and stuff
+                done <= (sys_cntr == 1); // we do not OUTPUT done when we are explicitly asked for output.
                 inttOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n];
 
                 //then the others
@@ -612,7 +612,7 @@ always @(posedge clk or posedge reset) begin
         dout <= 0;
     end
     else begin
-        if(state == 3'd6) begin
+        if(state == 3'd7) begin
             dout <= po[coefout];
         end
         else begin

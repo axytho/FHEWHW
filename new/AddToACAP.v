@@ -52,7 +52,7 @@ module AddToACAP(
  wire load_output;
  assign load_output = (state == 3'd5) & (sys_cntr < `RING_SIZE);
  reg [`RING_DEPTH-1:0] read_addr_in;
-reg                        start_full;
+wire                        start_full;
  reg                       load_data_ntt;
  reg                       load_data_intt;
  reg                       start_ntt;
@@ -76,6 +76,8 @@ reg [`DATA_SIZE_ARB-1:0] add_result_reg [2*`PE_NUMBER-1:0];
 reg notTheFirstTime;
 reg lastTime;
  reg jState; //whether we are working with the first part of GSW or the second part;
+ 
+ reg load_intt_from_bram;
  always @(posedge clk or posedge reset) begin
                    if(reset) begin
                        state <= 3'd0;
@@ -157,16 +159,14 @@ reg lastTime;
                        
                        3'd6: begin//output data to intt agaiin (go through addition)
                           if (sys_cntr == ((`RING_SIZE >> (`PE_DEPTH+1)) + `STAGE_DELAY)) begin
-                             if(done_acc) begin //because it takes 1024 cycles, so we really don't want to do this every 
+                             if(done_acc) begin //go to state 5, for final output
                                   state <= 3'd5;
                                   sys_cntr <= 0;
                              end
-                             else begin
+                             else begin // rerun intt
                                 state <= 3'd2;
                                 sys_cntr <= 0;
                              end
-                             state <= 3'd2;
-                             sys_cntr <= 0;// finished one loop
                          end 
                          else begin
                             state <= 3'd6;
@@ -183,6 +183,7 @@ end
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast;
 assign inttlast = (sys_cntr & ((`RING_SIZE >> (`PE_DEPTH+1))-1));
 
+
 always @(posedge clk or posedge reset) begin: INPUT_SINGLE
         if(reset) begin
             read_addr_in <= 0;
@@ -190,7 +191,7 @@ always @(posedge clk or posedge reset) begin: INPUT_SINGLE
         end
         else begin            
             if (state == 3'd1) begin // input data from BRAM
-                read_addr_in <= sys_cntr-2+2;//-2 because we start late, +2 because delay of BRAM
+                read_addr_in <= sys_cntr-2+1;//-2 because we start late, +1 because delay of BRAM
                 load_data_intt <= (sys_cntr == 1);
             end
             else  begin
@@ -204,10 +205,9 @@ end
 always @(posedge clk or posedge reset) begin: START_INTT
         if(reset) begin
             start_intt <= 0;
-            start_full<= 0;
         end
         else begin
-         start_full<= 0;            
+                     
             if (state == 3'd2) begin // input data from BRAM
                 start_intt <= (sys_cntr == 1);// one extra cycle doesn't hurt anything, and it gives us extra time
             end
@@ -227,6 +227,15 @@ always @(posedge clk or posedge reset) begin: LOAD_NTT
                 load_data_ntt <= done_intt;
         end
 end     
+always @(posedge clk or posedge reset) begin: LOAD_INTT
+        if(reset) begin
+            load_intt_from_bram <= 0;
+        end
+        else begin            
+
+                load_intt_from_bram <= (done_ntt[0] & notTheFirstTime);
+        end
+end    
 
 always @(posedge clk or posedge reset) begin: START_NTT
         if(reset) begin
@@ -242,6 +251,10 @@ always @(posedge clk or posedge reset) begin: START_NTT
        end
  
 end
+// assign start_full
+// start_full is made so that if you trigger it, the intt will turn it off during execution
+assign start_full = (state ==3'd6);
+
 
 always @(posedge clk or posedge reset) begin: DONE_ACC //check whether we're done (usuall
         if(reset) begin
@@ -250,8 +263,8 @@ always @(posedge clk or posedge reset) begin: DONE_ACC //check whether we're don
         end
         else begin            
             if (state == 3'd4) begin // input data from BRAM
-                done_acc <= 1;// we force done for now to test whether it works
-                outputSingle <= (1'b1);
+                done_acc <= 0;// we force done for now to test whether it works
+                outputSingle <= (1'b0);
             end
             else  begin
                 done_acc <= 0;
@@ -328,7 +341,7 @@ INTT inverse_ntt    (clk,reset,
              start_intt,
              din_intt,
              bramIn_intt,
-             outputSingle,
+             outputSingle, //To be set
              done_intt,
              decompose_in,
              dout_intt);
@@ -348,7 +361,7 @@ genvar branch;
                 assign add_input[k][(branch*`NTT_NUMBER*`DATA_SIZE_ARB)+:(`NTT_NUMBER*`DATA_SIZE_ARB)] = bramOut_ntt[branch];
             end
             assign bramIn_intt[`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB] = add_result_reg[k];
-            resultAdder addition (add_input[k], add_result[k]);                                             
+            resultAdder addition (add_input[k], add_result[k]); //bit length 216 differs from formal bit length 108 for port 'value_in'                                            
         end
 endgenerate
 
@@ -386,9 +399,8 @@ genvar i;
                               start_ntt,
                               decompose_out_reg[i],
                               secret_key[(`DATA_SIZE_ARB*`PE_NUMBER)*i+:(`DATA_SIZE_ARB*`PE_NUMBER)],
-                              jState,
                               done_ntt[i],
-                              bramOut_ntt[i],
+                              bramOut_ntt[i]
                               );
     end
 endgenerate

@@ -34,8 +34,7 @@ module NTTN   (input                           clk,reset,
                input                           start,
                input  [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn,
                input  [(`PE_NUMBER*`DATA_SIZE_ARB)-1:0] secret_key,
-               input                           jState,
-               input                           shiftEvenSecretJ1,
+               //input                           notTheFirstTime, // we'll output wrongly, but we don't care so this is commented
                output reg                      done,
                output reg [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut//###
                //output reg [`DATA_SIZE_ARB-1:0]                      dout//for single output at the end
@@ -57,7 +56,7 @@ reg [2:0] state;
 // 5: last stage of intt
 
 reg [`RING_DEPTH+3:0] sys_cntr;
-
+reg jState;
 
 reg [`DATA_SIZE_ARB-1:0]q;
 reg [`DATA_SIZE_ARB-1:0]n_inv;
@@ -89,7 +88,7 @@ wire                             ntt_finished;
 
 reg                              ntt_intt; // ntt:0 -- intt:1
 wire                              writeToProduct;
-assign  writeToProduct = ((state==3'd5) || (state==3'd6));
+assign  writeToProduct = (state==3'd5) ;
 //wire  readFromProduct;
 //assign  readFromProduct= (state==3'd4);
 // pu
@@ -182,7 +181,7 @@ always @(posedge clk or posedge reset) begin
             sys_cntr <= 0;
         end
         3'd1: begin //BRAM x64 readin
-            if(sys_cntr == (`RING_SIZE >>(`PE_DEPTH+1))) begin
+            if(sys_cntr == ((`RING_SIZE >>(`PE_DEPTH+1)) - 1)  ) begin //the -1 goes there to ensure that there we don't write too long
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -210,7 +209,7 @@ always @(posedge clk or posedge reset) begin
             end
         end
         3'd5: begin // repurposing this for secret key operations
-            if(sys_cntr == (((`RING_SIZE >> (`PE_DEPTH+1))<<1) + `INTMUL_DELAY+`MODRED_DELAY+`STAGE_DELAY)) begin
+            if(sys_cntr == (((`RING_SIZE >> (`PE_DEPTH-1))) + `INTMUL_DELAY+`MODRED_DELAY+`STAGE_DELAY)) begin
                 state <= 3'd4;
                 sys_cntr <= 0;
             end
@@ -447,7 +446,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                             pi[n+1] <= 0;
                         end
                     end
-                    if(sys_cntr_d < (2'd3*(`RING_SIZE >> (`PE_DEPTH+1)))) begin
+                    else if(sys_cntr_d < (2'd3*(`RING_SIZE >> (`PE_DEPTH+1)))) begin
                         if(n[0] == 0) begin
                             pe[n+1] <= 1;
                             pw[n+1] <= {3'b001,inttlast_d[3:0]};
@@ -566,19 +565,35 @@ always @(posedge clk or posedge reset) begin: OUT_BLOCK
 integer n;
     for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1
         if(reset) begin
+            done <= 0;
             bramOut <= 0;
         end
         else begin
             if(state == 3'd4) begin
+                done <= (sys_cntr == 1);
                 bramOut[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)] <= po[n];
             end
             else begin
+                done <= 0;
                 bramOut <= 0;
             end
         end
     end
 end
-
+always @(posedge clk or posedge reset) begin: FIRST_TIME_REG
+        if(reset) begin
+            jState <= 0;
+        end
+        else begin            
+            if (state == 3'd5 && (sys_cntr_d ==(`RING_SIZE >> ((`PE_DEPTH)-1)))) begin // input data from BRAM
+                jState <= ~jState;
+            end
+            else  begin
+                jState <= jState;
+            end         
+       end
+ 
+end
 
 
 
