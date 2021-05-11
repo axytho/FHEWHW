@@ -2,12 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e47740b1-a85f-441e-89ba-9031884ae762" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/genvar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../2015-382.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../JonasThesisChapter1Chapter2.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../graphicsDM/Picture1.png" beforeDir="false" afterPath="$PROJECT_DIR$/../graphicsDM/Picture1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../graphicsDM/Picture2.png" beforeDir="false" afterPath="$PROJECT_DIR$/../graphicsDM/Picture2.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FHEW.py" beforeDir="false" afterPath="$PROJECT_DIR$/FHEW.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NTTMYTEST.py" beforeDir="false" afterPath="$PROJECT_DIR$/NTTMYTEST.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FHEWtest.py" beforeDir="false" afterPath="$PROJECT_DIR$/FHEWtest.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +117,7 @@
       <recent name="D:\Jonas\Google Drive\KULeuven5\Thesis\ThesisProjectGit\Papers\pythonTests" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.test_generator">
+  <component name="RunManager" selected="Python.FHEWtest">
     <configuration name="FHEWtest" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pythonTests" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -226,9 +225,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.FHEWtest" />
         <item itemvalue="Python.test_generator" />
         <item itemvalue="Python.scratch" />
-        <item itemvalue="Python.FHEWtest" />
         <item itemvalue="Python.genvar" />
         <item itemvalue="Python.NTTMYTEST" />
       </list>

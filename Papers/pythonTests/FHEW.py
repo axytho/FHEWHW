@@ -15,14 +15,21 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
         #ct[i] *= pow(psi, i, q)
     ctEvaluation = [list() for _ in range(2)]
     modified = [list() for _ in range(2)]
+    hwResult = list()
     for j in range(2):
         modified[j] = IterativeInverseNTTHardware(list(ct[j]) , modulus, psi_inv)
     ModifiedNTT = open(
         "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/MODIFIED.txt",
         'w')
+    resultINTT = open(
+        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/RESULTINTT.txt",
+        'w')
     for k in range(N):
         bitReversedModified= indexReverse(modified[0], 10)
         ModifiedNTT.write(hex(bitReversedModified[k]).replace("L", "")[2:] + "\n")
+        hwResult.append(modified[0][512*(k%2)+(k>>1)])
+    for k in range(N):
+        resultINTT.write(hex(hwResult[k]).replace("L", "")[2:] + "\n")
 
 
     for j in range(2):
@@ -73,7 +80,9 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
         #print([j for (i, j) in zip([abs(NTTMYTEST.SIGNED_IN[1024 * k + i] - ctEvaluation[k][i]) for i in range(N)], range(N)) if i > 0])
         #print([j for (i, j) in
                #zip([abs(NTTMYTEST.DCT_OUT[1024 * k + i] - evaluateDCT[k][i]) for i in range(N)], range(N)) if i > 0])
-
+    SECRET_PRODUCT = open(
+        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/SECRET_PRODUCT.txt",
+        'w')
     #print([ j for (i,j) in zip([abs(NTTMYTEST.PALISADE[i] - evaluateDCT[0][i]) for i in range(N)],range(N)) if i > 0 ])
     for j in range(2):
         for l in range(digitsG*2):
@@ -81,7 +90,14 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
                # if (j==0 and l ==1 and m ==0):
                #     print(accumulator[0][j][m], evaluateDCT[j][m], secretKeyInput[l][j][m],
                #           (accumulator[0][j][m] + evaluateDCT[j][m] * secretKeyInput[l][j][m]) % modulus )
+                SECRET_PRODUCT.write(hex( evaluateDCT[l][m] * secretKeyInput[l][j][m]%modulus).replace("L", "")[2:] + "\n")
                 accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * secretKeyInput[l][j][m]) % modulus
+                # Secret key structure in memory:
+                # Pieces of 4*32*27 bits
+               # for the whole ACCloop:
+                # for m in range N>>PE:
+                #    for l in range digitsG:
+                #    blocks of
     return accumulator
 
 
