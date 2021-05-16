@@ -481,7 +481,8 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                         pw[n] <= 0;
                         pi[n] <= 0;
                     end
-                    pr[n] <= {3'b010,inttlast};//in the first one, it's indeed this simple, but not the second one
+                    pr[n] <= {4'b0100,inttlast[3:0]};//in the first one, it's indeed this simple, but not the second one
+                    // I add [3:0] to make it obvious what's happening
                 end
                 else begin //if jstate ==1
                     if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH+1))) begin
@@ -550,7 +551,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 //pr gets programmed seperately because it needs to run on sys_cntr
                     if(sys_cntr < (`RING_SIZE >> (`PE_DEPTH+1))) begin
                         if(n[0] == 0) begin
-                            pr[n] <= {4'b0010,inttlast[3:0]};//Bram 0 still has to be multiplied, so read that from lower half of BRAM
+                            pr[n] <= {4'b0100,inttlast[3:0]};//Bram 0 still has to be multiplied, so read that from lower half of BRAM
                         end
                         else begin
                             pr[n] <= {4'b1000,inttlast[3:0]};// BRAM1 is aded, but that's been stored
@@ -558,7 +559,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     end
                     else if(sys_cntr < (`RING_SIZE >> (`PE_DEPTH))) begin
                         if(n[0] == 1) begin
-                            pr[n] <= {4'b0010,inttlast[3:0]};//now BRAM 1 still has to be multiplied, which we find in the lower half
+                            pr[n] <= {4'b0100,inttlast[3:0]};//now BRAM 1 still has to be multiplied, which we find in the lower half
                         end
                         else begin
                             pr[n] <= {4'b1000,inttlast[3:0]}; //BRAM0 is added
@@ -566,7 +567,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     end
                     else if(sys_cntr < (2'd3*(`RING_SIZE >> (`PE_DEPTH+1)))) begin
                         if(n[0] == 0) begin //IF BRAM0
-                            pr[n] <= {4'b0010,inttlast[3:0]};
+                            pr[n] <= {4'b0100,inttlast[3:0]};
                         end
                         else begin
                             pr[n] <= {4'b1001,inttlast[3:0]};//BRAM1 got stored here to be added
@@ -574,7 +575,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     end
                     else if(sys_cntr < (`RING_SIZE >> (`PE_DEPTH)-1)) begin
                         if(n[0] == 1) begin
-                            pr[n] <= {4'b0010,inttlast[3:0]};
+                            pr[n] <= {4'b0100,inttlast[3:0]};
                         end
                         else begin
                             pr[n] <= {4'b1001,inttlast[3:0]}; //if BRAM0, read from where you stored your values for BRAM1 multiplication
