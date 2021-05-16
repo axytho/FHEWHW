@@ -1,10 +1,13 @@
 import FHEW
-
+import math
 N = 1024
 psi = 282116
 omega = 133754304
 modulus = 134215681
-
+K = math.ceil(math.log(modulus,2))
+#print(K)
+R       = 2**((int(math.log(N,2))+1) * int(math.ceil((1.0*K)/(1.0*((int(math.log(N,2))+1))))))
+#print(((int(math.log(N,2))+1) * int(math.ceil((1.0*K)/(1.0*((int(math.log(N,2))+1)))))))
 accumulator = [[N * [0] for i in range(2)] for _ in range(2)]
 a = [2 * [0] for i in range(512)]
 result = [[N * [0] for i in range(2)] for _ in range(2)]

@@ -7,13 +7,14 @@ def accumulation(N, modulus, rootOfUnity, psi, secretKey, accumulator, a):
         for k in range(2):
             a0 = a[i_FHEW][k]
             #print(a0)
+            #print(((k==0) and (i_FHEW ==0)), a0)
             if (a0!=0):
-                accumulator = addToACAP(N, modulus, rootOfUnity, psi, secretKey[i_FHEW][a0 -1][k], accumulator, (k==0) and (i_FHEW ==0)) #-1 because we only save 22 values.
+                accumulator = addToACAP(N, modulus, rootOfUnity, psi, secretKey[i_FHEW][a0 -1][k], accumulator, ((k==0) and (i_FHEW ==0))) #-1 because we only save 22 values.
     return accumulator
 
 
 def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printThis):
-    assert(pow(psi,2,modulus)==rootOfUnity)
+    #assert(pow(psi,2,modulus)==rootOfUnity)
     baseG = 7
     w_inv = modinv(rootOfUnity, modulus)
     psi_inv = pow(psi, 2**(N*2)-1, modulus) #correct
@@ -94,10 +95,10 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printTh
         #print([j for (i, j) in zip([abs(NTTMYTEST.SIGNED_IN[1024 * k + i] - ctEvaluation[k][i]) for i in range(N)], range(N)) if i > 0])
         #print([j for (i, j) in
                #zip([abs(NTTMYTEST.DCT_OUT[1024 * k + i] - evaluateDCT[k][i]) for i in range(N)], range(N)) if i > 0])
-    #if (printThis):
-    #    SECRET_PRODUCT = open(
-    #        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports"
-    #        "/VerilogThesis/test/SECRET_PRODUCT.txt", 'w')
+    if (printThis):
+        ACC_TEMP = open(
+            "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports"
+            "/VerilogThesis/test/SECRET_PRODUCT.txt", 'w')
     #print([ j for (i,j) in zip([abs(NTTMYTEST.PALISADE[i] - evaluateDCT[0][i]) for i in range(N)],range(N)) if i > 0 ])
     for j in range(2):
         for l in range(digitsG*2):
@@ -105,10 +106,16 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printTh
                # if (j==0 and l ==1 and m ==0):
                #     print(accumulator[0][j][m], evaluateDCT[j][m], secretKeyInput[l][j][m],
                #           (accumulator[0][j][m] + evaluateDCT[j][m] * secretKeyInput[l][j][m]) % modulus )
-                #if (printThis):
-                #    SECRET_PRODUCT.write(hex( evaluateDCT[l][m] * secretKeyInput[l][j][m]%modulus).replace("L", "")[2:] + "\n")
+
+                """
                 if (printThis and m==0):
-                    print(hex(evaluateDCT[1][2]), hex(secretKeyInput[1][0][0]), hex(evaluateDCT[1][0]*secretKeyInput[1][0][0]%modulus))
+                    jResult = 1
+                    for value in range(0,1024,64):
+                        print(hex(evaluateDCT[1][value]), hex((secretKeyInput[1][jResult][value]<<33) % modulus), hex((evaluateDCT[1][value]*secretKeyInput[1][jResult][value])%modulus))
+                if (printThis and m==1023):
+                    value = 1
+                    print(hex(evaluateDCT[1][value]), hex((secretKeyInput[1][0][value]<<33) % modulus), hex((evaluateDCT[1][value]*secretKeyInput[1][0][value])%modulus))
+                """
                 accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * secretKeyInput[l][j][m]) % modulus
                 # Secret key structure in memory:
                 # Pieces of 4*32*27 bits
@@ -116,6 +123,12 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printTh
                 # for m in range N>>PE:
                 #    for l in range digitsG:
                 #    blocks of
+
+    for j in range(2):
+        for m in range(N):
+            if (printThis):
+                ACC_TEMP.write(hex(accumulator[0][j][m]).replace("L", "")[2:] + "\n")
+
     return accumulator
 
 
