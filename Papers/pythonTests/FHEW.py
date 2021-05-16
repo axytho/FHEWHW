@@ -1,7 +1,18 @@
 import math
 import NTTMYTEST
 
-def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
+
+def accumulation(N, modulus, rootOfUnity, psi, secretKey, accumulator, a):
+    for i_FHEW in range(32):
+        for k in range(2):
+            a0 = a[i_FHEW][k]
+            #print(a0)
+            if (a0!=0):
+                accumulator = addToACAP(N, modulus, rootOfUnity, psi, secretKey[i_FHEW][a0 -1][k], accumulator, (k==0) and (i_FHEW ==0)) #-1 because we only save 22 values.
+    return accumulator
+
+
+def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printThis):
     assert(pow(psi,2,modulus)==rootOfUnity)
     baseG = 7
     w_inv = modinv(rootOfUnity, modulus)
@@ -14,22 +25,22 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
     #for i in range(2*N,N,-1):
         #ct[i] *= pow(psi, i, q)
     ctEvaluation = [list() for _ in range(2)]
-    modified = [list() for _ in range(2)]
-    hwResult = list()
-    for j in range(2):
-        modified[j] = IterativeInverseNTTHardware(list(ct[j]) , modulus, psi_inv)
-    ModifiedNTT = open(
-        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/MODIFIED.txt",
-        'w')
-    resultINTT = open(
-        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/RESULTINTT.txt",
-        'w')
-    for k in range(N):
-        bitReversedModified= indexReverse(modified[0], 10)
-        ModifiedNTT.write(hex(bitReversedModified[k]).replace("L", "")[2:] + "\n")
-        hwResult.append(modified[0][512*(k%2)+(k>>1)])
-    for k in range(N):
-        resultINTT.write(hex(hwResult[k]).replace("L", "")[2:] + "\n")
+    #modified = [list() for _ in range(2)]
+    #hwResult = list()
+    #for j in range(2):
+     #   modified[j] = IterativeInverseNTTHardware(list(ct[j]) , modulus, psi_inv)
+    #ModifiedNTT = open(
+    #    "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/MODIFIED.txt",
+    #    'w')
+    #resultINTT = open(
+    #    "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/RESULTINTT.txt",
+    #    'w')
+    #for k in range(N):
+        #bitReversedModified= indexReverse(modified[0], 10)
+        #ModifiedNTT.write(hex(bitReversedModified[k]).replace("L", "")[2:] + "\n")
+        #hwResult.append(modified[0][512*(k%2)+(k>>1)])
+    #for k in range(N):
+    #    resultINTT.write(hex(hwResult[k]).replace("L", "")[2:] + "\n")
 
 
     for j in range(2):
@@ -39,7 +50,10 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
     #print([j for (i, j) in
     #       zip([abs(modified[0][i] - ctEvaluation[0][i]) for i in range(N)], range(N)) if i > 0])
     #print(hex(ctEvaluation[1][0]))
-
+    if (False):
+        for i in range(1024):
+            print("Value we want:",i, "so: ", hex(ctEvaluation[1][i]))
+        #print(hex(ctEvaluation[1][900-1]))
 
     dct = signedDigitDecompose(ctEvaluation,N, modulus, baseG)
     #print(hex(dct[0][0]), hex(dct[2][0]), hex(dct[4][0]), hex(dct[6][0]))
@@ -47,11 +61,11 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
     #print([ j for (i,j) in zip([abs(NTTMYTEST.NTTPoly[i] - dct[0][i]) for i in range(N)],range(N)) if i > 0 ])
     #[print(hex(element)) for element in dct[0]]#CORRECT!
 
-    NTT_IN = open(
-        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_IN.txt",
-        'w')
-    for k in range(N):
-        NTT_IN.write(hex(dct[0][k]).replace("L", "")[2:] + "\n")
+    #NTT_IN = open(
+    #    "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_IN.txt",
+    #    'w')
+    #for k in range(N):
+    #    NTT_IN.write(hex(dct[0][k]).replace("L", "")[2:] + "\n")
 
 
     modifiedDCT = [N*[0] for _ in range(2*digitsG)]
@@ -61,16 +75,16 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
         for i in range(N):
             modifiedDCT[j][i] = pow(psi, i, modulus) * dct[j][i] % modulus
         evaluateDCT[j] = IterativeForwardNTT(list(modifiedDCT[j]), modulus, 133754304)
-        hwEvaluateDCT[j] = IterativeForwardCT(list(dct[j]), modulus, psi)
+        #hwEvaluateDCT[j] = IterativeForwardCT(list(dct[j]), modulus, psi)
     #[print("Index: ", i, "element:", hex(evaluateDCT[0][i]), "check", hex(hwEvaluateDCT[0][i])) for i in range(N)]
-    print([j for (i, j) in
-           zip([abs(evaluateDCT[0][i] - hwEvaluateDCT[0][i]) for i in range(N)], range(N)) if i > 0])
+    #print([j for (i, j) in
+     #      zip([abs(evaluateDCT[0][i] - hwEvaluateDCT[0][i]) for i in range(N)], range(N)) if i > 0])
 
-    NTT_OUT = open(
-        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_OUT.txt",
-        'w')
-    for k in range(N):
-        NTT_OUT.write(hex(evaluateDCT[0][k]).replace("L", "")[2:] + "\n")
+    ##NTT_OUT = open(
+    ##    "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_OUT.txt",
+    ##    'w')
+    ##for k in range(N):
+    ##    NTT_OUT.write(hex(evaluateDCT[0][k]).replace("L", "")[2:] + "\n")
 
     #[print("Index: ", i , "element:" ,hex(evaluateDCT[0][i])) for i in range(N)] #CORRECT
     #print(dct[1][0], NTTMYTEST.SIGNED_IN[2048])
@@ -80,9 +94,10 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
         #print([j for (i, j) in zip([abs(NTTMYTEST.SIGNED_IN[1024 * k + i] - ctEvaluation[k][i]) for i in range(N)], range(N)) if i > 0])
         #print([j for (i, j) in
                #zip([abs(NTTMYTEST.DCT_OUT[1024 * k + i] - evaluateDCT[k][i]) for i in range(N)], range(N)) if i > 0])
-    SECRET_PRODUCT = open(
-        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/SECRET_PRODUCT.txt",
-        'w')
+    #if (printThis):
+    #    SECRET_PRODUCT = open(
+    #        "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports"
+    #        "/VerilogThesis/test/SECRET_PRODUCT.txt", 'w')
     #print([ j for (i,j) in zip([abs(NTTMYTEST.PALISADE[i] - evaluateDCT[0][i]) for i in range(N)],range(N)) if i > 0 ])
     for j in range(2):
         for l in range(digitsG*2):
@@ -90,7 +105,10 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator):
                # if (j==0 and l ==1 and m ==0):
                #     print(accumulator[0][j][m], evaluateDCT[j][m], secretKeyInput[l][j][m],
                #           (accumulator[0][j][m] + evaluateDCT[j][m] * secretKeyInput[l][j][m]) % modulus )
-                SECRET_PRODUCT.write(hex( evaluateDCT[l][m] * secretKeyInput[l][j][m]%modulus).replace("L", "")[2:] + "\n")
+                #if (printThis):
+                #    SECRET_PRODUCT.write(hex( evaluateDCT[l][m] * secretKeyInput[l][j][m]%modulus).replace("L", "")[2:] + "\n")
+                if (printThis and m==0):
+                    print(hex(evaluateDCT[1][2]), hex(secretKeyInput[1][0][0]), hex(evaluateDCT[1][0]*secretKeyInput[1][0][0]%modulus))
                 accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * secretKeyInput[l][j][m]) % modulus
                 # Secret key structure in memory:
                 # Pieces of 4*32*27 bits
