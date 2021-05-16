@@ -31,9 +31,12 @@ limitations under the License.
 
 //LWE params
 `define D_R              2 ///($rtoi($ceil(($clog2(`LWE_SIZE)/$clog2(`B_R)))))
-`define SECRET_KEY_SIZE (`B_R*`LWE_SIZE*`D_R*(`RING_DEPTH>>(`PE_NUMBER)<<1))
+`define SECRET_KEY_SIZE  (1507328) //(`B_R*`LWE_SIZE*`D_R*   (`RING_SIZE>>(`PE_NUMBER-1)))
 `define SECRET_ADDR_WIDTH ($clog2(`SECRET_KEY_SIZE))
 // ------------------------------------------------
+`define LWE_TOT            
+`define CNTR            ($clog2(`LWE_SIZE*`D_R))
+`define A_WIDTH         ($clog2(`B_R ))
 // Parameters for integer multiplication
 
 `define NTT_SUM_DELAY   ($clog2(`NTT_NUMBER))

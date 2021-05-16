@@ -35,8 +35,10 @@ module NTTN   (input                           clk,reset,
                input  [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn,
                input  [(`PE_NUMBER*`DATA_SIZE_ARB)-1:0] secret_key,
                //input                           notTheFirstTime, // we'll output wrongly, but we don't care so this is commented
+               output  [`PE_DEPTH-1+1:0]                        secret_addr_ntt,
                output reg                      done,
                output reg [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramOut//###
+              
                //output reg [`DATA_SIZE_ARB-1:0]                      dout//for single output at the end
                // ###output reg [`DATA_SIZE_ARB-1:0] dout
                );
@@ -88,7 +90,11 @@ wire                             ntt_finished;
 
 reg                              ntt_intt; // ntt:0 -- intt:1
 wire                              writeToProduct;
-assign  writeToProduct = (state==3'd5) ;
+assign  writeToProduct = (state==3'd5);
+
+
+assign secret_addr_ntt = sys_cntr[`PE_DEPTH-1+1:0];
+
 //wire  readFromProduct;
 //assign  readFromProduct= (state==3'd4);
 // pu
@@ -142,7 +148,7 @@ AddressGeneratorNTTN ag(clk,reset,
                     );
 
 // ---------------------------------------------------------------- ntt/intt
-reg [`DATA_SIZE_ARB-1:0] params    [0:7];
+reg [`DATA_SIZE_ARB-1:0] params    [0:6];
 initial begin
 	// params
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params);
@@ -480,13 +486,13 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 else begin //if jstate ==1
                     if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH+1))) begin
                         if(n[0] == 0) begin
-                            pr[n] <= {4'b0010,inttlast[3:0]};//Bram 0 still has to be multiplied, so read that from lower half of BRAM
+                            //pr[n] <= {4'b0010,inttlast[3:0]};//Bram 0 still has to be multiplied, so read that from lower half of BRAM
                             pe[n] <= 1;
                             pw[n] <= {3'b010,inttlast_d[3:0]};
                             pi[n] <= ASout[n];//read the even result wich gives w*Odd
                         end
                         else begin
-                            pr[n] <= {4'b1000,inttlast[3:0]};// BRAM1 is aded, but that's been stored
+                            //pr[n] <= {4'b1000,inttlast[3:0]};// BRAM1 is aded, but that's been stored
                             pe[n] <= 0;
                             pw[n] <= 0;
                             pi[n] <= 0;
@@ -494,25 +500,27 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     end
                     else if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH))) begin
                         if(n[0] == 1) begin
-                            pr[n] <= {4'b0010,inttlast[3:0]};//now BRAM 1 still has to be multiplied, which we find in the lower half
+                            //pr[n] <= {4'b0010,inttlast[3:0]};//now BRAM 1 still has to be multiplied, which we find in the lower half
                             pe[n] <= 1;
                             pw[n] <= {3'b010,inttlast_d[3:0]};
                             pi[n] <= ASout[n-1];
                         end
                         else begin
-                            pr[n] <= {4'b1000,inttlast[3:0]};
+                            //pr[n] <= {4'b1000,inttlast[3:0]}; //BRAM0 is added
                             pe[n] <= 0;
                             pw[n] <= 0;
                             pi[n] <= 0;
                         end
                     end
-                    if(sys_cntr_d < (2'd3*(`RING_SIZE >> (`PE_DEPTH+1)))) begin
-                        if(n[0] == 0) begin
+                    else if(sys_cntr_d < (2'd3*(`RING_SIZE >> (`PE_DEPTH+1)))) begin
+                        if(n[0] == 0) begin //IF BRAM0
+                            //pr[n] <= {4'b0011,inttlast[3:0]};
                             pe[n] <= 1;
                             pw[n] <= {3'b011,inttlast_d[3:0]};
                             pi[n] <= ASout[n];
                         end
                         else begin
+                            //pr[n] <= {4'b1001,inttlast[3:0]};//BRAM1 got stored here to be added
                             pe[n] <= 0;
                             pw[n] <= 0;
                             pi[n] <= 0;
@@ -520,20 +528,60 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     end
                     else if(sys_cntr_d < (`RING_SIZE >> (`PE_DEPTH)-1)) begin
                         if(n[0] == 1) begin
+                            //pr[n] <= {4'b0011,inttlast[3:0]};
                             pe[n] <= 1;
                             pw[n] <= {3'b011,inttlast_d[3:0]};
                             pi[n] <= ASout[n-1];
                         end
                         else begin
+                            //pr[n] <= {4'b1001,inttlast[3:0]}; //if BRAM0, read from where you stored your values for BRAM1 multiplication
                             pe[n] <= 0;
                             pw[n] <= 0;
                             pi[n] <= 0;
                         end
                     end
                     else begin
+                        //pr[n] <= 0;
                         pe[n] <= 0;
                         pw[n] <= 0;
                         pi[n] <= 0;
+                    end
+                                    
+                //pr gets programmed seperately because it needs to run on sys_cntr
+                    if(sys_cntr < (`RING_SIZE >> (`PE_DEPTH+1))) begin
+                        if(n[0] == 0) begin
+                            pr[n] <= {4'b0010,inttlast[3:0]};//Bram 0 still has to be multiplied, so read that from lower half of BRAM
+                        end
+                        else begin
+                            pr[n] <= {4'b1000,inttlast[3:0]};// BRAM1 is aded, but that's been stored
+                        end
+                    end
+                    else if(sys_cntr < (`RING_SIZE >> (`PE_DEPTH))) begin
+                        if(n[0] == 1) begin
+                            pr[n] <= {4'b0010,inttlast[3:0]};//now BRAM 1 still has to be multiplied, which we find in the lower half
+                        end
+                        else begin
+                            pr[n] <= {4'b1000,inttlast[3:0]}; //BRAM0 is added
+                        end
+                    end
+                    else if(sys_cntr < (2'd3*(`RING_SIZE >> (`PE_DEPTH+1)))) begin
+                        if(n[0] == 0) begin //IF BRAM0
+                            pr[n] <= {4'b0010,inttlast[3:0]};
+                        end
+                        else begin
+                            pr[n] <= {4'b1001,inttlast[3:0]};//BRAM1 got stored here to be added
+                        end
+                    end
+                    else if(sys_cntr < (`RING_SIZE >> (`PE_DEPTH)-1)) begin
+                        if(n[0] == 1) begin
+                            pr[n] <= {4'b0010,inttlast[3:0]};
+                        end
+                        else begin
+                            pr[n] <= {4'b1001,inttlast[3:0]}; //if BRAM0, read from where you stored your values for BRAM1 multiplication
+                        end
+                    end
+                    else begin
+                        pr[n] <= 0;
                     end
                                     
                 end
@@ -638,6 +686,15 @@ always @(posedge clk or posedge reset) begin: NT_BLOCK
                         NTTin[2*n+0] <= 0;
                         NTTin[2*n+1] <= po[2*n+1];
                     end
+                    else if(sys_cntr < (2+(2'd3*(`RING_SIZE >> (`PE_DEPTH+1))))) begin // should take 2 + 16 cycles to read everything and write it back with
+                        // 1 delay.
+                        NTTin[2*n+0] <= 0;
+                        NTTin[2*n+1] <= po[2*n+0];//0...31, 64...95, etc...
+                    end
+                    else if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH-1)))) begin //if less than 32+2
+                        NTTin[2*n+0] <= 0;
+                        NTTin[2*n+1] <= po[2*n+1];
+                    end
                     else begin //again, this is the standard operation, probably for the last 2 cycles of state 3 or something
                         NTTin[2*n+0] <= po[2*n+0];
                         NTTin[2*n+1] <= po[2*n+1];
@@ -647,20 +704,31 @@ always @(posedge clk or posedge reset) begin: NT_BLOCK
                 else begin
                     if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH+1)))) begin // should take 2 + 16 cycles to read everything and write it back with
             // 1 delay.
-                        NTTin[2*n+0] <= po[2*n+1]; //even
+                        NTTin[2*n+0] <= po[2*n+1]; //BRAM1 is added, so it must be added to the plays where it won't be multiplied.
                         NTTin[2*n+1] <= po[2*n+0];//0...31, 64...95, etc...
                     end
                     else if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH)))) begin //if less than 32+2
-                        NTTin[2*n+0] <= po[2*n+0];
+                        NTTin[2*n+0] <= po[2*n+0]; //BRAM 0 is added so must go to even
+                        NTTin[2*n+1] <= po[2*n+1];
+                    end
+
+                    else if(sys_cntr < (2+(2'd3*(`RING_SIZE >> (`PE_DEPTH+1))))) begin // should take 2 + 16 cycles to read everything and write it back with
+                                // 1 delay.
+                        NTTin[2*n+0] <= po[2*n+1]; //BRAM1 is added, so it must be added to the plays where it won't be multiplied.
+                        NTTin[2*n+1] <= po[2*n+0];//0...31, 64...95, etc...
+                    end
+                    else if(sys_cntr < (2+(`RING_SIZE >> (`PE_DEPTH-1)))) begin //if less than 32+2
+                        NTTin[2*n+0] <= po[2*n+0]; //BRAM 0 is added so must go to even
                         NTTin[2*n+1] <= po[2*n+1];
                     end
                     else begin //again, this is the standard operation 
                         NTTin[2*n+0] <= po[2*n+0];
                         NTTin[2*n+1] <= po[2*n+1];
                     end
-                    MULin[n] <= secret_key[`DATA_SIZE_ARB*n+:`DATA_SIZE_ARB];                                   
-                end
-            end
+
+                MULin[n] <= secret_key[`DATA_SIZE_ARB*n+:`DATA_SIZE_ARB];                                   
+                end //of jState
+            end// of state 5
             else begin //standard operation, mainly in state 3.
                 NTTin[2*n+0] <= po[2*n+0];
                 NTTin[2*n+1] <= po[2*n+1];

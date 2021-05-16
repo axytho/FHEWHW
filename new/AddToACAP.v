@@ -30,7 +30,7 @@ module AddToACAP(
                input [`RING_DEPTH+1-1:0]         write_addr_input, //11 bits, because we are working with RGSW b, with 2*1024 bits
                input [`DATA_SIZE_ARB-1:0]      data_in,
                input                           load_a, //
-               input [`DATA_SIZE_ARB-1:0]      data_a,
+               input [`A_WIDTH-1:0]      data_a,
                input [`RING_DEPTH-1:0]         write_addr_a,
                input                           start_addToACAP,//does the whole homomorphic encryption
                input [`DATA_SIZE_ARB*`PE_NUMBER*`NTT_NUMBER-1:0] secret_key,  
@@ -68,10 +68,14 @@ wire                        start_full;
  wire [(2* `DATA_SIZE_ARB *`PE_NUMBER)-1:0] decompose_out [`NTT_NUMBER-1:0];
  reg [(2* `DATA_SIZE_ARB *`PE_NUMBER)-1:0] decompose_out_reg [`NTT_NUMBER-1:0];
  wire [(2* `DATA_SIZE_ARB *`PE_NUMBER)-1:0] bramOut_ntt [`NTT_NUMBER-1:0];
+ wire [(`PE_DEPTH+1)-1:0] secret_addr_ntt [`NTT_NUMBER-1:0];
 
-wire [`NTT_NUMBER*2*`DATA_SIZE_ARB-1:0] add_input [2*`PE_NUMBER-1:0];
+wire [`NTT_NUMBER*`DATA_SIZE_ARB-1:0] add_input [2*`PE_NUMBER-1:0];
 wire [`DATA_SIZE_ARB-1:0] add_result [2*`PE_NUMBER-1:0];
 reg [`DATA_SIZE_ARB-1:0] add_result_reg [2*`PE_NUMBER-1:0];
+
+reg [`CNTR-1+1:0] acc_cntr;
+wire [`A_WIDTH-1:0] data_out_a;
 
 reg notTheFirstTime;
 reg lastTime;
@@ -94,7 +98,7 @@ reg lastTime;
                            end
                            sys_cntr <= 0;
                        end
-
+                       
                        3'd1: begin 
                            if(sys_cntr == (`RING_SIZE+1)) begin //because it takes 1024 cycles, so we really don't want to do this every time
                                state <= 3'd2;
@@ -118,7 +122,7 @@ reg lastTime;
                        end
                        3'd3: begin// wait for innt to finish going through the signed bit decompose and writing to ntt
                            if(sys_cntr == ((`RING_SIZE >> (`PE_DEPTH+1)) + `STAGE_DELAY)) begin
-                               state <= 3'd4;
+                               state <= 3'd7; //quickly verify that the next stage is not a a0==0
                                sys_cntr <= 0;
                            end
                            else begin
@@ -171,8 +175,21 @@ reg lastTime;
                          else begin
                             state <= 3'd6;
                             sys_cntr <= sys_cntr + 1;
-                        end                     
-                      end
+                         end                     
+                       end
+                                               
+                                               
+                       3'd7: begin // a state just for seeing how many a's turn out to be 0
+                            sys_cntr <= 0;
+                            if (~(data_out_a == 0)) begin
+                                state <= 3'd4;
+                                sys_cntr <= 0;
+                            end
+                            else begin
+                                state <= 3'd7;
+                                sys_cntr <= sys_cntr+1;
+                            end
+                       end
                        default: begin
                            state <= 3'd0;
                            sys_cntr <= 0;
@@ -293,15 +310,24 @@ always @(posedge clk or posedge reset) begin: FIRST_TIME_REG
         if(reset) begin
             notTheFirstTime <= 0;
             jState <= 0;
+            acc_cntr <=0;
         end
         else begin            
             if (state == 3'd4 && done_ntt[0]) begin // input data from BRAM
                 notTheFirstTime <= 1'b1; // we force done for now to test whether it works
                 jState <= ~jState;
+                acc_cntr <= acc_cntr + 1;
+            end
+            else if ((state == 3'd7) && (data_out_a==0) && (sys_cntr[0] == 0)) begin // the first cycle in state we probably don't do anything, any extra cycle is +2
+                //only in even cycles, because we need 2 cycles to verify that the next a is actually 0
+                notTheFirstTime <= notTheFirstTime;
+                jState <= jState;
+                acc_cntr <= acc_cntr + 2;
             end
             else  begin
                 notTheFirstTime <= notTheFirstTime;
                 jState <= jState;
+                acc_cntr <=acc_cntr;
             end         
        end
  
@@ -321,6 +347,14 @@ always @(posedge clk or posedge reset) begin: LAST_TIME_REG
  
 end
 
+wire [`A_WIDTH-1:0]addr_a_minus_one;
+assign addr_a_minus_one = data_out_a-1;
+wire [`CNTR+`A_WIDTH-1:0] i_LWE_Dr_plus_a0;
+assign i_LWE_Dr_plus_a0 = (`A_WIDTH-1)*acc_cntr[`CNTR:1]+addr_a_minus_one;
+//secret_addr_ntt contains both the EVENODD variable, the current j_result we're multiplying for and the PE_cycle_BRAM_EVENODD, it is 6 bits
+// j_state tells us which j_dct_result we're multiplying with
+// the top is an addition of the address a plus the 10 bits that make up acc_cntr[CNTR:1]
+assign secret_addr = {i_LWE_Dr_plus_a0, jState, secret_addr_ntt[0]};//15+1+6=22 bits
 
 
 // ### important: we can (and should) initialize or weights from an external file https://studfile.net/preview/4643996/page:29/ instead of loading it in
@@ -333,6 +367,7 @@ BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH+1)) ACCInput(clk,write_enable_bra
 
 BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH+1)) ACCOutput(clk,load_output,{jState, write_addr_output},dout_intt,read_out,data_out);
 
+BRAM #(.DLEN(`A_WIDTH),.HLEN(`CNTR)) ACC_a(clk,load_a,write_addr_a,data_a,acc_cntr[`CNTR:1],data_out_a);
 
 INTT inverse_ntt    (clk,reset,
              load_intt_from_bram,
@@ -358,7 +393,7 @@ genvar branch;
             decompose_out[2][`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB],
             decompose_out[3][`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB]);
             for (branch = 0; branch<`NTT_NUMBER; branch = branch + 1) begin
-                assign add_input[k][(branch*`NTT_NUMBER*`DATA_SIZE_ARB)+:(`NTT_NUMBER*`DATA_SIZE_ARB)] = bramOut_ntt[branch];
+                assign add_input[k][(branch*`DATA_SIZE_ARB)+:(`DATA_SIZE_ARB)] = bramOut_ntt[branch];
             end
             assign bramIn_intt[`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB] = add_result_reg[k];
             resultAdder addition (add_input[k], add_result[k]); //bit length 216 differs from formal bit length 108 for port 'value_in'                                            
@@ -399,6 +434,7 @@ genvar i;
                               start_ntt,
                               decompose_out_reg[i],
                               secret_key[(`DATA_SIZE_ARB*`PE_NUMBER)*i+:(`DATA_SIZE_ARB*`PE_NUMBER)],
+                              secret_addr_ntt[i],
                               done_ntt[i],
                               bramOut_ntt[i]
                               );

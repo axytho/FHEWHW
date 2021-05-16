@@ -25,10 +25,10 @@ module resultAdder(
     output [`DATA_SIZE_ARB-1:0] result
     );
     
-    reg [`DATA_SIZE_ARB-1:0] params    [0:7];
+    reg [`DATA_SIZE_ARB-1:0] params    [0:6];
         initial begin
             // params
-            $readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params);
+            $readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params, 0, 6);
         end
     
     //one adder unit
