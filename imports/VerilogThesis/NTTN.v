@@ -1,5 +1,6 @@
 /*
 Copyright 2020, Ahmet Can Mert <ahmetcanmert@sabanciuniv.edu>
+edited for use in FHEW by Jonas Bertels <jonas.bertels@kuleuven.be>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -216,8 +217,14 @@ always @(posedge clk or posedge reset) begin
         end
         3'd5: begin // repurposing this for secret key operations
             if(sys_cntr == (((`RING_SIZE >> (`PE_DEPTH-1))) + `INTMUL_DELAY+`MODRED_DELAY+`STAGE_DELAY)) begin
-                state <= 3'd4;
-                sys_cntr <= 0;
+                /*if (jState ==0) begin
+                    state <= 3'd0;// I mean, you could go to state 4, but no one would care, because intt wouldn't listen.
+                    sys_cntr <= 0;
+                end else begin*/
+                    state <= 3'd4; //READ IT OUT ANYWAY, not necessary if we're going to state j=1, but jState is hard to regulate, 
+                                   // and if intt doesn't load it doesn't care what's happening.
+                    sys_cntr <= 0;
+                //end
             end
             else begin
                 state <= 3'd5;
@@ -410,13 +417,13 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 pr[n] <= {1'b0, raddr};
             end
             else if(state == 3'd4) begin // output data
-                if (jState ==0) begin
+               // if (jState ==0) begin
                     pe[n] <= 0;
                     pw[n] <= 0;
                     pi[n] <= 0;
                     //###pr[n] <= {2'b10,addrout};
-                    pr[n] <= {4'b1010,inttlast[3:0]};//### correct in this case
-                end
+                    pr[n] <= {3'b101,inttlast};//5 bits for 32 cycles of readout
+               /* end
                 else begin
                     pe[n] <= 0;
                     pw[n] <= 0;
@@ -424,7 +431,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     //###pr[n] <= {2'b10,addrout};
                     pr[n] <= {4'b1011,inttlast[3:0]};//### correct in this case                
                 
-                end
+                end*/
             end
             else if(state == 3'd5) begin // last stage of intt
                 if (jState ==0) begin

@@ -1,22 +1,8 @@
 
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 04/10/2021 12:12:50 PM
-// Design Name: 
-// Module Name: AddToACAP
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Contact me at Jonas Bertels <jonas.bertels@kuleuven.be> if code is unclear
+//  Use as you please (but keep in mind that the NTT was written by Mert and as such
+// his licenses apply).
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -75,6 +61,9 @@ wire [`DATA_SIZE_ARB-1:0] add_result [2*`PE_NUMBER-1:0];
 reg [`DATA_SIZE_ARB-1:0] add_result_reg [2*`PE_NUMBER-1:0];
 
 reg [`CNTR-1+1:0] acc_cntr;
+reg [`CNTR-1+1:0] a_zero_cntr;
+wire [`CNTR-1+1:0] acc_cnt_a_zero_sum;
+assign acc_cnt_a_zero_sum = acc_cntr[`CNTR:1] + a_zero_cntr;
 wire [`A_WIDTH-1:0] data_out_a;
 
 reg notTheFirstTime;
@@ -110,7 +99,7 @@ reg lastTime;
                            end
                        end
                        
-                       3'd2: begin //run the inntt //TODO: done_intt doesn't work
+                       3'd2: begin //run the inntt 
                             if(done_intt) begin //because it takes 1024 cycles, so we really don't want to do this every 
                               state <= 3'd3;
                               sys_cntr <= 0;
@@ -133,7 +122,13 @@ reg lastTime;
                        3'd4: begin//run the ntt and check whether we're going for another run or whether we're outputting
                            if(done_ntt[0]) begin //because it takes 1024 cycles, so we really don't want to do this every 
                                  if (notTheFirstTime) begin
-                                    state <= 3'd6;
+                                    if (jState) begin//jState changes on done_ntt so will still be 1 if we continue to readout
+                                        state <= 3'd6;
+                                    end
+                                    else begin
+                                        state <= 3'd2;
+                                    end
+                                    
                                  end
                                  else begin
                                     state <= 3'd1; //rerunning state_1 because we need to run it for the second part of the ACC
@@ -161,8 +156,8 @@ reg lastTime;
                          end                     
                        end
                        
-                       3'd6: begin//output data to intt agaiin (go through addition)
-                          if (sys_cntr == ((`RING_SIZE >> (`PE_DEPTH+1)) + `STAGE_DELAY)) begin
+                       3'd6: begin//output data to intt agaiin (go through addition) We only run it once every time AddToACAP finishes
+                          if (sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `STAGE_DELAY)) begin//output 32 cycles
                              if(done_acc) begin //go to state 5, for final output
                                   state <= 3'd5;
                                   sys_cntr <= 0;
@@ -250,7 +245,7 @@ always @(posedge clk or posedge reset) begin: LOAD_INTT
         end
         else begin            
 
-                load_intt_from_bram <= (done_ntt[0] & notTheFirstTime);
+                load_intt_from_bram <= (done_ntt[0] & notTheFirstTime & jState);//if jState ==1, this means the previous round is just done.
         end
 end    
 
@@ -311,23 +306,27 @@ always @(posedge clk or posedge reset) begin: FIRST_TIME_REG
             notTheFirstTime <= 0;
             jState <= 0;
             acc_cntr <=0;
+            a_zero_cntr <= 0;
         end
         else begin            
             if (state == 3'd4 && done_ntt[0]) begin // input data from BRAM
                 notTheFirstTime <= 1'b1; // we force done for now to test whether it works
                 jState <= ~jState;
                 acc_cntr <= acc_cntr + 1;
+                a_zero_cntr <= a_zero_cntr;
             end
-            else if ((state == 3'd7) && (data_out_a==0) && (sys_cntr[0] == 0)) begin // the first cycle in state we probably don't do anything, any extra cycle is +2
-                //only in even cycles, because we need 2 cycles to verify that the next a is actually 0
+            else if ((state == 3'd7) && (data_out_a==0) && (sys_cntr[0] == 1'b0)) begin // the first cycle in state we probably don't do anything,
+                //only in even cycles, because we need 2 cycles to verify that the next a is actually 0, because BRAM delay
                 notTheFirstTime <= notTheFirstTime;
                 jState <= jState;
-                acc_cntr <= acc_cntr + 2;
+                acc_cntr <=acc_cntr;//TODO:
+                a_zero_cntr <= a_zero_cntr+2;//+2 because we need +2 to change a address
             end
             else  begin
                 notTheFirstTime <= notTheFirstTime;
                 jState <= jState;
                 acc_cntr <=acc_cntr;
+                a_zero_cntr <= a_zero_cntr;
             end         
        end
  
@@ -367,7 +366,7 @@ BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH+1)) ACCInput(clk,write_enable_bra
 
 BRAM #(.DLEN(`DATA_SIZE_ARB),.HLEN(`RING_DEPTH+1)) ACCOutput(clk,load_output,{jState, write_addr_output},dout_intt,read_out,data_out);
 
-BRAM #(.DLEN(`A_WIDTH),.HLEN(`CNTR)) ACC_a(clk,load_a,write_addr_a,data_a,acc_cntr[`CNTR:1],data_out_a);
+BRAM #(.DLEN(`A_WIDTH),.HLEN(`CNTR)) ACC_a(clk,load_a,write_addr_a,data_a,acc_cnt_a_zero_sum,data_out_a);
 
 INTT inverse_ntt    (clk,reset,
              load_intt_from_bram,
@@ -377,6 +376,7 @@ INTT inverse_ntt    (clk,reset,
              din_intt,
              bramIn_intt,
              outputSingle, //To be set
+             jState,
              done_intt,
              decompose_in,
              dout_intt);
@@ -393,7 +393,7 @@ genvar branch;
             decompose_out[2][`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB],
             decompose_out[3][`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB]);
             for (branch = 0; branch<`NTT_NUMBER; branch = branch + 1) begin
-                assign add_input[k][(branch*`DATA_SIZE_ARB)+:(`DATA_SIZE_ARB)] = bramOut_ntt[branch];
+                assign add_input[k][(branch*`DATA_SIZE_ARB)+:(`DATA_SIZE_ARB)] = bramOut_ntt[branch][(k*`DATA_SIZE_ARB)+:(`DATA_SIZE_ARB)];
             end
             assign bramIn_intt[`DATA_SIZE_ARB*k+:`DATA_SIZE_ARB] = add_result_reg[k];
             resultAdder addition (add_input[k], add_result[k]); //bit length 216 differs from formal bit length 108 for port 'value_in'                                            

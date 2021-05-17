@@ -38,6 +38,7 @@ module INTT   (input                           clk,reset,
                input [`DATA_SIZE_ARB-1:0]      din,// single input
                input  [(2*`DATA_SIZE_ARB * `PE_NUMBER)-1:0] bramIn, //large input
                input                           output_data_single, //trigers single output of data
+               input                           jState, //allows us to determine which input we use.
                output reg                      done, //done, triggered when writing away in 64 27 bit values
                output reg [(2*`DATA_SIZE_ARB *`PE_NUMBER)-1:0] inttOut,//###
                output reg [`DATA_SIZE_ARB-1:0]                      dout//for single output at the end
@@ -89,7 +90,8 @@ wire [`RING_DEPTH-`PE_DEPTH+2:0]      raddr_tw;
 wire [4:0]                       stage_count;
 wire                             ntt_finished;
 
-reg                              half_full; // ntt:0 -- intt:1
+reg                              do_full; 
+wire                             jState1_and_first_reverse;
 
 // pu
 reg [`DATA_SIZE_ARB-1:0] NTTin [(2*`PE_NUMBER)-1:0];
@@ -155,20 +157,24 @@ end
 
 always @(posedge clk or posedge reset) begin
     if(reset) begin
-        half_full <= 0;
+        do_full <= 0;
     end
     else begin
         if(start_intt || state == 3'd3)//once we're in the execution, make sure we don't go back to execution
-            half_full <= 0;
+            do_full <= 0;
         else if(start_full)
-            half_full <= 1;
+            do_full <= 1;
         else
-            half_full <= half_full;
+            do_full <= do_full;
     end
 end
 
-// --- 
-
+// Make sure that we read from the correct part before bitreversing (I know this is really confusing anyonereading through this)
+// but basically for all 64 BRAM's I'm loading 32 values at the end of each addToAcao
+// This saves me a couple of clock cycles, but most importantly,
+// it's simpler than trying to keep half the stuff in the NTT, and then reading out twice
+// and it makes outputting easier
+assign jState1_and_first_reverse = (do_full) &  (jState);
 
 // ---------------------------------------------------------------- state machine & sys_cntr
 
@@ -186,15 +192,18 @@ always @(posedge clk or posedge reset) begin
                 state <= 3'd1;//read x64
             else if(load_data)
                 state <= 3'd2;//read single
-            else if(start | start_intt)
+            else if(start_intt & ~do_full)// first time we do it this way because we load them them in inversely.
+            // seen in hindsight, this is a "premature" optimisation
+            // but actually the real problem was that the need for a bitreversal wasn't appararent at first.
                 state <= 3'd3;//execute
-              
+            else if(start_intt & do_full)
+                state <= 3'd6;//bitReverse, then execute
             else
                 state <= 3'd0;
             sys_cntr <= 0;
         end
         3'd1: begin //BRAM x64 readin
-            if(sys_cntr == ((`RING_SIZE >>(`PE_DEPTH+1)) - 1)) begin
+            if(sys_cntr == ((`RING_SIZE >>(`PE_DEPTH)) - 1)) begin//read in 32 cycles
                 state <= 3'd0;                    
                 sys_cntr <= 0;
             end
@@ -241,11 +250,11 @@ always @(posedge clk or posedge reset) begin
             end
         end
         3'd6: begin //bitReverse
-            if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && ~half_full) begin
+            if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && ~do_full) begin
                 state <= 3'd4;//readout
                 sys_cntr <= 0;
             end
-            else if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && half_full)  begin
+            else if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && do_full)  begin
                 state <= 3'd3;//execute
                 sys_cntr <= 0;
             end
@@ -255,7 +264,7 @@ always @(posedge clk or posedge reset) begin
             end
         end
         3'd7: begin //read out the BRAM's in single file
-            if(sys_cntr == (`RING_SIZE+1)) begin
+            if(sys_cntr == ((`RING_SIZE<<1)+1)) begin
                 state <= 3'd0;
                 sys_cntr <= 0;
             end
@@ -331,13 +340,13 @@ end
 
 // ---------------------------------------------------------------- load data & other data operations
 // ### is the symbol for code that I write, and commented code will have a hashtag in from of it
-wire [`RING_DEPTH-`PE_DEPTH-1:0] addrout;
-assign addrout = (sys_cntr >> (`PE_DEPTH+1));
+wire [`RING_DEPTH-`PE_DEPTH-1:0] addrout;//allows us to do 32 addresses, which is what we want
+assign addrout = (sys_cntr >> (`PE_DEPTH+1));//every 64 cycles, which is correct, even for twice the ammount of cycles
 
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast;
 assign inttlast = (sys_cntr & ((`RING_SIZE >> (`PE_DEPTH+1))-1)); //counter mod 16
 
-wire [`RING_DEPTH-`PE_DEPTH-2:0] read_out_bram [2*`PE_NUMBER-1:0];
+wire [`RING_DEPTH-`PE_DEPTH-2:0] read_out_bram [(`PE_NUMBER<<1)-1:0];
 generate
 genvar n_bram;
 for (n_bram = 0; n_bram < (2*`PE_NUMBER); n_bram= n_bram + 1) begin
@@ -391,7 +400,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
             if((state == 3'd1)) begin // input data from BRAM
                     // ###
                 pe[n] <= 1'b1; //read everything fast
-                pw[n] <= inttlast;
+                pw[n] <= {2'b10, inttlast};//inttlast is 5 bits, which we need here.
                 pi[n] <= bramIn[n*`DATA_SIZE_ARB+:`DATA_SIZE_ARB];
                 pr[n] <= 0;
             end
@@ -527,19 +536,18 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
             
             
             else if((state == 3'd6)) begin
+                pr[n] <= {2'b10,jState1_and_first_reverse, read_out_bram[n]};//read_out_bram is always 4 bits
                 if ((sys_cntr < `BITREVERSE_DELAY)) begin // input data from reverser
                     // ###
                     pe[n] <= 0; //first 0,1, 4,5, 8,9, etc...
                     pw[n] <= 0; //write to 00 from 10
                     pi[n] <= 0;
-                    pr[n] <= {3'b100, read_out_bram[n]};
+                    
                 end
                 else begin
                     pe[n] <= (n[0] == sys_cntr_bit_reverse_delayed[4]); //first 0,2, 4,6, 8,10, etc...
                     pw[n] <= write_addr_intt[4*n[5:1]+:4]; //write to 00 from 10
                     pi[n] <= bram_in_from_reversed[n[5:1]*`DATA_SIZE_ARB+:`DATA_SIZE_ARB];
-                    pr[n] <= {3'b100, read_out_bram[n]};
-                
                 end
             end
             else if(state == 3'd7) begin // output data
