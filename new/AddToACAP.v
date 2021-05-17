@@ -63,7 +63,6 @@ reg [`DATA_SIZE_ARB-1:0] add_result_reg [2*`PE_NUMBER-1:0];
 reg [`CNTR-1+1:0] acc_cntr;
 reg [`CNTR-1+1:0] a_zero_cntr;
 wire [`CNTR-1+1:0] acc_cnt_a_zero_sum;
-assign acc_cnt_a_zero_sum = acc_cntr[`CNTR:1] + a_zero_cntr;
 wire [`A_WIDTH-1:0] data_out_a;
 
 reg notTheFirstTime;
@@ -265,7 +264,7 @@ always @(posedge clk or posedge reset) begin: START_NTT
 end
 // assign start_full
 // start_full is made so that if you trigger it, the intt will turn it off during execution
-assign start_full = (state ==3'd6);
+assign start_full = (state ==3'd4 & notTheFirstTime);
 
 
 always @(posedge clk or posedge reset) begin: DONE_ACC //check whether we're done (usuall
@@ -320,7 +319,7 @@ always @(posedge clk or posedge reset) begin: FIRST_TIME_REG
                 notTheFirstTime <= notTheFirstTime;
                 jState <= jState;
                 acc_cntr <=acc_cntr;//TODO:
-                a_zero_cntr <= a_zero_cntr+2;//+2 because we need +2 to change a address
+                a_zero_cntr <= a_zero_cntr+1;//+2 because we need +2 to change a address
             end
             else  begin
                 notTheFirstTime <= notTheFirstTime;
@@ -349,11 +348,13 @@ end
 wire [`A_WIDTH-1:0]addr_a_minus_one;
 assign addr_a_minus_one = data_out_a-1;
 wire [`CNTR+`A_WIDTH-1:0] i_LWE_Dr_plus_a0;
-assign i_LWE_Dr_plus_a0 = (`A_WIDTH-1)*acc_cntr[`CNTR:1]+addr_a_minus_one;
+assign acc_cnt_a_zero_sum = acc_cntr[`CNTR:1] + a_zero_cntr;
+assign i_LWE_Dr_plus_a0 = (`B_R-1)*acc_cnt_a_zero_sum+addr_a_minus_one;
 //secret_addr_ntt contains both the EVENODD variable, the current j_result we're multiplying for and the PE_cycle_BRAM_EVENODD, it is 6 bits
 // j_state tells us which j_dct_result we're multiplying with
 // the top is an addition of the address a plus the 10 bits that make up acc_cntr[CNTR:1]
 assign secret_addr = {i_LWE_Dr_plus_a0, jState, secret_addr_ntt[0]};//15+1+6=22 bits
+
 
 
 // ### important: we can (and should) initialize or weights from an external file https://studfile.net/preview/4643996/page:29/ instead of loading it in

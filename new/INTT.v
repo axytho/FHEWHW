@@ -92,6 +92,7 @@ wire                             ntt_finished;
 
 reg                              do_full; 
 wire                             jState1_and_first_reverse;
+wire                             start_address_gen;
 
 // pu
 reg [`DATA_SIZE_ARB-1:0] NTTin [(2*`PE_NUMBER)-1:0];
@@ -136,7 +137,7 @@ endgenerate
 // ---------------------------------------------------------------- control unit
 
 AddressGenerator ag(clk,reset,
-                    (start | start_intt),
+                    (start_address_gen),
                     raddr,
                     waddr0,waddr1,
                     wen0  ,wen1  ,
@@ -160,7 +161,7 @@ always @(posedge clk or posedge reset) begin
         do_full <= 0;
     end
     else begin
-        if(start_intt || state == 3'd3)//once we're in the execution, make sure we don't go back to execution
+        if(state == 3'd3)//once we're in the execution, make sure we don't go back to execution
             do_full <= 0;
         else if(start_full)
             do_full <= 1;
@@ -250,11 +251,11 @@ always @(posedge clk or posedge reset) begin
             end
         end
         3'd6: begin //bitReverse
-            if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && ~do_full) begin
+            if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) & ~do_full) begin
                 state <= 3'd4;//readout
                 sys_cntr <= 0;
             end
-            else if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) && do_full)  begin
+            else if ((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) & do_full)  begin
                 state <= 3'd3;//execute
                 sys_cntr <= 0;
             end
@@ -280,6 +281,9 @@ always @(posedge clk or posedge reset) begin
         endcase
     end
 end
+
+//For the stupid address generator: (replaces start_intt, which would else trigger for state==6
+assign start_address_gen = (((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREVERSE_DELAY)) & do_full) & (state == 3'd6)) || ((start_intt & ~do_full) & (state == 3'd0));
 
 // ---------------------------------------------------------------- load twiddle factor + q + n_inv & other operations
 
