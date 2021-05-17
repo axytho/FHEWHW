@@ -400,7 +400,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
             if((state == 3'd1)) begin // input data from BRAM
                     // ###
                 pe[n] <= 1'b1; //read everything fast
-                pw[n] <= {2'b10, inttlast};//inttlast is 5 bits, which we need here.
+                pw[n] <= {2'b10, sys_cntr[4:0]};//inttlast is fake 5 bits, we need sys_cntr, which we need here.
                 pi[n] <= bramIn[n*`DATA_SIZE_ARB+:`DATA_SIZE_ARB];
                 pr[n] <= 0;
             end

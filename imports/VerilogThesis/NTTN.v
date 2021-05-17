@@ -422,7 +422,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                     pw[n] <= 0;
                     pi[n] <= 0;
                     //###pr[n] <= {2'b10,addrout};
-                    pr[n] <= {3'b101,inttlast};//5 bits for 32 cycles of readout
+                    pr[n] <= {3'b101,sys_cntr[4:0]};//5 bits for 32 cycles of readout
                /* end
                 else begin
                     pe[n] <= 0;
