@@ -71,10 +71,10 @@ assign thirdSelectValue = thirdSeven - 7'd64;
 assign thirdSelect = thirdSelectValue[6];
 wire [`DATA_SIZE_ARB-1:0] rThirdMinusBasePlusModulus = thirdSeven + (`MODULUS - 8'd128);
 assign thirdResult = thirdSelect ? thirdSeven : rThirdMinusBasePlusModulus;
-wire [`DATA_SIZE_ARB-1-21:0] rNext1 = rNext2[`DATA_SIZE_ARB-1-14:7] + {1'b0,~thirdSelect};
+wire [6:0] rNext1 =  rNext2[`DATA_SIZE_ARB-1-14:7] + {1'b0,~thirdSelect};
 
 //YOU NEED A FOURTH BECAUSE d CAN BE NEGATIVE AND THEREFORE HIGHER THAN MODULUS
-assign fourthSeven = {rNext1[5], rNext1[5:0]}; //signed bit logic
+assign fourthSeven = rNext1; //signed bit logic
 wire [6:0] fourthSelectValue;
 wire fourthSelect;
 assign fourthSelectValue = fourthSeven - 7'd64;
