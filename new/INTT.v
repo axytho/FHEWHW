@@ -558,7 +558,7 @@ always @(posedge clk or posedge reset) begin: DT_BLOCK
                 pe[n] <= 0;
                 pw[n] <= 0;
                 pi[n] <= 0;
-                pr[n] <= {2'b10,addrout};
+                pr[n] <= {2'b10,sys_cntr[(`PE_DEPTH-1):0]};
             end
             else begin
                 pe[n] <= 0;

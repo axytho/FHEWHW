@@ -14,7 +14,8 @@
       "axi_bram_ctrl_0": "",
       "axi_bram_ctrl_0_bram": "",
       "axi_smc": "",
-      "rst_ps8_0_99M": ""
+      "rst_ps8_0_99M": "",
+      "AddToACAP_0": ""
     },
     "components": {
       "zynq_ultra_ps_e_0": {
@@ -1178,6 +1179,11 @@
               "minimum": "0xB0000000",
               "maximum": "0x007FFFFFFFFF",
               "width": "40"
+            },
+            "parameters": {
+              "master_id": {
+                "value": "2"
+              }
             }
           }
         }
@@ -1199,8 +1205,35 @@
         "xci_path": "ip\\furkan_design_axi_bram_ctrl_0_bram_0\\furkan_design_axi_bram_ctrl_0_bram_0.xci",
         "inst_hier_path": "axi_bram_ctrl_0_bram",
         "parameters": {
+          "Assume_Synchronous_Clk": {
+            "value": "false"
+          },
+          "EN_SAFETY_CKT": {
+            "value": "true"
+          },
+          "Enable_32bit_Address": {
+            "value": "true"
+          },
+          "Enable_B": {
+            "value": "Use_ENB_Pin"
+          },
           "Memory_Type": {
             "value": "True_Dual_Port_RAM"
+          },
+          "Register_PortA_Output_of_Memory_Primitives": {
+            "value": "false"
+          },
+          "Register_PortB_Output_of_Memory_Primitives": {
+            "value": "false"
+          },
+          "Use_RSTA_Pin": {
+            "value": "true"
+          },
+          "Use_RSTB_Pin": {
+            "value": "true"
+          },
+          "use_bram_block": {
+            "value": "BRAM_Controller"
           }
         }
       },
@@ -1211,7 +1244,7 @@
         "inst_hier_path": "axi_smc",
         "parameters": {
           "NUM_SI": {
-            "value": "1"
+            "value": "2"
           }
         },
         "interface_ports": {
@@ -1220,15 +1253,64 @@
             "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
             "bridges": [
               "M00_AXI"
-            ]
+            ],
+            "parameters": {
+              "NUM_READ_OUTSTANDING": {
+                "value": "8"
+              },
+              "NUM_WRITE_OUTSTANDING": {
+                "value": "8"
+              }
+            }
+          },
+          "S01_AXI": {
+            "mode": "Slave",
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "bridges": [
+              "M00_AXI"
+            ],
+            "parameters": {
+              "NUM_READ_OUTSTANDING": {
+                "value": "8"
+              },
+              "NUM_WRITE_OUTSTANDING": {
+                "value": "8"
+              }
+            }
           },
           "M00_AXI": {
             "mode": "Master",
-            "vlnv": "xilinx.com:interface:aximm_rtl:1.0"
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "parameters": {
+              "MAX_BURST_LENGTH": {
+                "value": "256"
+              },
+              "NUM_READ_OUTSTANDING": {
+                "value": "8"
+              },
+              "NUM_WRITE_OUTSTANDING": {
+                "value": "8"
+              },
+              "RUSER_BITS_PER_BYTE": {
+                "value": "0"
+              },
+              "SUPPORTS_NARROW_BURST": {
+                "value": "0"
+              },
+              "WUSER_BITS_PER_BYTE": {
+                "value": "0"
+              }
+            }
           }
         },
         "interface_ports": {
           "S00_AXI": {
+            "mode": "Slave",
+            "bridges": [
+              "M00_AXI"
+            ]
+          },
+          "S01_AXI": {
             "mode": "Slave",
             "bridges": [
               "M00_AXI"
@@ -1241,13 +1323,69 @@
         "xci_name": "furkan_design_rst_ps8_0_99M_0",
         "xci_path": "ip\\furkan_design_rst_ps8_0_99M_0\\furkan_design_rst_ps8_0_99M_0.xci",
         "inst_hier_path": "rst_ps8_0_99M"
+      },
+      "AddToACAP_0": {
+        "vlnv": "xilinx.com:module_ref:AddToACAP:1.0",
+        "xci_name": "furkan_design_AddToACAP_0_0",
+        "xci_path": "ip\\furkan_design_AddToACAP_0_0\\furkan_design_AddToACAP_0_0.xci",
+        "inst_hier_path": "AddToACAP_0",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "AddToACAP",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "ASSOCIATED_RESET": {
+                "value": "resetn",
+                "value_src": "constant"
+              }
+            }
+          },
+          "resetn": {
+            "type": "rst",
+            "direction": "I",
+            "parameters": {
+              "POLARITY": {
+                "value": "ACTIVE_LOW",
+                "value_src": "constant"
+              }
+            }
+          },
+          "data_in": {
+            "direction": "I",
+            "left": "31",
+            "right": "0"
+          },
+          "write_enable_bram": {
+            "direction": "O",
+            "left": "3",
+            "right": "0"
+          },
+          "port_enable": {
+            "direction": "O"
+          },
+          "write_addr_interfacebram": {
+            "direction": "O",
+            "left": "31",
+            "right": "0"
+          },
+          "data_out": {
+            "direction": "O",
+            "left": "31",
+            "right": "0"
+          }
+        }
       }
     },
     "interface_nets": {
-      "axi_smc_M00_AXI": {
+      "axi_bram_ctrl_0_BRAM_PORTA": {
         "interface_ports": [
-          "axi_smc/M00_AXI",
-          "axi_bram_ctrl_0/S_AXI"
+          "axi_bram_ctrl_0_bram/BRAM_PORTA",
+          "axi_bram_ctrl_0/BRAM_PORTA"
         ]
       },
       "zynq_ultra_ps_e_0_M_AXI_HPM0_FPD": {
@@ -1256,10 +1394,16 @@
           "axi_smc/S00_AXI"
         ]
       },
-      "axi_bram_ctrl_0_BRAM_PORTA": {
+      "zynq_ultra_ps_e_0_M_AXI_HPM1_FPD": {
         "interface_ports": [
-          "axi_bram_ctrl_0_bram/BRAM_PORTA",
-          "axi_bram_ctrl_0/BRAM_PORTA"
+          "zynq_ultra_ps_e_0/M_AXI_HPM1_FPD",
+          "axi_smc/S01_AXI"
+        ]
+      },
+      "axi_smc_M00_AXI": {
+        "interface_ports": [
+          "axi_smc/M00_AXI",
+          "axi_bram_ctrl_0/S_AXI"
         ]
       }
     },
@@ -1270,7 +1414,10 @@
           "zynq_ultra_ps_e_0/maxihpm0_fpd_aclk",
           "axi_smc/aclk",
           "axi_bram_ctrl_0/s_axi_aclk",
-          "rst_ps8_0_99M/slowest_sync_clk"
+          "rst_ps8_0_99M/slowest_sync_clk",
+          "zynq_ultra_ps_e_0/maxihpm1_fpd_aclk",
+          "axi_bram_ctrl_0_bram/clkb",
+          "AddToACAP_0/clk"
         ]
       },
       "zynq_ultra_ps_e_0_pl_resetn0": {
@@ -1283,7 +1430,39 @@
         "ports": [
           "rst_ps8_0_99M/peripheral_aresetn",
           "axi_bram_ctrl_0/s_axi_aresetn",
-          "axi_smc/aresetn"
+          "axi_smc/aresetn",
+          "axi_bram_ctrl_0_bram/rstb",
+          "AddToACAP_0/resetn"
+        ]
+      },
+      "axi_bram_ctrl_0_bram_doutb": {
+        "ports": [
+          "axi_bram_ctrl_0_bram/doutb",
+          "AddToACAP_0/data_in"
+        ]
+      },
+      "AddToACAP_0_write_addr_interfacebram": {
+        "ports": [
+          "AddToACAP_0/write_addr_interfacebram",
+          "axi_bram_ctrl_0_bram/addrb"
+        ]
+      },
+      "AddToACAP_0_data_out": {
+        "ports": [
+          "AddToACAP_0/data_out",
+          "axi_bram_ctrl_0_bram/dinb"
+        ]
+      },
+      "AddToACAP_0_write_enable_bram": {
+        "ports": [
+          "AddToACAP_0/write_enable_bram",
+          "axi_bram_ctrl_0_bram/web"
+        ]
+      },
+      "AddToACAP_0_port_enable": {
+        "ports": [
+          "AddToACAP_0/port_enable",
+          "axi_bram_ctrl_0_bram/enb"
         ]
       }
     },

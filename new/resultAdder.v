@@ -25,11 +25,11 @@ module resultAdder(
     output [`DATA_SIZE_ARB-1:0] result
     );
     
-    reg [`DATA_SIZE_ARB-1:0] params    [0:6];
+  /*  reg [`DATA_SIZE_ARB-1:0] params    [0:6];
         initial begin
             // params
             $readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params, 0, 6);
-        end
+        end*/
     
     //one adder unit
     wire [`DATA_SIZE_ARB:0] modular_add [(`NTT_NUMBER)-2:0];
@@ -53,7 +53,7 @@ module resultAdder(
             assign modular_add[n+(`NTT_NUMBER) - (`NTT_NUMBER>>(i))] = modular_add_res[2*n+(`NTT_NUMBER << 1) - (`NTT_NUMBER<<1 >>i)]
              + modular_add_res[2*n+1+(`NTT_NUMBER << 1) - (`NTT_NUMBER<<1>>i)]; 
             assign modular_add_minus_q[n+(`NTT_NUMBER) - (`NTT_NUMBER>>i)] = 
-            modular_add[n+(`NTT_NUMBER) - (`NTT_NUMBER>>i)]-params[1];
+            modular_add[n+(`NTT_NUMBER) - (`NTT_NUMBER>>i)]-`MODULUS;
             assign modular_add_res[(`NTT_NUMBER << 1) - (`NTT_NUMBER>>i)+ n] = 
         (modular_add_minus_q[n+(`NTT_NUMBER) - (`NTT_NUMBER>>i)][`DATA_SIZE_ARB+1] == 1'b0)
          ? modular_add_minus_q[n+(`NTT_NUMBER) - (`NTT_NUMBER>>i)][`DATA_SIZE_ARB-1:0] 
