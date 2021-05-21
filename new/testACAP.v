@@ -21,7 +21,7 @@ module testACAP();
 parameter HP = 5;
 parameter FP = (2*HP); //10
 
-reg                       clk,resetn;
+reg                       clk,reset;
 
 reg                       write_enable_bram;
 reg                       start_addToACAP;
@@ -43,7 +43,7 @@ always #HP clk = ~clk;
 
 // ---------------------------------------------------------------- TXT data
              
-AddToACAP_sim accumulator    (clk,resetn,
+AddToACAP_sim accumulator    (clk,reset,
              write_enable_bram,
              write_addr_input,
              data_in,
@@ -81,25 +81,25 @@ end
 integer k;
 integer d;
 always @(posedge clk) begin
-    if (~resetn) begin
+    if (reset) begin
         secret_key <=0;
     end
     else begin
         secret_key <= secret[secret_addr_d]; //actually, we are allowed to delay secret_key by 2 clock cycles.
     end
 end
-ShiftReg #(.SHIFT(1),.DATA(`SECRET_ADDR_WIDTH)) address_shift(clk, resetn, secret_addr, secret_addr_d);
+ShiftReg #(.SHIFT(1),.DATA(`SECRET_ADDR_WIDTH)) address_shift(clk, reset, secret_addr, secret_addr_d);
 
 
 initial begin: CLK_RESET_INIT
 	// clk & reset (150 cc)
 	clk       = 0;
-	resetn     = 1;
+	reset     = 0;
 
 	#200;
-	resetn    = 1;
+	reset    = 1;
 	#200;
-	resetn    = 1;
+	reset    = 0;
 	#100;
 
 	#1000;
