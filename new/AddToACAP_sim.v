@@ -11,7 +11,7 @@
 
 module AddToACAP_sim(
                input                           clk,
-               input                           reset,
+               input                           resetn,
                input                           write_enable_bram,  //keep it
                input [`RING_DEPTH+1-1:0]         write_addr_input, //11 bits, because we are working with RGSW b, with 2*1024 bits
                input [`DATA_SIZE_ARB-1:0]      data_in,
@@ -30,7 +30,8 @@ module AddToACAP_sim(
                
  reg [`RING_DEPTH+3:0] sys_cntr;
  reg [2:0] state;
- 
+ wire reset;
+ assign reset = ~resetn;
 
  
  wire [`RING_DEPTH-1:0]         write_addr_output;
