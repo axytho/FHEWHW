@@ -48,7 +48,6 @@ wire                        start_full;
  reg                       load_data_intt;
  reg                       start_ntt;
  reg                       start_intt;
- reg                       done_acc;
   wire  [`DATA_SIZE_ARB-1:0] din_intt;
  wire  [`DATA_SIZE_ARB-1:0] dout_intt;
  reg                       outputSingle;
@@ -131,13 +130,8 @@ initial begin
                        end
                        
                        3'd2: begin //run the inntt 
-                            if(done_intt) begin //because it takes 1024 cycles, so we really don't want to do this every 
-                                if (acc_cnt_a_zero_sum > 11'd63) begin
-                                    state <= 3'd5;
-                               end
-                               else begin
-                                  state <= 3'd3; 
-                               end
+                            if(done_intt) begin //because it takes 1024 cycles, so we really don't want to do this every       
+                               state <= 3'd3; 
                               sys_cntr <= 0;
                           end
                           else begin
@@ -178,7 +172,7 @@ initial begin
                        end
                        
                        3'd5: begin//means we're (almost) done and we're outputing data
-                           if (sys_cntr == ((`RING_SIZE<<1)+8)) begin
+                           if (sys_cntr >((`RING_SIZE<<1)+9)) begin
 
                                state <= 3'd0;
                               
@@ -192,7 +186,7 @@ initial begin
                        
                        3'd6: begin//output data to intt agaiin (go through addition) We only run it once every time AddToACAP finishes
                           if (sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `STAGE_DELAY)) begin//output 32 cycles
-                             if(done_acc) begin //go to state 5, for final output
+                             if(acc_cnt_a_zero_sum > 11'd63)  begin //go to state 5, for final output
                                   state <= 3'd5;
                                   sys_cntr <= 0;
                              end
@@ -229,6 +223,9 @@ end
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast;
 assign inttlast = (sys_cntr & ((`RING_SIZE >> (`PE_DEPTH+1))-1));
 
+wire [(`RING_DEPTH+1-1):0] sys_cntr_minus_five;
+assign sys_cntr_minus_five = sys_cntr[(`RING_DEPTH+1-1):0]-5;
+
 always @(*) begin: WRITE_ADDR_BLOCK
     if (state==3'd0) begin  
         write_addr_interfacebram <= 13'h1004; //decimal: 4100:adress where deadbeef should be located
@@ -241,18 +238,18 @@ always @(*) begin: WRITE_ADDR_BLOCK
         data_out <= 32'hdeadc0de;
     end
     //write data away
-    else if (state==3'd5 && sys_cntr < ((`RING_SIZE<<1)+1)) begin 
-        write_addr_interfacebram <=  {2'b01,sys_cntr[(`RING_DEPTH+1-1):0]};
+    else if (state==3'd5 && (sys_cntr < ((`RING_SIZE<<1)+5))) begin 
+        write_addr_interfacebram <=  {2'b11,sys_cntr_minus_five};
         write_enable_bram <= 4'b1111;
         data_out <= dout_intt;
     end
     //write done
-    else if (state==3'd5&& sys_cntr == ((`RING_SIZE<<1)+4)) begin //4 is randomly chosen to make a done statement
-        write_addr_interfacebram <=  13'h1800;//6144
+    else if (state==3'd5&& sys_cntr == ((`RING_SIZE<<1)+6)) begin //4 is randomly chosen to make a done statement
+        write_addr_interfacebram <=  13'h1789;
         write_enable_bram <= 4'b1111;
         data_out <= 32'hd01ecafe;
     end
-    else if (state==3'd5&& sys_cntr == ((`RING_SIZE<<1)+6)) begin //4 is randomly chosen to make a done statement
+    else if (state==3'd5&& sys_cntr == ((`RING_SIZE<<1)+7)) begin //4 is randomly chosen to make a done statement
         write_addr_interfacebram <=  13'h1004;//overwrite the start so we don't start again 
         write_enable_bram <= 4'b1111;
         data_out <= 32'hbabacafe;
@@ -353,16 +350,14 @@ assign start_full = (state ==3'd4 & notTheFirstTime);
 
 always @(posedge clk or posedge reset) begin: DONE_ACC //check whether we're done (usuall
         if(reset) begin
-            done_acc <= 0;
             outputSingle  <=0;
         end
         else begin            
-            if (state == 3'd4) begin // input data from BRAM
-                done_acc <= 0;// we force done for now to test whether it works
-                outputSingle <= (1'b0);
+            if (state == 3'd5) begin // input data from BRAM
+             // we force done for now to test whether it works
+                outputSingle <= (sys_cntr == 0);
             end
             else  begin
-                done_acc <= 0;
                 outputSingle  <=0;
             end         
        end
