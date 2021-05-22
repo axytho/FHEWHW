@@ -9,11 +9,13 @@ def accumulation(N, modulus, rootOfUnity, psi, secretKey, accumulator, a):
             #print(a0)
             #print(((k==0) and (i_FHEW ==0)), a0)
             if (a0!=0):
-                accumulator = addToACAP(N, modulus, rootOfUnity, psi, secretKey[i_FHEW][a0 -1][k], accumulator, ((k==0) and (i_FHEW ==0))) #-1 because we only save 22 values.
+                accumulator = addToACAP(N, modulus, rootOfUnity, psi, secretKey[i_FHEW][a0 -1][k], accumulator, ((k==1) and (i_FHEW ==31)), True) #-1 because we only save 22 values.
     return accumulator
 
 
-def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printThis):
+def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printThis, hwCheck):
+
+    originalSecret = 88888888 #TODO: REMOVE
     #assert(pow(psi,2,modulus)==rootOfUnity)
     baseG = 7
     w_inv = modinv(rootOfUnity, modulus)
@@ -43,30 +45,55 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printTh
     #for k in range(N):
     #    resultINTT.write(hex(hwResult[k]).replace("L", "")[2:] + "\n")
 
+    if (False):
+        for j in range(2):
+            for i in range(1024):
+                print("Value we want:",i, "so: ", hex(ct[j][i]))
+
 
     for j in range(2):
         ctEvaluation[j] = indexReverse(IterativeInverseNTT(list(indexReverse(list(ct[j]), 10)), modulus, w_inv), 10)
         for a,b in zip(range(2 * N, N, -1), range(N)):
             ctEvaluation[j][b] = (pow(psi, a, modulus) * ctEvaluation[j][b]) % modulus
+
+    if (False):
+        for j in range(2):
+            for i in range(1024):
+                print("Value we want:",i, "so: ", hex(ctEvaluation[j][i]))
     #print([j for (i, j) in
     #       zip([abs(modified[0][i] - ctEvaluation[0][i]) for i in range(N)], range(N)) if i > 0])
-    #print(hex(ctEvaluation[1][0]))
-    if (False):
-        for i in range(1024):
-            print("Value we want:",i, "so: ", hex(ctEvaluation[1][i]))
+
+    #print("What", hex(ctEvaluation[1][0]),  hex(ctEvaluation[1][64]))
         #print(hex(ctEvaluation[1][900-1]))
 
     dct = signedDigitDecompose(ctEvaluation,N, modulus, baseG)
+
+    if (False):
+        for start in range(32):
+            for i in range(512+ start,0,-32):
+                print("Value we want:",i, "so: ", hex(dct[6][i]))
     #print(hex(dct[0][0]), hex(dct[2][0]), hex(dct[4][0]), hex(dct[6][0]))
     #print([abs(NTTMYTEST.NTTPoly[i] - dct[0][i]) for i in range(N)])
     #print([ j for (i,j) in zip([abs(NTTMYTEST.NTTPoly[i] - dct[0][i]) for i in range(N)],range(N)) if i > 0 ])
     #[print(hex(element)) for element in dct[0]]#CORRECT!
+    #if (False):
+    #    for i in range(1024):
+    #        print("Value we want:",i, "so: ", hex(dct[1][i]))
+    if (printThis):
+        TESTVECTOR = open(
+            "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/TESTVECTOR.txt",
+            'w')
+        for l in range(2):
+            for k in range(N):
+                TESTVECTOR.write(hex(ctEvaluation[l][k]).replace("L", "")[2:] + "\n")
 
-    #NTT_IN = open(
-    #    "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_IN.txt",
-    #    'w')
-    #for k in range(N):
-    #    NTT_IN.write(hex(dct[0][k]).replace("L", "")[2:] + "\n")
+
+        DCT_IN = open(
+            "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/DCT_IN.txt",
+            'w')
+        for l in range(8):
+            for k in range(N):
+                DCT_IN.write(hex(dct[l][k]).replace("L", "")[2:] + "\n")
 
 
     modifiedDCT = [N*[0] for _ in range(2*digitsG)]
@@ -107,16 +134,33 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printTh
                #     print(accumulator[0][j][m], evaluateDCT[j][m], secretKeyInput[l][j][m],
                #           (accumulator[0][j][m] + evaluateDCT[j][m] * secretKeyInput[l][j][m]) % modulus )
 
-                """
+
                 if (printThis and m==0):
-                    jResult = 1
+                    lResult = 3
+                    jResult = 0
+                    part = 0
+                    add =1
                     for value in range(0,1024,64):
-                        print(hex(evaluateDCT[1][value]), hex((secretKeyInput[1][jResult][value]<<33) % modulus), hex((evaluateDCT[1][value]*secretKeyInput[1][jResult][value])%modulus))
-                if (printThis and m==1023):
+                        pass
+                        #print(hex(evaluateDCT[part+2*lResult][value]), hex((secretKeyInput[part+2*lResult][jResult][value]<<33) % modulus),
+                        #      hex((evaluateDCT[part+2*lResult][value]*secretKeyInput[part+2*lResult][jResult][value])%modulus),
+                        #      hex((evaluateDCT[part+2*lResult][value]*secretKeyInput[part+2*lResult][jResult][value] +  evaluateDCT[part+2*lResult+add][value]*secretKeyInput[part+2*lResult+add][jResult][value])%modulus)  )
+                    acc = 0
+                    acc2 = 0
+                    value = 0
+                    for thing in range(4,6,1):
+                        acc += evaluateDCT[thing][value]*secretKeyInput[thing][jResult][value]
+                    for thing in range(6,8,1):
+                        acc2 += evaluateDCT[thing][value]*secretKeyInput[thing][jResult][value]
+                    #print("Accumulator:", hex(acc%modulus))
+                    #print("Accumulator:", hex(acc2%modulus))
+                if (printThis and m==1023 and False):
                     value = 1
                     print(hex(evaluateDCT[1][value]), hex((secretKeyInput[1][0][value]<<33) % modulus), hex((evaluateDCT[1][value]*secretKeyInput[1][0][value])%modulus))
-                """
-                accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * secretKeyInput[l][j][m]) % modulus
+                if (hwCheck):
+                    accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * originalSecret) % modulus
+                else:
+                    accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * secretKeyInput[l][j][m]) % modulus
                 # Secret key structure in memory:
                 # Pieces of 4*32*27 bits
                # for the whole ACCloop:
