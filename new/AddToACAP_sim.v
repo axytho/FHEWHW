@@ -31,7 +31,7 @@ module AddToACAP_sim(
  reg [`RING_DEPTH+3:0] sys_cntr;
  reg [2:0] state;
  wire reset;
- assign reset = ~resetn;
+ assign reset = (~resetn || (state==3'd0 && ~start_addToACAP));
 
  
  wire [`RING_DEPTH-1:0]         write_addr_output;
