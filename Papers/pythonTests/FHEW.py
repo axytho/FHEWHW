@@ -158,7 +158,8 @@ def addToACAP(N, modulus, rootOfUnity, psi, secretKeyInput, accumulator, printTh
                     value = 1
                     print(hex(evaluateDCT[1][value]), hex((secretKeyInput[1][0][value]<<33) % modulus), hex((evaluateDCT[1][value]*secretKeyInput[1][0][value])%modulus))
                 if (hwCheck):
-                    accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * originalSecret) % modulus
+                    if (l<4):
+                        accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * originalSecret) % modulus
                 else:
                     accumulator[0][j][m] = (accumulator[0][j][m] + evaluateDCT[l][m] * secretKeyInput[l][j][m]) % modulus
                 # Secret key structure in memory:
