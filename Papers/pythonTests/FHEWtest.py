@@ -18,9 +18,9 @@ secretKey = [[[[[N * [0] for i in range(2)] for _0 in range(8)] for _1 in range(
 Accumulator = open(
     "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/STARTACCUMULATOR.txt",
     'r')
-#AccVerilog = open(
-#    "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/ACCVERILOG.txt",
-#    'w')
+AccVerilog = open(
+    "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/ACCVERILOG.txt",
+    'w')
 SecretKey = open(
     "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHONSECRET.txt",
     'r')
@@ -39,10 +39,29 @@ SecretHex = SecretKey.readlines()
 ResultHex = Result.readlines()
 AHex = A_vector.readlines()
 
+
+
 for j in range(2):
     for k in range(N):
         accumulator[0][j][k] = int(AccHex[j * N + k],16)
         #Accumulator.write(hex( accumulator[0][j][k]).replace("L", "")[2:] + "\n")# accumulator contains the same 1024 repeated values by accident but whatever
+
+AccVerilog.write("u32 acc_list[2048] = {\n")
+for j in range(32):
+    for i in range(32):
+        AccVerilog.write("0x00000000, ")
+    AccVerilog.write("\n")
+for j in range(32):
+    for i in range(32):
+        if (i==31 and j==31):
+            newString = "0x{0} ".format(AccHex[N + 32*j+i].rstrip())
+            AccVerilog.write(newString)
+        else:
+            anotherString = "0x{0}, ".format(AccHex[N + 32*j+i].rstrip())
+            AccVerilog.write(anotherString)
+            print(anotherString+ anotherString)
+    AccVerilog.write("\n")
+AccVerilog.write("};\n")
 
 for i_LWE in range(32):
     for k in range(2):

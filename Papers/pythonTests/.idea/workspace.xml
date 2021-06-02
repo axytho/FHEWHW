@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e47740b1-a85f-441e-89ba-9031884ae762" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/FHEW.py" beforeDir="false" afterPath="$PROJECT_DIR$/FHEW.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FHEWtest.py" beforeDir="false" afterPath="$PROJECT_DIR$/FHEWtest.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
