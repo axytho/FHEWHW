@@ -37,7 +37,7 @@ always @(*) begin
     T2  = (-T2L);
 end
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         T2H   <= 0;
         CARRY <= 0;
@@ -51,7 +51,7 @@ always @(posedge clk or posedge reset) begin
 end
 
 // --------------------------------------------------------------- final addition operation
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         C <= 0;
     end

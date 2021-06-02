@@ -100,7 +100,7 @@ initial begin
   // --------------EVERYTHING BETWEEN THESE COMMENTS IS HACKED IN TO MAKE A VERY BASIC INTERFACE WORK. ORDINARLILY, our secret key comes from the outside
 // ---------------
  
- always @(posedge clk or posedge reset) begin
+ always @(posedge clk) begin
                    if(reset) begin
                        state <= 3'd0;
                        sys_cntr <= 0;
@@ -276,7 +276,7 @@ always @(*) begin: START_AND_RESET
 end
 
 
-always @(posedge clk or posedge reset) begin: INPUT_SINGLE
+always @(posedge clk) begin: INPUT_SINGLE
         if(reset) begin
             read_addr_in <= 0;
             load_data_intt <= 0;
@@ -294,7 +294,7 @@ always @(posedge clk or posedge reset) begin: INPUT_SINGLE
  
 end
 
-always @(posedge clk or posedge reset) begin: START_INTT
+always @(posedge clk  ) begin: START_INTT
         if(reset) begin
             start_intt <= 0;
         end
@@ -310,7 +310,7 @@ always @(posedge clk or posedge reset) begin: START_INTT
  
 end
 
-always @(posedge clk or posedge reset) begin: LOAD_NTT
+always @(posedge clk  ) begin: LOAD_NTT
         if(reset) begin
             load_data_ntt <= 0;
         end
@@ -319,7 +319,7 @@ always @(posedge clk or posedge reset) begin: LOAD_NTT
                 load_data_ntt <= done_intt;
         end
 end     
-always @(posedge clk or posedge reset) begin: LOAD_INTT
+always @(posedge clk  ) begin: LOAD_INTT
         if(reset) begin
             load_intt_from_bram <= 0;
         end
@@ -329,7 +329,7 @@ always @(posedge clk or posedge reset) begin: LOAD_INTT
         end
 end    
 
-always @(posedge clk or posedge reset) begin: START_NTT
+always @(posedge clk  ) begin: START_NTT
         if(reset) begin
             start_ntt <= 0;
         end
@@ -348,7 +348,7 @@ end
 assign start_full = (state ==3'd4 & notTheFirstTime);
 
 
-always @(posedge clk or posedge reset) begin: DONE_ACC //check whether we're done (usuall
+always @(posedge clk  ) begin: DONE_ACC //check whether we're done (usuall
         if(reset) begin
             outputSingle  <=0;
         end
@@ -365,7 +365,7 @@ always @(posedge clk or posedge reset) begin: DONE_ACC //check whether we're don
 end
 
 
-always @(posedge clk or posedge reset) begin: FIRST_TIME_REG
+always @(posedge clk  ) begin: FIRST_TIME_REG
         if(reset) begin
             notTheFirstTime <= 0;
             jState <= 0;
@@ -456,7 +456,7 @@ genvar branch;
         end
 endgenerate
 
-always @(posedge clk or posedge reset) begin: REG_BLOCK_DECOMPOSE
+always @(posedge clk) begin: REG_BLOCK_DECOMPOSE
     integer n;
     for (n=0; n<(`PE_NUMBER*2); n=n+1) begin  
            if (reset) begin
@@ -468,7 +468,7 @@ always @(posedge clk or posedge reset) begin: REG_BLOCK_DECOMPOSE
     end
 end
 
-always @(posedge clk or posedge reset) begin: REG_BLOCK_ADDER
+always @(posedge clk  ) begin: REG_BLOCK_ADDER
     integer adder_int;
     for (adder_int=0; adder_int<(`PE_NUMBER*2); adder_int=adder_int+1) begin  
            if (reset) begin
@@ -484,7 +484,7 @@ end
 
 generate    
 genvar i;
-    for (i=0; i<`NTT_NUMBER; i=i+1) begin
+    for (i=0; i<2/*`NTT_NUMBER*/; i=i+1) begin//breaking my code to fit it onto the ZCU102
     NTTN normal_ct_ntt    (clk,reset,
                               load_data_ntt,
                               start_ntt,
@@ -495,8 +495,10 @@ genvar i;
                               bramOut_ntt[i]
                               );
     end
+    
 endgenerate
-
+assign bramOut_ntt[2] = 0;//forcing our design to be smaller
+assign bramOut_ntt[3] = 0;
 
 
 

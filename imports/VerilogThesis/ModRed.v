@@ -59,7 +59,7 @@ assign C_ext  = C_reg[`L_SIZE][(`DATA_SIZE_ARB+2)-1:0];
 assign C_temp = C_ext - q;
 
 // ------------------------------------------------------------- final comparison
-always @(posedge clk or posedge reset)
+always @(posedge clk  )
 begin
 	if(reset) begin
 		C <= 0;

@@ -56,7 +56,7 @@ endgenerate
 integer i_loop=0;
 integer m_loop=0;
 
-always @(posedge clk or posedge reset)
+always @(posedge clk  )
 begin
   for(i_loop=0; i_loop < `GENERIC; i_loop=i_loop+1)
   begin
@@ -90,7 +90,7 @@ generate
 endgenerate
 
 // DFF value
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
 	if(reset) begin
 		C_out <= 0;
 		S_out <= 0;
@@ -102,7 +102,7 @@ always @(posedge clk or posedge reset) begin
 end
 
 // --------------------------------------------------------------- c + s operation
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
 	if(reset)
 		C <= 0;
 	else

@@ -59,7 +59,7 @@ reg [1:0] state;
 // 1 --> NTT
 // 2 --> NTT (WAIT between stages)
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset)
         state <= 0;
     else begin
@@ -85,7 +85,7 @@ end
 
 // --------------------------------------------------------------------------- WAIT OPERATION (15 CYCLES)
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         c_wait_limit <= 0;
         c_wait       <= 0;
@@ -104,7 +104,7 @@ end
 // simply keep the limits equal to 9 for depth and 15 for 32 PE's or 1 for N=8 (i.e. 2 loops)
 // with 2 PE's or 3 (i.e. 4 loops) for N=8 with 1 PE.
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         c_stage_limit <= 0;
         c_loop_limit  <= 0;
@@ -121,7 +121,7 @@ always @(posedge clk or posedge reset) begin
     end
 end
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         c_stage       <= 0;
         c_loop        <= 0;
@@ -158,7 +158,7 @@ wire [`RING_DEPTH-`PE_DEPTH+2:0] c_tw_temp;//5/6 bits on PE=2/1
 // loop_limit is 15,
 assign c_tw_temp = (c_loop_limit>>c_stage);//value = 1/3 >> by the stage (I don't quite understand why you'd take that large a size for this)
 //15, 7, 3, 1, 0, 0, 0, 0, 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         c_tw <= 0; //outside reset or start
     end
@@ -215,7 +215,7 @@ end
 wire [`RING_DEPTH-`PE_DEPTH-1:0] raddr_temp;
 assign raddr_temp = ((`RING_DEPTH-`PE_DEPTH-1) - (c_stage+1));
 
-always @ (posedge clk or posedge reset) begin
+always @ (posedge clk  ) begin
     if(reset) begin
         raddr   <= 0;
         raddr_m <= 0;
@@ -260,7 +260,7 @@ end
 wire [`RING_DEPTH-`PE_DEPTH-1:0] waddr_temp;
 assign waddr_temp = ((`RING_DEPTH-`PE_DEPTH-1) - (c_stage+1));
 
-always @ (posedge clk or posedge reset) begin
+always @ (posedge clk  ) begin
     if(reset) begin
         waddre  <= 0;
         waddro  <= 0;
@@ -311,7 +311,7 @@ end
 
 // --------------------------------------------------------------------------- wen,brsel,brselen (1 cc delayed)
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         wen     <= 0;
         brsel   <= 0;
@@ -340,7 +340,7 @@ assign brscrambled_temp  = (`PE_NUMBER >> (c_stage-(`RING_DEPTH-`PE_DEPTH-1)));/
 assign brscrambled_temp2 = (`PE_DEPTH - (c_stage-(`RING_DEPTH-`PE_DEPTH-1))); // 5- (stage - 4) = 9 - stage
 assign brscrambled_temp3 = ((`PE_DEPTH+1) - (c_stage-(`RING_DEPTH-`PE_DEPTH-1))); // 10-stage
 
-always @(posedge clk or posedge reset) begin: B_BLOCK
+always @(posedge clk  ) begin: B_BLOCK
     integer n;
     for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1 //64 BRAMS
         if(reset) begin
@@ -367,7 +367,7 @@ end
 
 // --------------------------------------------------------------------------- ntt_finished
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         finished <= 0;
     end
@@ -386,7 +386,7 @@ wire [`RING_DEPTH-`PE_DEPTH+2:0] c_tw_w;
 //ShifrtReg mainly generates a delay equal to the .SHIFT variable
 ShiftReg #(.SHIFT(1),.DATA(`RING_DEPTH-`PE_DEPTH+3)) sr00(clk,reset,c_tw,c_tw_w);
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         raddr0   <= 0;
         raddr_tw <= 0;

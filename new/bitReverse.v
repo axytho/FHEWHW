@@ -29,7 +29,7 @@ output reg [`PE_NUMBER*`PE_NUMBER-1:0] data_out
     );
 reg [`PE_NUMBER*`PE_NUMBER-1:0] data_out_reg;
 //reg [3:0] cycleDelay;
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if (reset) begin
         data_out <= 0;
     end
@@ -77,7 +77,7 @@ end
 
 //for tomorrow: use genvar!!!
 /*
-always @(posedge clk or posedge reset) begin: B_BLOCK    
+always @(posedge clk  ) begin: B_BLOCK    
    integer n;
 integer k2TO5;
 for(n=0; n < (`PE_NUMBER); n=n+1) begin: LOOP_1 

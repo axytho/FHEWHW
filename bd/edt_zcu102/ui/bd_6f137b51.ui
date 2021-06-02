@@ -9,7 +9,7 @@ preplace port gpio_rtl -pg 1 -lvl 5 -x 1510 -y 150 -defaultsOSRD
 preplace inst zynq_ultra_ps_e_0 -pg 1 -lvl 1 -x 320 -y 90 -defaultsOSRD
 preplace netloc zynq_ultra_ps_e_0_pl_clk0 1 0 2 20 0 610
 levelinfo -pg 1 0 320 790 1060 1340 1510
-pagesize -pg 1 -db -bbox -sgen 0 -170 1610 390
+pagesize -pg 1 -db -bbox -sgen 0 -170 1620 390
 "
 }
 {

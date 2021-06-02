@@ -23,7 +23,7 @@ module ShiftReg #(parameter SHIFT = 0, DATA=32)
 
 reg [DATA-1:0] shift_array [SHIFT-1:0];
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset)
         shift_array[0] <= 0;
     else
@@ -34,7 +34,7 @@ genvar shft;
 
 generate
     for(shft=0; shft < SHIFT-1; shft=shft+1) begin: DELAY_BLOCK
-        always @(posedge clk or posedge reset) begin
+        always @(posedge clk  ) begin
             if(reset)
                 shift_array[shft+1] <= 0;
             else

@@ -156,7 +156,7 @@ initial begin
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PARAM.txt"    , params);
 end
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         do_full <= 0;
     end
@@ -179,7 +179,7 @@ assign jState1_and_first_reverse = (do_full) &  (jState);
 
 // ---------------------------------------------------------------- state machine & sys_cntr
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         state <= 3'd0;
         sys_cntr <= 0;
@@ -287,7 +287,7 @@ assign start_address_gen = (((sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `BITREV
 
 // ---------------------------------------------------------------- load twiddle factor + q + n_inv & other operations
 
-always @(posedge clk or posedge reset) begin: TW_BLOCK
+always @(posedge clk  ) begin: TW_BLOCK
     integer n;
     for(n=0; n < (`PE_NUMBER); n=n+1) begin: LOOP_1
         if(reset) begin
@@ -331,7 +331,7 @@ always @(posedge clk or posedge reset) begin: TW_BLOCK
     end
 end
 
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         q     <= 0;
         n_inv <= 0;
@@ -388,7 +388,7 @@ wire [`RING_DEPTH-`PE_DEPTH-1:0]           sys_cntr_bit_reverse_delayed;
 wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast_d;
 
 
-always @(posedge clk or posedge reset) begin: DT_BLOCK
+always @(posedge clk  ) begin: DT_BLOCK
     integer n;
     for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1
         
@@ -598,7 +598,7 @@ end
 
 
 
-always @(posedge clk or posedge reset) begin: OUT_BLOCK
+always @(posedge clk  ) begin: OUT_BLOCK
 integer n;
     for(n=0; n < (2*`PE_NUMBER); n=n+1) begin: LOOP_1
         if(reset) begin
@@ -619,7 +619,7 @@ integer n;
         end
     end
 end
-always @(posedge clk or posedge reset) begin
+always @(posedge clk  ) begin
     if(reset) begin
         dout <= 0;
     end
@@ -634,7 +634,7 @@ always @(posedge clk or posedge reset) begin
 end
 // ---------------------------------------------------------------- PU control
 
-always @(posedge clk or posedge reset) begin: NT_BLOCK
+always @(posedge clk  ) begin: NT_BLOCK
     integer n;
     for(n=0; n < (`PE_NUMBER); n=n+1) begin: LOOP_1
         if(reset) begin
