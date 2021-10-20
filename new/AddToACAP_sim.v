@@ -44,7 +44,6 @@ wire                        start_full;
  reg                       load_data_intt;
  reg                       start_ntt;
  reg                       start_intt;
- reg                       done_acc;
   wire  [`DATA_SIZE_ARB-1:0] din_intt;
  wire  [`DATA_SIZE_ARB-1:0] dout_intt;
  reg                       outputSingle;
@@ -71,7 +70,7 @@ reg lastTime;
  reg jState; //whether we are working with the first part of GSW or the second part;
  
  reg load_intt_from_bram;
- always @(posedge clk or posedge reset) begin
+ always @(posedge clk  ) begin
                    if(reset) begin
                        state <= 3'd0;
                        sys_cntr <= 0;
@@ -141,31 +140,29 @@ reg lastTime;
                              end
                        end
                        
-                       3'd5: begin//means we're (almost) done and we're outputing data
-                           if (sys_cntr == (`RING_SIZE+1)) begin
-                               if (lastTime) begin
-                                  state <= 3'd0;
-                               end else begin
-                                  state <=3'd4;
-                               end    
-                               sys_cntr <= 0;// finished one loop
-                          end 
-                          else begin
-                             state <= 3'd5;
-                             sys_cntr <= sys_cntr + 1;
-                         end                     
-                       end
+                      3'd5: begin//means we're (almost) done and we're outputing data
+                          if (sys_cntr >((`RING_SIZE<<1)+9)) begin
+
+                              state <= 3'd0;
+                             
+                              sys_cntr <= 0;// finished one loop
+                         end 
+                         else begin
+                            state <= 3'd5;
+                            sys_cntr <= sys_cntr + 1;
+                        end                     
+                      end
                        
                        3'd6: begin//output data to intt agaiin (go through addition) We only run it once every time AddToACAP finishes
                           if (sys_cntr == ((`RING_SIZE >> (`PE_DEPTH)) + `STAGE_DELAY)) begin//output 32 cycles
-                             if(done_acc) begin //go to state 5, for final output
-                                  state <= 3'd5;
-                                  sys_cntr <= 0;
-                             end
-                             else begin // rerun intt
-                                state <= 3'd2;
-                                sys_cntr <= 0;
-                             end
+                              if(acc_cnt_a_zero_sum > 11'd63)  begin //go to state 5, for final output
+                                 state <= 3'd5;
+                                 sys_cntr <= 0;
+                              end
+                              else begin // rerun intt
+                                 state <= 3'd2;
+                                 sys_cntr <= 0;
+                              end
                          end 
                          else begin
                             state <= 3'd6;
@@ -196,7 +193,7 @@ wire [`RING_DEPTH-`PE_DEPTH-1:0] inttlast;
 assign inttlast = (sys_cntr & ((`RING_SIZE >> (`PE_DEPTH+1))-1));
 
 
-always @(posedge clk or posedge reset) begin: INPUT_SINGLE
+always @(posedge clk  ) begin: INPUT_SINGLE
         if(reset) begin
             read_addr_in <= 0;
             load_data_intt <= 0;
@@ -214,7 +211,7 @@ always @(posedge clk or posedge reset) begin: INPUT_SINGLE
  
 end
 
-always @(posedge clk or posedge reset) begin: START_INTT
+always @(posedge clk  ) begin: START_INTT
         if(reset) begin
             start_intt <= 0;
         end
@@ -230,7 +227,7 @@ always @(posedge clk or posedge reset) begin: START_INTT
  
 end
 
-always @(posedge clk or posedge reset) begin: LOAD_NTT
+always @(posedge clk  ) begin: LOAD_NTT
         if(reset) begin
             load_data_ntt <= 0;
         end
@@ -239,7 +236,7 @@ always @(posedge clk or posedge reset) begin: LOAD_NTT
                 load_data_ntt <= done_intt;
         end
 end     
-always @(posedge clk or posedge reset) begin: LOAD_INTT
+always @(posedge clk  ) begin: LOAD_INTT
         if(reset) begin
             load_intt_from_bram <= 0;
         end
@@ -249,7 +246,7 @@ always @(posedge clk or posedge reset) begin: LOAD_INTT
         end
 end    
 
-always @(posedge clk or posedge reset) begin: START_NTT
+always @(posedge clk  ) begin: START_NTT
         if(reset) begin
             start_ntt <= 0;
         end
@@ -268,24 +265,22 @@ end
 assign start_full = (state ==3'd4 & notTheFirstTime);
 
 
-always @(posedge clk or posedge reset) begin: DONE_ACC //check whether we're done (usuall
+always @(posedge clk  ) begin: DONE_ACC //check whether we're done (usuall
         if(reset) begin
-            done_acc <= 0;
             outputSingle  <=0;
         end
         else begin            
-            if (state == 3'd4) begin // input data from BRAM
-                done_acc <= 0;// we force done for now to test whether it works
-                outputSingle <= (1'b0);
+            if (state == 3'd5) begin // input data from BRAM
+             // we force done for now to test whether it works
+                outputSingle <= (sys_cntr == 0);
             end
             else  begin
-                done_acc <= 0;
                 outputSingle  <=0;
             end         
        end
  
 end
-always @(posedge clk or posedge reset) begin: OUTPUT_DATA //check whether we're done (usuall
+always @(posedge clk  ) begin: OUTPUT_DATA //check whether we're done (usuall
         if(reset) begin
             done <= 0;
         end
@@ -301,7 +296,7 @@ always @(posedge clk or posedge reset) begin: OUTPUT_DATA //check whether we're 
 end
 
 
-always @(posedge clk or posedge reset) begin: FIRST_TIME_REG
+always @(posedge clk  ) begin: FIRST_TIME_REG
         if(reset) begin
             notTheFirstTime <= 0;
             jState <= 0;
@@ -331,7 +326,7 @@ always @(posedge clk or posedge reset) begin: FIRST_TIME_REG
        end
  
 end
-always @(posedge clk or posedge reset) begin: LAST_TIME_REG
+always @(posedge clk  ) begin: LAST_TIME_REG
         if(reset) begin
             lastTime <= 0;
         end
@@ -402,7 +397,7 @@ genvar branch;
         end
 endgenerate
 
-always @(posedge clk or posedge reset) begin: REG_BLOCK_DECOMPOSE
+always @(posedge clk  ) begin: REG_BLOCK_DECOMPOSE
     integer n;
     for (n=0; n<(`PE_NUMBER*2); n=n+1) begin  
            if (reset) begin
@@ -414,7 +409,7 @@ always @(posedge clk or posedge reset) begin: REG_BLOCK_DECOMPOSE
     end
 end
 
-always @(posedge clk or posedge reset) begin: REG_BLOCK_ADDER
+always @(posedge clk  ) begin: REG_BLOCK_ADDER
     integer adder_int;
     for (adder_int=0; adder_int<(`PE_NUMBER*2); adder_int=adder_int+1) begin  
            if (reset) begin

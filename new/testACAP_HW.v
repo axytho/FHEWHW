@@ -137,7 +137,7 @@ portAB = 0;
     A_address <= 13'h1004;
     #FP;
     portAB = 0;
-    A_in <= 32'hdeadbe3f; //this is the start signal
+    A_in <= 32'hdeadbe3f; //this is not the start signal TODO: overwrite this in ACAP
     enable <= 4'b0;
     #FP;
 end

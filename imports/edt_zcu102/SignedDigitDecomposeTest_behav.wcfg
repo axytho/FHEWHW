@@ -3,322 +3,629 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="testACAP_HW_behav.wdb" id="1">
+      <db_ref path="testACAP_behav.wdb" id="1">
          <top_modules>
             <top_module name="glbl" />
-            <top_module name="testACAP_HW" />
+            <top_module name="testACAP" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1124259667fs"></ZoomStartTime>
-      <ZoomEndTime time="1124471668fs"></ZoomEndTime>
-      <Cursor1Time time="1124271067fs"></Cursor1Time>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="6840001fs"></ZoomEndTime>
+      <Cursor1Time time="5000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="360"></NameColumnWidth>
-      <ValueColumnWidth column_width="116"></ValueColumnWidth>
+      <ValueColumnWidth column_width="106"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="75" />
-   <wvobject fp_name="/testACAP_HW/accumulator/clk" type="logic">
+   <WVObjectSize size="152" />
+   <wvobject fp_name="/testACAP/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/resetn" type="logic">
+   <wvobject fp_name="/testACAP/resetn" type="logic">
       <obj_property name="ElementShortName">resetn</obj_property>
       <obj_property name="ObjectShortName">resetn</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/data_in" type="array">
-      <obj_property name="ElementShortName">data_in[31:0]</obj_property>
-      <obj_property name="ObjectShortName">data_in[31:0]</obj_property>
+   <wvobject fp_name="/testACAP/write_enable_bram" type="logic">
+      <obj_property name="ElementShortName">write_enable_bram</obj_property>
+      <obj_property name="ObjectShortName">write_enable_bram</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/write_enable_bram" type="array">
-      <obj_property name="ElementShortName">write_enable_bram[3:0]</obj_property>
-      <obj_property name="ObjectShortName">write_enable_bram[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/port_enable" type="logic">
-      <obj_property name="ElementShortName">port_enable</obj_property>
-      <obj_property name="ObjectShortName">port_enable</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/write_addr_interfacebram" type="array">
-      <obj_property name="ElementShortName">write_addr_interfacebram[31:0]</obj_property>
-      <obj_property name="ObjectShortName">write_addr_interfacebram[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/data_out" type="array">
-      <obj_property name="ElementShortName">data_out[31:0]</obj_property>
-      <obj_property name="ObjectShortName">data_out[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/sys_cntr" type="array">
-      <obj_property name="ElementShortName">sys_cntr[13:0]</obj_property>
-      <obj_property name="ObjectShortName">sys_cntr[13:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/state" type="array">
-      <obj_property name="ElementShortName">state[2:0]</obj_property>
-      <obj_property name="ObjectShortName">state[2:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/reset" type="logic">
-      <obj_property name="ElementShortName">reset</obj_property>
-      <obj_property name="ObjectShortName">reset</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/write_addr_output" type="array">
-      <obj_property name="ElementShortName">write_addr_output[9:0]</obj_property>
-      <obj_property name="ObjectShortName">write_addr_output[9:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/read_addr_in" type="array">
-      <obj_property name="ElementShortName">read_addr_in[9:0]</obj_property>
-      <obj_property name="ObjectShortName">read_addr_in[9:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/start_full" type="logic">
-      <obj_property name="ElementShortName">start_full</obj_property>
-      <obj_property name="ObjectShortName">start_full</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/load_data_ntt" type="logic">
-      <obj_property name="ElementShortName">load_data_ntt</obj_property>
-      <obj_property name="ObjectShortName">load_data_ntt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/load_data_intt" type="logic">
-      <obj_property name="ElementShortName">load_data_intt</obj_property>
-      <obj_property name="ObjectShortName">load_data_intt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/start_ntt" type="logic">
-      <obj_property name="ElementShortName">start_ntt</obj_property>
-      <obj_property name="ObjectShortName">start_ntt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/start_intt" type="logic">
-      <obj_property name="ElementShortName">start_intt</obj_property>
-      <obj_property name="ObjectShortName">start_intt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/din_intt" type="array">
-      <obj_property name="ElementShortName">din_intt[26:0]</obj_property>
-      <obj_property name="ObjectShortName">din_intt[26:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/dout_intt" type="array">
-      <obj_property name="ElementShortName">dout_intt[26:0]</obj_property>
-      <obj_property name="ObjectShortName">dout_intt[26:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/outputSingle" type="logic">
-      <obj_property name="ElementShortName">outputSingle</obj_property>
-      <obj_property name="ObjectShortName">outputSingle</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/done_ntt" type="array">
-      <obj_property name="ElementShortName">done_ntt[3:0]</obj_property>
-      <obj_property name="ObjectShortName">done_ntt[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/done_intt" type="logic">
-      <obj_property name="ElementShortName">done_intt</obj_property>
-      <obj_property name="ObjectShortName">done_intt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/decompose_in" type="array">
-      <obj_property name="ElementShortName">decompose_in[1727:0]</obj_property>
-      <obj_property name="ObjectShortName">decompose_in[1727:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/bramIn_intt" type="array">
-      <obj_property name="ElementShortName">bramIn_intt[1727:0]</obj_property>
-      <obj_property name="ObjectShortName">bramIn_intt[1727:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/decompose_out" type="array">
-      <obj_property name="ElementShortName">decompose_out[3:0][1727:0]</obj_property>
-      <obj_property name="ObjectShortName">decompose_out[3:0][1727:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/decompose_out_reg" type="array">
-      <obj_property name="ElementShortName">decompose_out_reg[3:0][1727:0]</obj_property>
-      <obj_property name="ObjectShortName">decompose_out_reg[3:0][1727:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/bramOut_ntt" type="array">
-      <obj_property name="ElementShortName">bramOut_ntt[3:0][1727:0]</obj_property>
-      <obj_property name="ObjectShortName">bramOut_ntt[3:0][1727:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/secret_addr_ntt" type="array">
-      <obj_property name="ElementShortName">secret_addr_ntt[3:0][5:0]</obj_property>
-      <obj_property name="ObjectShortName">secret_addr_ntt[3:0][5:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/add_input" type="array">
-      <obj_property name="ElementShortName">add_input[63:0][107:0]</obj_property>
-      <obj_property name="ObjectShortName">add_input[63:0][107:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/add_result" type="array">
-      <obj_property name="ElementShortName">add_result[63:0][26:0]</obj_property>
-      <obj_property name="ObjectShortName">add_result[63:0][26:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/add_result_reg" type="array">
-      <obj_property name="ElementShortName">add_result_reg[63:0][26:0]</obj_property>
-      <obj_property name="ObjectShortName">add_result_reg[63:0][26:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/start_addToACAP" type="logic">
+   <wvobject fp_name="/testACAP/start_addToACAP" type="logic">
       <obj_property name="ElementShortName">start_addToACAP</obj_property>
       <obj_property name="ObjectShortName">start_addToACAP</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/acc_cntr" type="array">
-      <obj_property name="ElementShortName">acc_cntr[10:0]</obj_property>
-      <obj_property name="ObjectShortName">acc_cntr[10:0]</obj_property>
+   <wvobject fp_name="/testACAP/write_addr_input" type="array">
+      <obj_property name="ElementShortName">write_addr_input[10:0]</obj_property>
+      <obj_property name="ObjectShortName">write_addr_input[10:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/a_zero_cntr" type="array">
-      <obj_property name="ElementShortName">a_zero_cntr[10:0]</obj_property>
-      <obj_property name="ObjectShortName">a_zero_cntr[10:0]</obj_property>
+   <wvobject fp_name="/testACAP/data_in" type="array">
+      <obj_property name="ElementShortName">data_in[26:0]</obj_property>
+      <obj_property name="ObjectShortName">data_in[26:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/acc_cnt_a_zero_sum" type="array">
-      <obj_property name="ElementShortName">acc_cnt_a_zero_sum[10:0]</obj_property>
-      <obj_property name="ObjectShortName">acc_cnt_a_zero_sum[10:0]</obj_property>
+   <wvobject fp_name="/testACAP/done" type="logic">
+      <obj_property name="ElementShortName">done</obj_property>
+      <obj_property name="ObjectShortName">done</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/data_out_a" type="array">
-      <obj_property name="ElementShortName">data_out_a[4:0]</obj_property>
-      <obj_property name="ObjectShortName">data_out_a[4:0]</obj_property>
+   <wvobject fp_name="/testACAP/read_out" type="array">
+      <obj_property name="ElementShortName">read_out[10:0]</obj_property>
+      <obj_property name="ObjectShortName">read_out[10:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/notTheFirstTime" type="logic">
-      <obj_property name="ElementShortName">notTheFirstTime</obj_property>
-      <obj_property name="ObjectShortName">notTheFirstTime</obj_property>
+   <wvobject fp_name="/testACAP/data_out" type="array">
+      <obj_property name="ElementShortName">data_out[26:0]</obj_property>
+      <obj_property name="ObjectShortName">data_out[26:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/jState" type="logic">
-      <obj_property name="ElementShortName">jState</obj_property>
-      <obj_property name="ObjectShortName">jState</obj_property>
+   <wvobject fp_name="/testACAP/data_a" type="array">
+      <obj_property name="ElementShortName">data_a[26:0]</obj_property>
+      <obj_property name="ObjectShortName">data_a[26:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/load_intt_from_bram" type="logic">
-      <obj_property name="ElementShortName">load_intt_from_bram</obj_property>
-      <obj_property name="ObjectShortName">load_intt_from_bram</obj_property>
+   <wvobject fp_name="/testACAP/load_a" type="logic">
+      <obj_property name="ElementShortName">load_a</obj_property>
+      <obj_property name="ObjectShortName">load_a</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/secret_key" type="array">
+   <wvobject fp_name="/testACAP/write_addr_a" type="array">
+      <obj_property name="ElementShortName">write_addr_a[9:0]</obj_property>
+      <obj_property name="ObjectShortName">write_addr_a[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/secret_key" type="array">
       <obj_property name="ElementShortName">secret_key[3455:0]</obj_property>
       <obj_property name="ObjectShortName">secret_key[3455:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inttlast" type="array">
-      <obj_property name="ElementShortName">inttlast[4:0]</obj_property>
-      <obj_property name="ObjectShortName">inttlast[4:0]</obj_property>
+   <wvobject fp_name="/testACAP/secret_addr" type="array">
+      <obj_property name="ElementShortName">secret_addr[21:0]</obj_property>
+      <obj_property name="ObjectShortName">secret_addr[21:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/addr_a_minus_one" type="array">
-      <obj_property name="ElementShortName">addr_a_minus_one[4:0]</obj_property>
-      <obj_property name="ObjectShortName">addr_a_minus_one[4:0]</obj_property>
+   <wvobject fp_name="/testACAP/secret_addr_d" type="array">
+      <obj_property name="ElementShortName">secret_addr_d[21:0]</obj_property>
+      <obj_property name="ObjectShortName">secret_addr_d[21:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/i_LWE_Dr_plus_a0" type="array">
-      <obj_property name="ElementShortName">i_LWE_Dr_plus_a0[14:0]</obj_property>
-      <obj_property name="ObjectShortName">i_LWE_Dr_plus_a0[14:0]</obj_property>
+   <wvobject fp_name="/testACAP/params" type="array">
+      <obj_property name="ElementShortName">params[0:7][26:0]</obj_property>
+      <obj_property name="ObjectShortName">params[0:7][26:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/secret_addr" type="logic">
-      <obj_property name="ElementShortName">secret_addr</obj_property>
-      <obj_property name="ObjectShortName">secret_addr</obj_property>
+   <wvobject fp_name="/testACAP/acc_in" type="array">
+      <obj_property name="ElementShortName">acc_in[0:2047][26:0]</obj_property>
+      <obj_property name="ObjectShortName">acc_in[0:2047][26:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /clk" type="logic">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
+   <wvobject fp_name="/testACAP/avector" type="array">
+      <obj_property name="ElementShortName">avector[0:1023][4:0]</obj_property>
+      <obj_property name="ObjectShortName">avector[0:1023][4:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /wen" type="logic">
-      <obj_property name="ElementShortName">wen</obj_property>
-      <obj_property name="ObjectShortName">wen</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /waddr" type="array">
-      <obj_property name="ElementShortName">waddr[6:0]</obj_property>
-      <obj_property name="ObjectShortName">waddr[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /din" type="array">
-      <obj_property name="ElementShortName">din[26:0]</obj_property>
-      <obj_property name="ObjectShortName">din[26:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /raddr" type="array">
-      <obj_property name="ElementShortName">raddr[6:0]</obj_property>
-      <obj_property name="ObjectShortName">raddr[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /dout" type="array">
-      <obj_property name="ElementShortName">dout[26:0]</obj_property>
-      <obj_property name="ObjectShortName">dout[26:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /blockram" type="array">
-      <obj_property name="ElementShortName">blockram[127:0][26:0]</obj_property>
-      <obj_property name="ObjectShortName">blockram[127:0][26:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /DLEN" type="array">
-      <obj_property name="ElementShortName">DLEN[31:0]</obj_property>
-      <obj_property name="ObjectShortName">DLEN[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /HLEN" type="array">
-      <obj_property name="ElementShortName">HLEN[31:0]</obj_property>
-      <obj_property name="ObjectShortName">HLEN[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/clk" type="logic">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/resetn" type="logic">
-      <obj_property name="ElementShortName">resetn</obj_property>
-      <obj_property name="ObjectShortName">resetn</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/write_enable_bram" type="array">
-      <obj_property name="ElementShortName">write_enable_bram[3:0]</obj_property>
-      <obj_property name="ObjectShortName">write_enable_bram[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/write_addr_interfacebram" type="array">
-      <obj_property name="ElementShortName">write_addr_interfacebram[31:0]</obj_property>
-      <obj_property name="ObjectShortName">write_addr_interfacebram[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/port_enable" type="logic">
-      <obj_property name="ElementShortName">port_enable</obj_property>
-      <obj_property name="ObjectShortName">port_enable</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/data_out" type="array">
-      <obj_property name="ElementShortName">data_out[31:0]</obj_property>
-      <obj_property name="ObjectShortName">data_out[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/data_in_reg" type="array">
-      <obj_property name="ElementShortName">data_in_reg[31:0]</obj_property>
-      <obj_property name="ObjectShortName">data_in_reg[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/result" type="array">
+   <wvobject fp_name="/testACAP/result" type="array">
       <obj_property name="ElementShortName">result[0:2047][26:0]</obj_property>
       <obj_property name="ObjectShortName">result[0:2047][26:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/k" type="array">
+   <wvobject fp_name="/testACAP/k" type="array">
       <obj_property name="ElementShortName">k[31:0]</obj_property>
       <obj_property name="ObjectShortName">k[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/d" type="array">
+   <wvobject fp_name="/testACAP/d" type="array">
       <obj_property name="ElementShortName">d[31:0]</obj_property>
       <obj_property name="ObjectShortName">d[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/portAB" type="logic">
-      <obj_property name="ElementShortName">portAB</obj_property>
-      <obj_property name="ObjectShortName">portAB</obj_property>
+   <wvobject fp_name="/testACAP/ntt_nout" type="array">
+      <obj_property name="ElementShortName">ntt_nout[0:1023][26:0]</obj_property>
+      <obj_property name="ObjectShortName">ntt_nout[0:1023][26:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/A_in" type="array">
-      <obj_property name="ElementShortName">A_in[31:0]</obj_property>
-      <obj_property name="ObjectShortName">A_in[31:0]</obj_property>
+   <wvobject fp_name="/testACAP/intt_nout" type="array">
+      <obj_property name="ElementShortName">intt_nout[0:1023][26:0]</obj_property>
+      <obj_property name="ObjectShortName">intt_nout[0:1023][26:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/A_address" type="array">
-      <obj_property name="ElementShortName">A_address[31:0]</obj_property>
-      <obj_property name="ObjectShortName">A_address[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/address" type="array">
-      <obj_property name="ElementShortName">address[31:0]</obj_property>
-      <obj_property name="ObjectShortName">address[31:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/enable" type="logic">
-      <obj_property name="ElementShortName">enable</obj_property>
-      <obj_property name="ObjectShortName">enable</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/m" type="array">
+   <wvobject fp_name="/testACAP/m" type="array">
       <obj_property name="ElementShortName">m[31:0]</obj_property>
       <obj_property name="ObjectShortName">m[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/n" type="array">
+   <wvobject fp_name="/testACAP/n" type="array">
       <obj_property name="ElementShortName">n[31:0]</obj_property>
       <obj_property name="ObjectShortName">n[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/en" type="array">
+   <wvobject fp_name="/testACAP/en" type="array">
       <obj_property name="ElementShortName">en[31:0]</obj_property>
       <obj_property name="ObjectShortName">en[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/ei" type="array">
+   <wvobject fp_name="/testACAP/ei" type="array">
       <obj_property name="ElementShortName">ei[31:0]</obj_property>
       <obj_property name="ObjectShortName">ei[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/data_in" type="array">
-      <obj_property name="ElementShortName">data_in[31:0]</obj_property>
-      <obj_property name="ObjectShortName">data_in[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testACAP_HW/HP" type="array">
+   <wvobject fp_name="/testACAP/HP" type="array">
       <obj_property name="ElementShortName">HP[31:0]</obj_property>
       <obj_property name="ObjectShortName">HP[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testACAP_HW/FP" type="array">
+   <wvobject fp_name="/testACAP/FP" type="array">
       <obj_property name="ElementShortName">FP[31:0]</obj_property>
       <obj_property name="ObjectShortName">FP[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/resetn" type="logic">
+      <obj_property name="ElementShortName">resetn</obj_property>
+      <obj_property name="ObjectShortName">resetn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/write_enable_bram" type="logic">
+      <obj_property name="ElementShortName">write_enable_bram</obj_property>
+      <obj_property name="ObjectShortName">write_enable_bram</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/write_addr_input" type="array">
+      <obj_property name="ElementShortName">write_addr_input[10:0]</obj_property>
+      <obj_property name="ObjectShortName">write_addr_input[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/data_in" type="array">
+      <obj_property name="ElementShortName">data_in[26:0]</obj_property>
+      <obj_property name="ObjectShortName">data_in[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/load_a" type="logic">
+      <obj_property name="ElementShortName">load_a</obj_property>
+      <obj_property name="ObjectShortName">load_a</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/data_a" type="array">
+      <obj_property name="ElementShortName">data_a[4:0]</obj_property>
+      <obj_property name="ObjectShortName">data_a[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/write_addr_a" type="array">
+      <obj_property name="ElementShortName">write_addr_a[9:0]</obj_property>
+      <obj_property name="ObjectShortName">write_addr_a[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/start_addToACAP" type="logic">
+      <obj_property name="ElementShortName">start_addToACAP</obj_property>
+      <obj_property name="ObjectShortName">start_addToACAP</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/secret_key" type="array">
+      <obj_property name="ElementShortName">secret_key[3455:0]</obj_property>
+      <obj_property name="ObjectShortName">secret_key[3455:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/read_out" type="array">
+      <obj_property name="ElementShortName">read_out[10:0]</obj_property>
+      <obj_property name="ObjectShortName">read_out[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/done" type="logic">
+      <obj_property name="ElementShortName">done</obj_property>
+      <obj_property name="ObjectShortName">done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/data_out" type="array">
+      <obj_property name="ElementShortName">data_out[26:0]</obj_property>
+      <obj_property name="ObjectShortName">data_out[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/secret_addr" type="array">
+      <obj_property name="ElementShortName">secret_addr[21:0]</obj_property>
+      <obj_property name="ObjectShortName">secret_addr[21:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/sys_cntr" type="array">
+      <obj_property name="ElementShortName">sys_cntr[13:0]</obj_property>
+      <obj_property name="ObjectShortName">sys_cntr[13:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/state" type="array">
+      <obj_property name="ElementShortName">state[2:0]</obj_property>
+      <obj_property name="ObjectShortName">state[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/reset" type="logic">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/write_addr_output" type="array">
+      <obj_property name="ElementShortName">write_addr_output[9:0]</obj_property>
+      <obj_property name="ObjectShortName">write_addr_output[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/load_output" type="logic">
+      <obj_property name="ElementShortName">load_output</obj_property>
+      <obj_property name="ObjectShortName">load_output</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/read_addr_in" type="array">
+      <obj_property name="ElementShortName">read_addr_in[9:0]</obj_property>
+      <obj_property name="ObjectShortName">read_addr_in[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/start_full" type="logic">
+      <obj_property name="ElementShortName">start_full</obj_property>
+      <obj_property name="ObjectShortName">start_full</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/load_data_ntt" type="logic">
+      <obj_property name="ElementShortName">load_data_ntt</obj_property>
+      <obj_property name="ObjectShortName">load_data_ntt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/load_data_intt" type="logic">
+      <obj_property name="ElementShortName">load_data_intt</obj_property>
+      <obj_property name="ObjectShortName">load_data_intt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/start_ntt" type="logic">
+      <obj_property name="ElementShortName">start_ntt</obj_property>
+      <obj_property name="ObjectShortName">start_ntt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/start_intt" type="logic">
+      <obj_property name="ElementShortName">start_intt</obj_property>
+      <obj_property name="ObjectShortName">start_intt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/done_acc" type="logic">
+      <obj_property name="ElementShortName">done_acc</obj_property>
+      <obj_property name="ObjectShortName">done_acc</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/din_intt" type="array">
+      <obj_property name="ElementShortName">din_intt[26:0]</obj_property>
+      <obj_property name="ObjectShortName">din_intt[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/dout_intt" type="array">
+      <obj_property name="ElementShortName">dout_intt[26:0]</obj_property>
+      <obj_property name="ObjectShortName">dout_intt[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/outputSingle" type="logic">
+      <obj_property name="ElementShortName">outputSingle</obj_property>
+      <obj_property name="ObjectShortName">outputSingle</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/done_ntt" type="array">
+      <obj_property name="ElementShortName">done_ntt[3:0]</obj_property>
+      <obj_property name="ObjectShortName">done_ntt[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/done_intt" type="logic">
+      <obj_property name="ElementShortName">done_intt</obj_property>
+      <obj_property name="ObjectShortName">done_intt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/decompose_in" type="array">
+      <obj_property name="ElementShortName">decompose_in[1727:0]</obj_property>
+      <obj_property name="ObjectShortName">decompose_in[1727:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/bramIn_intt" type="array">
+      <obj_property name="ElementShortName">bramIn_intt[1727:0]</obj_property>
+      <obj_property name="ObjectShortName">bramIn_intt[1727:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/decompose_out" type="array">
+      <obj_property name="ElementShortName">decompose_out[3:0][1727:0]</obj_property>
+      <obj_property name="ObjectShortName">decompose_out[3:0][1727:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/decompose_out_reg" type="array">
+      <obj_property name="ElementShortName">decompose_out_reg[3:0][1727:0]</obj_property>
+      <obj_property name="ObjectShortName">decompose_out_reg[3:0][1727:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/bramOut_ntt" type="array">
+      <obj_property name="ElementShortName">bramOut_ntt[3:0][1727:0]</obj_property>
+      <obj_property name="ObjectShortName">bramOut_ntt[3:0][1727:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/secret_addr_ntt" type="array">
+      <obj_property name="ElementShortName">secret_addr_ntt[3:0][5:0]</obj_property>
+      <obj_property name="ObjectShortName">secret_addr_ntt[3:0][5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/add_input" type="array">
+      <obj_property name="ElementShortName">add_input[63:0][107:0]</obj_property>
+      <obj_property name="ObjectShortName">add_input[63:0][107:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/add_result" type="array">
+      <obj_property name="ElementShortName">add_result[63:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">add_result[63:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/add_result_reg" type="array">
+      <obj_property name="ElementShortName">add_result_reg[63:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">add_result_reg[63:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/acc_cntr" type="array">
+      <obj_property name="ElementShortName">acc_cntr[10:0]</obj_property>
+      <obj_property name="ObjectShortName">acc_cntr[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/a_zero_cntr" type="array">
+      <obj_property name="ElementShortName">a_zero_cntr[10:0]</obj_property>
+      <obj_property name="ObjectShortName">a_zero_cntr[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/acc_cnt_a_zero_sum" type="array">
+      <obj_property name="ElementShortName">acc_cnt_a_zero_sum[10:0]</obj_property>
+      <obj_property name="ObjectShortName">acc_cnt_a_zero_sum[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/data_out_a" type="array">
+      <obj_property name="ElementShortName">data_out_a[4:0]</obj_property>
+      <obj_property name="ObjectShortName">data_out_a[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/notTheFirstTime" type="logic">
+      <obj_property name="ElementShortName">notTheFirstTime</obj_property>
+      <obj_property name="ObjectShortName">notTheFirstTime</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/lastTime" type="logic">
+      <obj_property name="ElementShortName">lastTime</obj_property>
+      <obj_property name="ObjectShortName">lastTime</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/jState" type="logic">
+      <obj_property name="ElementShortName">jState</obj_property>
+      <obj_property name="ObjectShortName">jState</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/load_intt_from_bram" type="logic">
+      <obj_property name="ElementShortName">load_intt_from_bram</obj_property>
+      <obj_property name="ObjectShortName">load_intt_from_bram</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inttlast" type="array">
+      <obj_property name="ElementShortName">inttlast[4:0]</obj_property>
+      <obj_property name="ObjectShortName">inttlast[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/addr_a_minus_one" type="array">
+      <obj_property name="ElementShortName">addr_a_minus_one[4:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_a_minus_one[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/i_LWE_Dr_plus_a0" type="array">
+      <obj_property name="ElementShortName">i_LWE_Dr_plus_a0[14:0]</obj_property>
+      <obj_property name="ObjectShortName">i_LWE_Dr_plus_a0[14:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/reset" type="logic">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/load_bram" type="logic">
+      <obj_property name="ElementShortName">load_bram</obj_property>
+      <obj_property name="ObjectShortName">load_bram</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/start_full" type="logic">
+      <obj_property name="ElementShortName">start_full</obj_property>
+      <obj_property name="ObjectShortName">start_full</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/load_data" type="logic">
+      <obj_property name="ElementShortName">load_data</obj_property>
+      <obj_property name="ObjectShortName">load_data</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/start_intt" type="logic">
+      <obj_property name="ElementShortName">start_intt</obj_property>
+      <obj_property name="ObjectShortName">start_intt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/din" type="array">
+      <obj_property name="ElementShortName">din[26:0]</obj_property>
+      <obj_property name="ObjectShortName">din[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/bramIn" type="array">
+      <obj_property name="ElementShortName">bramIn[1727:0]</obj_property>
+      <obj_property name="ObjectShortName">bramIn[1727:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/output_data_single" type="logic">
+      <obj_property name="ElementShortName">output_data_single</obj_property>
+      <obj_property name="ObjectShortName">output_data_single</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/jState" type="logic">
+      <obj_property name="ElementShortName">jState</obj_property>
+      <obj_property name="ObjectShortName">jState</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/done" type="logic">
+      <obj_property name="ElementShortName">done</obj_property>
+      <obj_property name="ObjectShortName">done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/inttOut" type="array">
+      <obj_property name="ElementShortName">inttOut[1727:0]</obj_property>
+      <obj_property name="ObjectShortName">inttOut[1727:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/dout" type="array">
+      <obj_property name="ElementShortName">dout[26:0]</obj_property>
+      <obj_property name="ObjectShortName">dout[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/start" type="logic">
+      <obj_property name="ElementShortName">start</obj_property>
+      <obj_property name="ObjectShortName">start</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/state" type="array">
+      <obj_property name="ElementShortName">state[2:0]</obj_property>
+      <obj_property name="ObjectShortName">state[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/sys_cntr" type="array">
+      <obj_property name="ElementShortName">sys_cntr[13:0]</obj_property>
+      <obj_property name="ObjectShortName">sys_cntr[13:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/write_addr_intt" type="array">
+      <obj_property name="ElementShortName">write_addr_intt[127:0]</obj_property>
+      <obj_property name="ObjectShortName">write_addr_intt[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/q" type="array">
+      <obj_property name="ElementShortName">q[26:0]</obj_property>
+      <obj_property name="ObjectShortName">q[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/n_inv" type="array">
+      <obj_property name="ElementShortName">n_inv[26:0]</obj_property>
+      <obj_property name="ObjectShortName">n_inv[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/pi" type="array">
+      <obj_property name="ElementShortName">pi[63:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">pi[63:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/po" type="array">
+      <obj_property name="ElementShortName">po[63:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">po[63:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/pw" type="array">
+      <obj_property name="ElementShortName">pw[63:0][6:0]</obj_property>
+      <obj_property name="ObjectShortName">pw[63:0][6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/pr" type="array">
+      <obj_property name="ElementShortName">pr[63:0][6:0]</obj_property>
+      <obj_property name="ObjectShortName">pr[63:0][6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/pe" type="array">
+      <obj_property name="ElementShortName">pe[63:0][0:0]</obj_property>
+      <obj_property name="ObjectShortName">pe[63:0][0:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/ti" type="array">
+      <obj_property name="ElementShortName">ti[31:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">ti[31:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/to" type="array">
+      <obj_property name="ElementShortName">to[31:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">to[31:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/tw" type="array">
+      <obj_property name="ElementShortName">tw[31:0][8:0]</obj_property>
+      <obj_property name="ObjectShortName">tw[31:0][8:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/tr" type="array">
+      <obj_property name="ElementShortName">tr[31:0][8:0]</obj_property>
+      <obj_property name="ObjectShortName">tr[31:0][8:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/te" type="array">
+      <obj_property name="ElementShortName">te[31:0][0:0]</obj_property>
+      <obj_property name="ObjectShortName">te[31:0][0:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/raddr" type="array">
+      <obj_property name="ElementShortName">raddr[6:0]</obj_property>
+      <obj_property name="ObjectShortName">raddr[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/waddr0" type="array">
+      <obj_property name="ElementShortName">waddr0[6:0]</obj_property>
+      <obj_property name="ObjectShortName">waddr0[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/waddr1" type="array">
+      <obj_property name="ElementShortName">waddr1[6:0]</obj_property>
+      <obj_property name="ObjectShortName">waddr1[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/wen0" type="logic">
+      <obj_property name="ElementShortName">wen0</obj_property>
+      <obj_property name="ObjectShortName">wen0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/wen1" type="logic">
+      <obj_property name="ElementShortName">wen1</obj_property>
+      <obj_property name="ObjectShortName">wen1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/brsel0" type="logic">
+      <obj_property name="ElementShortName">brsel0</obj_property>
+      <obj_property name="ObjectShortName">brsel0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/brsel1" type="logic">
+      <obj_property name="ElementShortName">brsel1</obj_property>
+      <obj_property name="ObjectShortName">brsel1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/brselen0" type="logic">
+      <obj_property name="ElementShortName">brselen0</obj_property>
+      <obj_property name="ObjectShortName">brselen0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/brselen1" type="logic">
+      <obj_property name="ElementShortName">brselen1</obj_property>
+      <obj_property name="ObjectShortName">brselen1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/brscramble" type="array">
+      <obj_property name="ElementShortName">brscramble[383:0]</obj_property>
+      <obj_property name="ObjectShortName">brscramble[383:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/raddr_tw" type="array">
+      <obj_property name="ElementShortName">raddr_tw[7:0]</obj_property>
+      <obj_property name="ObjectShortName">raddr_tw[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/stage_count" type="array">
+      <obj_property name="ElementShortName">stage_count[4:0]</obj_property>
+      <obj_property name="ObjectShortName">stage_count[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/ntt_finished" type="logic">
+      <obj_property name="ElementShortName">ntt_finished</obj_property>
+      <obj_property name="ObjectShortName">ntt_finished</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/do_full" type="logic">
+      <obj_property name="ElementShortName">do_full</obj_property>
+      <obj_property name="ObjectShortName">do_full</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/jState1_and_first_reverse" type="logic">
+      <obj_property name="ElementShortName">jState1_and_first_reverse</obj_property>
+      <obj_property name="ObjectShortName">jState1_and_first_reverse</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/start_address_gen" type="logic">
+      <obj_property name="ElementShortName">start_address_gen</obj_property>
+      <obj_property name="ObjectShortName">start_address_gen</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/NTTin" type="array">
+      <obj_property name="ElementShortName">NTTin[63:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">NTTin[63:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/MULin" type="array">
+      <obj_property name="ElementShortName">MULin[31:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">MULin[31:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/ASout" type="array">
+      <obj_property name="ElementShortName">ASout[63:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">ASout[63:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/EOout" type="array">
+      <obj_property name="ElementShortName">EOout[63:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">EOout[63:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/bramOut" type="array">
+      <obj_property name="ElementShortName">bramOut[863:0]</obj_property>
+      <obj_property name="ObjectShortName">bramOut[863:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/reversed_input" type="array">
+      <obj_property name="ElementShortName">reversed_input[1023:0]</obj_property>
+      <obj_property name="ObjectShortName">reversed_input[1023:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/bram_in_from_reversed" type="array">
+      <obj_property name="ElementShortName">bram_in_from_reversed[863:0]</obj_property>
+      <obj_property name="ObjectShortName">bram_in_from_reversed[863:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/params" type="array">
+      <obj_property name="ElementShortName">params[0:6][26:0]</obj_property>
+      <obj_property name="ObjectShortName">params[0:6][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/addrout" type="array">
+      <obj_property name="ElementShortName">addrout[4:0]</obj_property>
+      <obj_property name="ObjectShortName">addrout[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/inttlast" type="array">
+      <obj_property name="ElementShortName">inttlast[4:0]</obj_property>
+      <obj_property name="ObjectShortName">inttlast[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/read_out_bram" type="array">
+      <obj_property name="ElementShortName">read_out_bram[63:0][3:0]</obj_property>
+      <obj_property name="ObjectShortName">read_out_bram[63:0][3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/cycle_bitreverse" type="array">
+      <obj_property name="ElementShortName">cycle_bitreverse[3:0]</obj_property>
+      <obj_property name="ObjectShortName">cycle_bitreverse[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/reverse_sys_cntr" type="array">
+      <obj_property name="ElementShortName">reverse_sys_cntr[9:0]</obj_property>
+      <obj_property name="ObjectShortName">reverse_sys_cntr[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/i" type="array">
+      <obj_property name="ElementShortName">i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/sys_cntr_d" type="array">
+      <obj_property name="ElementShortName">sys_cntr_d[13:0]</obj_property>
+      <obj_property name="ObjectShortName">sys_cntr_d[13:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/sys_cntr_bit_reverse_delayed" type="array">
+      <obj_property name="ElementShortName">sys_cntr_bit_reverse_delayed[4:0]</obj_property>
+      <obj_property name="ObjectShortName">sys_cntr_bit_reverse_delayed[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/inttlast_d" type="array">
+      <obj_property name="ElementShortName">inttlast_d[4:0]</obj_property>
+      <obj_property name="ObjectShortName">inttlast_d[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/coefout" type="array">
+      <obj_property name="ElementShortName">coefout[5:0]</obj_property>
+      <obj_property name="ObjectShortName">coefout[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /wen" type="logic">
+      <obj_property name="ElementShortName">wen</obj_property>
+      <obj_property name="ObjectShortName">wen</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /waddr" type="array">
+      <obj_property name="ElementShortName">waddr[6:0]</obj_property>
+      <obj_property name="ObjectShortName">waddr[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /din" type="array">
+      <obj_property name="ElementShortName">din[26:0]</obj_property>
+      <obj_property name="ObjectShortName">din[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /raddr" type="array">
+      <obj_property name="ElementShortName">raddr[6:0]</obj_property>
+      <obj_property name="ObjectShortName">raddr[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /dout" type="array">
+      <obj_property name="ElementShortName">dout[26:0]</obj_property>
+      <obj_property name="ObjectShortName">dout[26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /blockram" type="array">
+      <obj_property name="ElementShortName">blockram[127:0][26:0]</obj_property>
+      <obj_property name="ObjectShortName">blockram[127:0][26:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /DLEN" type="array">
+      <obj_property name="ElementShortName">DLEN[31:0]</obj_property>
+      <obj_property name="ObjectShortName">DLEN[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testACAP/accumulator/inverse_ntt/\BRAM_GEN_BLOCK[0].bd00 /HLEN" type="array">
+      <obj_property name="ElementShortName">HLEN[31:0]</obj_property>
+      <obj_property name="ObjectShortName">HLEN[31:0]</obj_property>
    </wvobject>
 </wave_config>
