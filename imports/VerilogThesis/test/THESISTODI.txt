@@ -1,0 +1,35 @@
+THESIS NOTES 2 JULY
+
+Capitalization must be consistent of titels. DONE
+
+
+
+More general changes:
+
+Talk about gadget decomposition in a generatl way in the preliminaries, then afterward in the other chapter talk about how
+Move gadget decomposition in. DONE
+
+ Add an example (of gadget decomposition) (at the end it's just bit composition). Give a small example of how it works. DONE.
+
+Add extra text to RLWE to explain why things are done. Why do we use RLWE instead of LWE. DONE
+
+Add a part on FV. It shows you spent time on, so you impress the assessors. Expand the preliminaries with the RLWE definitions, and then also show what would happen if you multiply 2 RLWE ciphertexts, 
+and then show that this is FV. Show that the messages are multiplied, that this is homomorphic multiplication, and that this is how FV works, which is another scheme, and we won't got into details. DONE
+
+In the preliminaries, for LWE it might be nice if you included the definition of it before continuing. You can make the definition in section 2.1.1 more formal. DONE
+
+You can add quality by adding fancy things like Examples and for example in NTT, start with the definition that NTT is polynomial multiplication.  DONE
+
+
+
+
+
+Chapter 4: Make clear WHY you did certain acceleration. DONE
+
+In the introduction of chapter 4, you can start from the software side, saying it is so slow that hardware acceleration provides a real benefit. DONE
+
+
+
+Turn thesis into article. TODO
+
+Indentation must be consistent. DONE
