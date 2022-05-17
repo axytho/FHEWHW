@@ -34,6 +34,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "fhew.h"
+#include <fstream>
+#include <iostream>
+#include <bitset>
 
 namespace lbcrypto {
 
@@ -279,7 +282,6 @@ void RingGSWAccumulatorScheme::SignedDigitDecompose(
   // NativeInteger::SignedNativeInt gminus1 = (1 << gBits) - 1;
   // NativeInteger::SignedNativeInt baseGdiv2 =
   // (baseG >> 1)-1;
-
   // Signed digit decomposition
   for (uint32_t j = 0; j < 2; j++) {
     for (uint32_t k = 0; k < N; k++) {
@@ -322,20 +324,146 @@ void RingGSWAccumulatorScheme::AddToACCAP(
   uint32_t digitsG2 = params->GetDigitsG2();
   const shared_ptr<ILNativeParams> polyParams = params->GetPolyParams();
 
-  std::vector<NativePoly> ct = acc->GetElements()[0];
+  std::vector<NativePoly> ct = acc->GetElements()[0]; //ct consists of 2 polynomials of 1024 coefficients
   std::vector<NativePoly> dct(digitsG2);
+  //std::cout << "The result should be 8: " << digitsG2 << std::endl;
 
   // initialize dct to zeros
   for (uint32_t i = 0; i < digitsG2; i++)
     dct[i] = NativePoly(polyParams, Format::COEFFICIENT, true);
 
+
+
   // calls 2 NTTs
   for (uint32_t i = 0; i < 2; i++) ct[i].SetFormat(Format::COEFFICIENT);
+  // This should technically be a INNT because we're going to coefficient?
 
   SignedDigitDecompose(params, ct, &dct);
 
-  // calls digitsG2 NTTs
+  // calls digitsG2 NTTs (which is 8 for APP)
   for (uint32_t j = 0; j < digitsG2; j++) dct[j].SetFormat(Format::EVALUATION);
+
+  // acc = dct * input (matrix product);
+  // uses in-place * operators for the last call to dct[i] to gain performance
+  // improvement
+  for (uint32_t j = 0; j < 2; j++) { // twice
+    (*acc)[0][j].SetValuesToZero();
+    for (uint32_t l = 0; l < digitsG2; l++) { //4 times
+      if (j == 0)
+        (*acc)[0][j] += dct[l] * input[l][j]; // 27 bit  * 1024 values
+      else
+        (*acc)[0][j] += (dct[l] *= input[l][j]);// input == secret key
+    }
+  }
+}
+
+// AP Accumulation as described in "Bootstrapping in FHEW-like Cryptosystems"
+void RingGSWAccumulatorScheme::AddToACCAPJONAS(
+    const std::shared_ptr<RingGSWCryptoParams> params,
+    const RingGSWCiphertext &input,
+    std::shared_ptr<RingGSWCiphertext> acc, bool printThis) const {
+  uint32_t digitsG2 = params->GetDigitsG2();
+  //uint32_t digitsG = digitsG2 >> 1;
+  const shared_ptr<ILNativeParams> polyParams = params->GetPolyParams();
+
+  std::vector<NativePoly> ct = acc->GetElements()[0]; //ct consists of 2 polynomials of 1024 coefficients
+  std::vector<NativePoly> dct(digitsG2);
+  //std::cout << "The result should be 8: " << digitsG2 << std::endl;
+    //JONAS: REMOVE!
+uint32_t N = params->GetLWEParams()->GetN();
+NativeInteger printInt;
+NativeInteger dctInt;
+NativeInteger secretKey;
+NativeInteger accumulator;
+if (printThis) {
+  std::cout << params->GetLWEParams()->GetQ() << std::endl;
+  std::cout << "I think this is psi: " << params->GetPolyParams()->GetRootOfUnity() << std::endl;
+  secretKey = input[2][1][4];
+  std::cout << "SecretKey[2][1][4]: " << secretKey.ConvertToInt() << std::endl;
+  //params->GetLWEParams()->GetN()
+  
+  std::ofstream accumulatorFile;
+ 
+  accumulatorFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/ACCUMULATOR.txt", std::ios::trunc);
+  for (uint32_t j = 0; j < 2; j++) {
+    for (uint32_t l = 0; l < digitsG2; l++) {
+
+
+      for (uint32_t i = 0; i < N ; i++) {
+        //secretKey = input[l][j][i];
+        accumulator = (*acc)[0][j][i];
+
+        //TODO: ct[0][i] cast this as INT first before writing it away to a file
+        accumulatorFile << std::hex << accumulator.ConvertToInt() << std::endl;
+        //secretKeyFile << std::hex << secretKey.ConvertToInt() << std::endl;
+
+      }
+    }
+  }
+}
+
+  // initialize dct to zeros
+  for (uint32_t i = 0; i < digitsG2; i++) dct[i] = NativePoly(polyParams, Format::COEFFICIENT, true);
+
+ 
+
+  // calls 2 NTTs
+  for (uint32_t i = 0; i < 2; i++) ct[i].SetFormat(Format::COEFFICIENT);
+  // This should technically be a INNT because we're going to coefficient?
+
+if (printThis) {
+  NativeInteger printInt;
+  std::ofstream testVectorFile;
+   testVectorFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/TESTVECTOR.txt", std::ios::trunc);
+  
+   for (uint32_t i = 0; i < 2; i++) {
+    for (uint32_t j = 0; j < N ; j++) {
+      printInt = ct[i][j];
+      testVectorFile << std::hex << printInt.ConvertToInt() << std::endl;
+    }
+  }
+
+}
+
+
+  SignedDigitDecompose(params, ct, &dct);
+if (printThis) {
+  //params->GetLWEParams()->GetN()
+  std::ofstream dctFile;
+ dctFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/DCT_IN.txt", std::ios::trunc);
+    for (uint32_t l = 0; l < digitsG2; l++) {
+
+
+      for (uint32_t i = 0; i < N ; i++) {
+        dctInt = dct[l][i];
+
+        //TODO: ct[0][i] cast this as INT first before writing it away to a file
+        dctFile << std::hex << dctInt.ConvertToInt() << std::endl;
+      }
+    }
+
+}
+
+
+  // calls digitsG2 NTTs (which is 8 for APP)
+  for (uint32_t j = 0; j < digitsG2; j++) dct[j].SetFormat(Format::EVALUATION);
+
+if (printThis) {
+  //params->GetLWEParams()->GetN()
+  std::ofstream dctFile;
+ dctFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/DCT.txt", std::ios::trunc);
+    for (uint32_t l = 0; l < digitsG2; l++) {
+
+
+      for (uint32_t i = 0; i < N ; i++) {
+        dctInt = dct[l][i];
+
+        //TODO: ct[0][i] cast this as INT first before writing it away to a file
+        dctFile << std::hex << dctInt.ConvertToInt() << std::endl;
+      }
+    }
+} 
+
 
   // acc = dct * input (matrix product);
   // uses in-place * operators for the last call to dct[i] to gain performance
@@ -343,12 +471,51 @@ void RingGSWAccumulatorScheme::AddToACCAP(
   for (uint32_t j = 0; j < 2; j++) {
     (*acc)[0][j].SetValuesToZero();
     for (uint32_t l = 0; l < digitsG2; l++) {
-      if (j == 0)
+      if (j == 0) {
         (*acc)[0][j] += dct[l] * input[l][j];
-      else
+        /*
+        if (printThis && j==0 && l==0) {
+          NativeInteger result0;
+          result0 = (*acc)[0][j][0];
+          std::cout << "Result0: " << result0.ConvertToInt() << std::endl;
+        }
+        if (printThis && j==0 && l==1) {
+          NativeInteger result1;
+          NativeInteger dct1;
+          NativeInteger input1;
+          NativeInteger mult1;
+          result1 = (*acc)[0][j][0];
+          dct1 = dct[l][0];
+          input1 = input[l][j][0];
+          mult1 = dct[l][0] * input[l][j][0];
+          std::cout << "Result1: " << result1.ConvertToInt() << std::endl;
+          std::cout << "DCT1: " << dct1.ConvertToInt() << std::endl;
+          std::cout << "Input1: " << input1.ConvertToInt() << std::endl;
+          std::cout << "Mult1: " << mult1.ConvertToInt() << std::endl; 
+        }*/
+      }
+      else{
         (*acc)[0][j] += (dct[l] *= input[l][j]);
+      }
     }
   }
+
+if (printThis) {
+  NativeInteger result;
+  std::ofstream resultFile;
+  resultFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/RESULT.txt", std::ios::trunc);
+  for (uint32_t j = 0; j < 2; j++) {
+    for (uint32_t l = 0; l < digitsG2; l++) {
+      for (uint32_t i = 0; i < N ; i++) {
+        result = (*acc)[0][j][i];
+        //TODO: ct[0][i] cast this as INT first before writing it away to a file
+        resultFile << std::hex << result.ConvertToInt() << std::endl;
+      }
+    }
+  }
+}
+
+
 }
 
 // GINX Accumulation as described in "Bootstrapping in FHEW-like Cryptosystems"
@@ -451,16 +618,135 @@ std::shared_ptr<RingGSWCiphertext> RingGSWAccumulatorScheme::BootstrapCore(
   // evaluation
   auto acc = std::make_shared<RingGSWCiphertext>(1, 2);
   (*acc)[0] = std::move(res);
+// total size of Secret key=512*2*2*8*1024*32 bits = 512 Mbits = 32 MB = ?(4*512*1024*2*23*4*27) =  
+// addto accap S!ze of secret key in addToACAP 4*1024*32 bits in 500-600 cycles cycles
 
-  if (params->GetMethod() == AP) {
-    for (uint32_t i = 0; i < n; i++) {
-      NativeInteger aI = q.ModSub(a[i], q);
-      for (uint32_t k = 0; k < digitsR.size();
-           k++, aI /= NativeInteger(baseR)) {
-        uint32_t a0 = (aI.Mod(baseR)).ConvertToInt();
-        if (a0) this->AddToACCAP(params, (*EK.BSkey)[i][a0][k], acc);
+//---------------------START OF WRITE-AWAY
+NativeInteger accumulator;
+std::ofstream accumulatorFile;
+accumulatorFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/STARTACCUMULATOR.txt", std::ios::trunc);
+  
+
+
+NativeInteger secretKey;
+NativeInteger modifiedSecretKey;//multiply with R.
+std::ofstream secretKeyFile;
+secretKeyFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/FULLSECRET.txt", std::ios::trunc);
+NativeInteger pythonSecretKey;
+std::ofstream pythonSecretFile;
+pythonSecretFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHONSECRET.txt", std::ios::trunc);
+
+NativeInteger result;
+std::ofstream resultFile;
+resultFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/RESULTACC.txt", std::ios::trunc);
+  
+
+
+std::ofstream aVectorFile;
+aVectorFile.open("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/AVECTOR.txt", std::ios::trunc);
+    for (uint32_t j = 0; j < 2; j++) {
+      for (uint32_t i = 0; i < N ; i++) {
+        accumulator = (*acc)[0][j][i];
+        //TODO: ct[0][i] cast this as INT first before writing it away to a file
+        accumulatorFile << std::hex << accumulator.ConvertToInt() << std::endl;
+
+      }
+  }
+
+  
+
+
+secretKey = (*EK.BSkey)[0][1][0][0*2 + 0][0][(0<<1)+(0<<6)+0];
+uint32_t Rlog2;
+Rlog2 = 33;//hardcoding is stupid, but I just want this to work
+/*
+NativeInteger R_raw;
+NativeInteger R_q;
+R = (secretKey << Rlog2);
+R_q = R.Mod(q);*/
+
+// correct way is: ((int(math.log(N,2))+1) * int(math.ceil((1.0*K)/(1.0*((int(math.log(N,2))+1))))))
+// N is the ring size and K=log2(Q)
+std::cout << "Result1: " << secretKey.ConvertToInt() << std::endl;
+for (uint32_t i_LWE = 0; i_LWE < 512; i_LWE++) { //32!!!!
+  std::cout << "Loop: " << i_LWE<< std::endl;
+  for (uint32_t k = 0; k < digitsR.size(); k++) {  //twice Br = 23 dr= 2
+    for (uint32_t a0 = 1; a0 <  NativeInteger(baseR);  a0++)   {//twice Br = 23 dr= 2
+//python key
+      for (uint32_t j = 0; j < 2; j++) {
+        for (uint32_t l = 0; l < 8; l++) {
+          for (uint32_t i = 0; i < N ; i++) {
+            pythonSecretKey = (*EK.BSkey)[i_LWE][a0][k][l][j][i];
+            pythonSecretFile << std::hex << pythonSecretKey.ConvertToInt() << std::endl;
+
+          }
+        }
+      }
+
+           //(*EK.BSkey)[i][a0][k]
+           
+          for (uint32_t j_part_mult = 0; j_part_mult < 2; j_part_mult++) {
+            for (uint32_t j = 0; j < 2; j++) {
+              for (uint32_t EVENODD = 0; EVENODD < 2; EVENODD++) {
+                for (uint32_t PE_cycle_BRAM_EVENODD = 0; PE_cycle_BRAM_EVENODD < 16; PE_cycle_BRAM_EVENODD++) {
+                  //these happen in the same space, as such they should go downward
+                  for (uint32_t NTT_NUMBER_PLUS_ONE = 4; NTT_NUMBER_PLUS_ONE > 0; --NTT_NUMBER_PLUS_ONE) {
+                    for (uint32_t PE_NUMBER_PLUS_ONE = 32; PE_NUMBER_PLUS_ONE > 0; --PE_NUMBER_PLUS_ONE) {
+                      //std::cout << "SegMent?: : " << PE_NUMBER << std::endl;
+                      secretKey = (*EK.BSkey)[i_LWE][a0][k][(NTT_NUMBER_PLUS_ONE-1)*2 + j_part_mult][j][((PE_NUMBER_PLUS_ONE-1)<<1)+(PE_cycle_BRAM_EVENODD<<6)+EVENODD];
+                      modifiedSecretKey = (secretKey << Rlog2);
+                      
+                      secretKeyFile << std::bitset<27>((modifiedSecretKey.Mod(Q)).ConvertToInt());
+                            //TODO: ct[0][i] cast this as INT first before writing it away to a file
+                    }
+                  }
+                secretKeyFile  << std::endl;
+                }
+              }
+            }
+          }
+        }
       }
     }
+
+for (uint32_t i = 0; i < n; i++) { 
+  NativeInteger aI = q.ModSub(a[i], q);
+  for (uint32_t k = 0; k < digitsR.size();//twice Br = 23 dr= 2
+           k++, aI /= NativeInteger(baseR)) {    
+          uint32_t a0 = (aI.Mod(baseR)).ConvertToInt();
+          aVectorFile << std::hex << a0 << std::endl;
+           }
+}
+accumulatorFile.close();
+aVectorFile.close();
+secretKeyFile.close();
+pythonSecretFile.close();
+
+//-----END OF WRITE-AWAY
+// To check whether it would work in stand-alone, split into 2 parts
+  if (params->GetMethod() == AP) {
+    for (uint32_t i = 0; i < n; i++) { //512 times
+      NativeInteger aI = q.ModSub(a[i], q);
+      for (uint32_t k = 0; k < digitsR.size();//twice Br = 23 dr= 2
+           k++, aI /= NativeInteger(baseR)) {
+        uint32_t a0 = (aI.Mod(baseR)).ConvertToInt();
+
+        if (a0) {
+          this->AddToACCAPJONAS(params, (*EK.BSkey)[i][a0][k], acc, i==0 && k==0);
+        }
+        if (i==1023 && k==1) {
+          for (uint32_t j = 0; j < 2; j++) {
+            for (uint32_t i_RGSW = 0; i_RGSW < N ; i_RGSW++) {
+              result = (*acc)[0][j][i_RGSW];
+              //TODO: ct[0][i] cast this as INT first before writing it away to a file
+              resultFile << std::hex << result.ConvertToInt() << std::endl;
+            }
+          }
+        }
+      }
+    }
+        
+        
   } else {  // if GINX
     for (uint32_t i = 0; i < n; i++) {
       // handles -a*E(1)

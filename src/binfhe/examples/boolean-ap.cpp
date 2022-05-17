@@ -45,10 +45,14 @@ int main() {
   // Generate the secret key
   auto sk = cc.KeyGen();
 
+  std::cout << "Secret Key has been generated, sending to test vector file" << std::endl;
+
   std::cout << "Generating the bootstrapping keys..." << std::endl;
 
   // Generate the bootstrapping keys (refresh and switching keys)
   cc.BTKeyGen(sk);
+
+  std::cout << "Bootstrapping Key has been generated, sending to test vector file" << std::endl;
 
   std::cout << "Completed the key generation." << std::endl;
 
@@ -58,14 +62,14 @@ int main() {
   // By default, freshly encrypted ciphertexts are bootstrapped.
   // If you wish to get a fresh encryption without bootstrapping, write
   // auto   ct1 = cc.Encrypt(sk, 1, FRESH);
-  auto ct1 = cc.Encrypt(sk, 1);
+  auto ct1 = cc.Encrypt(sk, 0);
   auto ct2 = cc.Encrypt(sk, 1);
 
   // Sample Program: Step 4: Evaluation
 
   // Compute (1 AND 1) = 1; Other binary gate options are OR, NAND, and NOR
   auto ctAND1 = cc.EvalBinGate(AND, ct1, ct2);
-
+/*
   // Compute (NOT 1) = 0
   auto ct2Not = cc.EvalNOT(ct2);
 
@@ -83,6 +87,13 @@ int main() {
 
   std::cout
       << "Result of encrypted computation of (1 AND 1) OR (1 AND (NOT 1)) = "
+      << result << std::endl;
+*/
+LWEPlaintext result;
+cc.Decrypt(sk, ctAND1, &result);
+
+  std::cout
+      << "Result of encrypted computation of (1 AND 0) = "
       << result << std::endl;
 
   return 0;

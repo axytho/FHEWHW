@@ -175,6 +175,16 @@ class RingGSWAccumulatorScheme {
   void AddToACCAP(const std::shared_ptr<RingGSWCryptoParams> params,
                   const RingGSWCiphertext &input,
                   std::shared_ptr<RingGSWCiphertext> acc) const;
+  /**
+   * Main accumulator function used in bootstrapping - AP variant
+   *
+   * @param params a shared pointer to RingGSW scheme parameters
+   * @param &input input ciphertext
+   * @param acc previous value of the accumulator
+   */
+  void AddToACCAPJONAS(const std::shared_ptr<RingGSWCryptoParams> params,
+                  const RingGSWCiphertext &input,
+                  std::shared_ptr<RingGSWCiphertext> acc, bool printThis) const;
 
   /**
    * Main accumulator function used in bootstrapping - GINX variant
