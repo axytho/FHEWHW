@@ -191,21 +191,48 @@ if noToBr:
                 W_TXT.write(hex(((w**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
                 WINV_TXT.write(hex(((w_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
 else:
-    for j in range(int(log(N, 2))):
-        for k in range(1 if (((N//PE)>>j) < 1) else ((N//PE)>>j)): #floor to 1 so becomes (AND PEinPython = 2*PE !!!) 16, 8, 4, 2, 1, 1, 1, 1,...
-            for i in range(P):
-                w_pow = (((P<<j)*(2*k) + ((2*i+1)<<j)) % (N))
-                print(w_pow)
-                W_TXT.write(hex(((psi**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
-                WINV_TXT.write(hex(((psi_inv**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+    WINV_file_location = "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/WINV_{0}.txt"
+    for i in range(P):
+        WINV_FILE = open(WINV_file_location.format(i), "w")
+        for j in range(int(log(N, 2))):
+            for k in range(1 if (((N//PE)>>j) < 1) else ((N//PE)>>j)): #floor to 1 so becomes (AND PEinPython = 2*PE !!!) 16, 8, 4, 2, 1, 1, 1, 1,...
+                winv_pow = (((P<<j)*(2*k) + ((2*i+1)<<j)) % (N))
+                #print(winv_pow)
+                WINV_FILE.write(hex(((psi_inv**winv_pow % q) * R) % q).replace("L","")[2:]+"\n")
 
+    checkList = list()
+    resultList = list()
+    W_file_location = "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/W_{0}.txt"
+    for PE_BLOCK in range(P):
+        W_FILE = open(W_file_location.format(PE_BLOCK), "w")
+        for i in range(int(log(N, 2))):
+        #for k in range((N//PE) if ((N//PE) < (1 << j)) else (1 << j)): #floor to 1 so becomes (AND PEinPython = 2*PE !!!) 1, 1, 1, 1, 1, 1, 2, 4, 8, 16
+            #DUMB WAY: 111 = 1 + 2 + 4+ 8+ 16 + 5*16 = 80+31=111, we load this many in to each BRAM, switch at the stages
+            #SMART WAY= 160 VALUES AND SCREW IT
+            for W_BRAM in range(P//2):
+                j = ( (PE_BLOCK + P*W_BRAM) >> (int(log(N, 2)) - i - 1) ) #sys counter must be 0 (x32), 0 * 16, 1*16, 0*8, 1*8, 2*8, 3*8
+                assert(j < 2**i)
+                w_pow = intReverse((2**i + j), int(log(N, 2))) #under ordinary circumstances, this is what you use for psi
+                checkList.append(w_pow)
+                #work mod N because you're working with psi
+                W_FILE.write(hex(((psi**w_pow % q) * R) % q).replace("L","")[2:]+"\n")
+
+
+
+
+   ### for i in range(int(log(N,2))):
+   ###     for j in range(0, (2 ** i)):
+   ###         for k in range(0, (2 ** (int(log(N,2)) - i - 1))):
+   ###             index = intReverse(2**i+j, int(log(N,2)))
+   ###             assert(index == checkList[i*512+ j*(2 ** (int(log(N,2)) - i - 1)) + k])
 # --------------------------------------------------------------------------
 #For every stage:
 # for k in range(16):
 #      power = 32*k+currentPEBlock (gives l for stage 1 indeed, going from 0 to 512
 # for k in range(8):
 #      power = 64*k+2*currentPEBlock (same thing except I don't understand the division by N//2 unless that's just a way
-# of guaranteeing that there are no problems since
+# of guaranteeing that there are no problems since --> answer: it's to ensure it repeats, we use the overflow to our
+# advantage in inner loop
 #
 # for k inrange(4):
 #       power = 128*k + 4*currentPEBlock
