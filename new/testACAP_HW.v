@@ -13,6 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+/*
+Copyright 2022 Jonas Bertels
+Changes: Modified NTT testbench to become testbench for FHEW
+*/
 
 `include "defines.v"
 
@@ -22,19 +26,6 @@ parameter HP = 5;
 parameter FP = (2*HP); //10
 
 reg                       clk,resetn;
-
-/*reg                       write_enable_bram;
-reg                       start_addToACAP;
-reg   [`RING_DEPTH+1-1:0]    write_addr_input;
-reg  [`DATA_SIZE_ARB-1:0] data_in;
-wire                      done;*/
-//reg [`RING_DEPTH+1-1:0] read_out;
-//reg [`DATA_SIZE_ARB-1:0] data_a;
-//reg                      load_a;
-//reg   [`RING_DEPTH-1:0]    write_addr_a;
-//reg [`DATA_SIZE_ARB*`PE_NUMBER*`NTT_NUMBER-1:0] secret_key;
-//wire [`SECRET_ADDR_WIDTH-1:0] secret_addr;
-//wire [`SECRET_ADDR_WIDTH-1:0] secret_addr_d;
 
 // ---------------------------------------------------------------- CLK
 
@@ -56,26 +47,17 @@ reg [`DATA_SIZE_ARB-1:0] params    [0:7];
 reg   [32-1:0]          data_in_reg;
 
 assign data_in = data_in_reg;
-//reg [`DATA_SIZE_ARB-1:0] ntt_pin   [0:`RING_SIZE-1];
-//reg [`DATA_SIZE_ARB-1:0] ntt_pout  [0:`RING_SIZE-1];
-//reg [`DATA_SIZE_ARB-1:0] acc_in  [0:(`RING_SIZE<<1)-1];
-//reg [`A_WIDTH-1:0] avector  [0:(`LWE_SIZE*`D_R)-1];
-//reg [`DATA_SIZE_ARB-1:0] result_out [0:(`RING_SIZE<<1)+1];
+
 reg [`DATA_SIZE_ARB-1:0] result [0:(`RING_SIZE<<1)-1];
 reg [32-1:0] DUALPORTBRAM [0:(`RING_SIZE<<3)-1];
-
+// SECRET is not used in this testbench
 //reg [`DATA_SIZE_ARB*`PE_NUMBER*`NTT_NUMBER-1:0] secret [0:`SECRET_KEY_SIZE-1];
-initial begin
-	// ntt
 
-	//$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_IN.txt"  , ntt_pin);
-	//$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/PYTHON_NTT_OUT.txt" , ntt_pout);
-	//$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/STARTACCUMULATOR.txt" , acc_in);
-	//$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/RESULTINTT.txt", result_out);
-	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/SECRET_PRODUCT.txt", result);
-	//$readmemb("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/FULLSECRET.txt", secret);
-	//$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/AVECTOR.txt", avector);
+initial begin
+	// FHEW BRAM which is used to communicate
 	$readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/DUALPORTBRAM.txt", DUALPORTBRAM);
+    // result which we compare with.
+    $readmemh("D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/SECRET_PRODUCT.txt", result);
 end
 
 // ---------------------------------------------------------------- TEST case
@@ -92,10 +74,7 @@ always @(posedge clk) begin
     end
 end
 ShiftReg #(.SHIFT(1),.DATA(`SECRET_ADDR_WIDTH)) address_shift(clk, ~resetn, secret_addr, secret_addr_d);*/
-/*
-wire [32-1:0] address;
-reg outputChoice;*/
-//assign address = outputChoice ? 
+
 reg portAB;
 reg [32-1:0] A_in;
 reg [32-1:0] A_address;
@@ -173,32 +152,9 @@ initial begin: CHECK_RESULT
      #FP;
 
     
-/*
-    	// wait result (ntt)
-    while(done_ntt == 0)
-        #FP;
-    #FP;
 
-    // Store output (ntt)
-    for(m=0; m<(`RING_SIZE >> (`PE_DEPTH+1)); m=m+1) begin
-       for(n=0; n<(`PE_NUMBER << 1); n=n+1) begin
-          ntt_nout[(`PE_NUMBER)*m+n] = bramOut_ntt[(`DATA_SIZE_ARB)*n+:(`DATA_SIZE_ARB)];
-        end
-        #FP;
-    end
 
-    #FP;
-	// Compare output with expected result (ntt)
-	for(m=0; m<(`RING_SIZE); m=m+1) begin
-		if(ntt_nout[m] == ntt_pout[m]) begin
-			en = en+1;
-		end
-		else begin
-		    $display("NTT:  Index-%d -- Calculated:%d, Expected:%d",m,ntt_nout[m],ntt_pout[m]);
-		end
-	end */
-
-	// Compare output with expected result (intt)
+	// Compare output from accumulator with expected result from accumulator
 	for(m=0; m<(`RING_SIZE<<1); m=m+1) begin
 	   A_address <= m+13'h1800;
 	   #FP;
@@ -211,11 +167,7 @@ initial begin: CHECK_RESULT
 	end
 
 	#FP;
-/*
-	if(en == (`RING_SIZE))
-		$display("NTT:  Correct");
-	else
-		$display("NTT:  Incorrect");*/
+
 
 	if(ei == (`RING_SIZE<<1))
 		$display("AddToACAP: Correct");
@@ -226,16 +178,6 @@ initial begin: CHECK_RESULT
 
 end
 
-// ---------------------------------------------------------------- UUT
-
-/*NTTN uut    (clk,reset,
-             load_w_ntt,
-             load_data_ntt,
-             start,
-             din_ntt,
-             bramIn,
-             done_ntt,
-             bramOut_ntt);*/
 
 
 endmodule
