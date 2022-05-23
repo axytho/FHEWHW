@@ -86,10 +86,11 @@ always @(posedge clk) begin
         DUALPORTBRAM[address] <= portAB ? A_in : data_out ;
 end
 
-// read operation
+// BRAM implementation
 always @(posedge clk) begin
     data_in_reg <= DUALPORTBRAM[address];
 end
+
 initial begin: CLK_RESET_INIT
 	// clk & reset (150 cc)
 	clk       = 0;
