@@ -104,7 +104,7 @@ initial begin: CLK_RESET_INIT
 	#1000;
 end
 
-
+// This is to be changed to work with standard ap_start, ap_done and ap_idle signals
 
 
 initial begin: LOAD_DATA_ACC
@@ -140,13 +140,13 @@ initial begin: CHECK_RESULT
 
     
 
-	// wait result (intt)
+
 	#1200000; //900*6 4
 	portAB = 1;
 	A_address <= 13'h1789;
 	#FP;
 
-	// Store output (intt)
+	// Wait until we get a done signal stored in the BRAM.
     while(~(data_in_reg == 32'hd01ecafe))
         #FP;
      #FP;
