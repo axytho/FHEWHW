@@ -110,3 +110,17 @@ for j in range(2):
 #print([j for (i, j) in
 #       zip([abs(resultAccumulator[0][i % 2][i // 2] - result[0][i % 2][i // 2]) for i in range(2 * N)], range(2 * N)) if
 #       i > 0])
+
+DUALPORTBRAM = open(
+    "D:/Jonas/Documents/Huiswerk/KULeuven5/VerilogThesis/edt_zcu102/edt_zcu102.srcs/sources_1/imports/VerilogThesis/test/DUALPORTBRAM.txt",
+    'w')
+AccumulatorList = Accumulator.readlines()
+avectorList = A_vector.readlines()
+for i in range(2048):
+    DUALPORTBRAM.write(AccumulatorList[i])
+
+for i in range(1024):
+    DUALPORTBRAM.write(avectorList[i])
+
+for i in range(1024*5):
+    DUALPORTBRAM.write("0" + "\n")
