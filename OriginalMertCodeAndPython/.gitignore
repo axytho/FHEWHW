@@ -1,7 +1,6 @@
-*.bmp
-Papers/Inside the FFT Black Box_ Serial and Parallel Fast Fourier Transform Algorithms [Chu & George 1999-11-11].pdf
-Papers/pythonTests/.idea/**
-Papers/pythonTests/__pycache__/**
+
+test_generator/.idea/**
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm
