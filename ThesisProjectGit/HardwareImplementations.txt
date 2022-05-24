@@ -1,0 +1,85 @@
+Hardware libraries:
+
+Sujoy Roy's Coprocessor:
+paper: https://www.iacr.org/archive/ches2014/87310183/87310183.pdf
+hardware: https://github.com/sujoyetc/Ring-LWE-Cryptoprocessor
+
+Tim Fritzmann's PQC accelerator:
+paper: https://eprint.iacr.org/2020/446.pdf RISQ-V: Tightly Coupled RISC-V Accelerators for Post-Quantum Cryptography
+Hardware: https://gitlab.lrz.de/tueisec/post-quantum-crypto
+notes: ~10 times speedup of NewHope, 512 coefficient NTT in ~10 000 cycles
+
+Parameterized Hardware Accelerators for Lattice-Based Cryptographyand Their Application to the HW/SW Co-Design of qTESLA
+paper: https://caslab.csl.yale.edu/publications/wang2020parametrized.pdf
+hardware: https://caslab.csl.yale.edu/code/qtesla-hw-sw-platform/
+notes:  unified CT-GS-NTT algorithm specifically designed for polynomial multiplication (where you are doing NTT-1(NTT(A)*¨NTT(B)) )
+for n=1024 and q = 343576577,  11455 cycles on ARtix-7
+
+paper: https://ascslab.org/research/pqcp/index.html
+hardware access: requesting it via e-mail
+
+paper: http://www.cs.haifa.ac.il/~orrd/LC17/paper51.pdf
+hardware access: https://www.seceng.ruhr-uni-bochum.de/research/publications/implementing-newhope-simple-key-exchange-low-cost-/
+
+paper: https://eprint.iacr.org/2017/690.pdf
+hardware access: cannot find a link, but I'll send a mail
+
+ISA Extensions for Finite Field Arithmetic
+%https://eprint.iacr.org/2020/049.pdf
+source code?
+
+FPGA-based High-Performance Parallel Architecture for Homomorphic Computing on Encrypted Data
+https://github.com/KULeuven-COSIC/HEAT
+HW can be requested
+
+GPU implementation:
+https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8855710
+https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7245720
+
+and full introduction on the NTT algorithm:
+http://etd.lib.metu.edu.tr/upload/12625145/index.pdf
+
+High performance NTT's!!!!! 
+https://digitalcommons.wpi.edu/cgi/viewcontent.cgi?article=8433&context=mqp-all
+THIS IS INTERESTING
+
+
+
+Reuse one CRT block of the FV HEWS paper 			Check... (talk about it)
+Modular reduction									check
+
+Make look-up table which rotates through the accumulator  	check
+
+Cut on the FV part.											check
+
+Make clear that FV has bootstrapping but 								check
+Just say you used SEAL and struggled a bit but don't go into detail.	check
+
+Focus on the NTT diagram				check
+Make mathematical part smaller			check
+Focus on high level operation			check
+No mathematical details					check
+
+
+2 LWE cipher texts, you get another LWE.														uhm... somewhatcheck. 
+You implement this by initializing a Look up table and then rotate this Look up table.			check
+Cut slides.
+
+One big table instead of slides																	check
+Introduction slide of what NTT does and why it does don't explain Cooley Tukey: NTT is FFT on finite field. We need a very efficient 
+Not going to do it from scratch																			check
+These are open source, we will select one and impelement it
+One final slide for plan, write a plannign table
+Put changed planning on slide.
+
+
+
+
+Present FHEW and don't talk about parameters yet
+In the slides where you do matrix vector multiplication, these should be the parameters.
+These are large polynomials, we need efficient polynomial multiplication
+
+Don't show full algorithm!!! it makes no sense!
+Look up tables. You rotate with matrix vector multiplication. At the end you'll have the correct value.
+Focus on high-level.
+Don't read from the paper.

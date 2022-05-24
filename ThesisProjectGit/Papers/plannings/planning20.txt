@@ -1,0 +1,5 @@
+11:30-12:30: implementation + clock setting
+12:30-14:00: CT working
+17:00: 32 I/O works
+18:00: everything till CT works
+20:00: secret key multiplication works

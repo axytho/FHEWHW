@@ -1,0 +1,75 @@
+ 1  pacman -Syu
+    2  pacman -S mingw-w64-x86_64-gcc
+    3  pacman -S mingw-w64-x86_64-cmake
+    4  pacman -S autoconf
+    5  pacman -S make
+    6  cd D/
+    7  cd d
+    8  cd D\
+    9  ls
+   10  cd D:/Jonas
+   11  cd Google\ Drive/KULeuven5/PALISADE/
+   12  cd palisade-release/build
+   13  cmake ..
+   14  cmake ..
+   15  cmake ..
+   16  cmake
+   17  cd d\Jonas
+   18  cd d
+   19  D:
+   20  cd d
+   21  cd D:
+   22  cd Jonas/Google\ Drive/KULeuven5/PALISADE/palisade-release/build
+   23  cmake ..
+   24  make -j
+   25  cd D
+   26  ls
+   27  cd d
+   28  cd d\
+   29  cd d/
+   30  cd d:
+   31  cd Jonas/Google\ Drive/KULeuven5/PALISADE/
+   32  cd palisade-release/build/
+   33  make install .../installation/
+   34  cd d:
+   35  cd Jonas/Google\ Drive/KULeuven5/PALISADE/
+   36  make testall
+   37  cd build
+   38  cd palisade-release/
+   39  cd build
+   40  make testall
+   41  cmake ..
+   42  cd d:
+   43  cd Jonas/Google\ Drive/KULeuven5/PALISADE
+   44  cd palisade-release/build
+   45  make install
+   46  make testall
+   47  cd c:
+   48  cd Program\ Files\ \(x86\)/PALISADE/
+   49  make testall
+   50  ls
+   51  cd CMake
+   52  make all
+   53  cd ../
+   54  ls
+   55  cd CMake/
+   56  make testall
+   57  D:/Jonas/Google Drive/KULeuven5/PALISADE/palisade-release/build/unittest/core_tests.exe: error while loading shared libraries: libPALISADEcore.dll: cannot open shared object file: No such file or directory
+   58  pke:
+   59  cd d:
+   60  cd Jonas/Google\ Drive/KULeuven5/PALISADE/
+   61  cd palisade-release/build/
+   62  export PATH=$PATH:lib
+   63  make testall
+   64  cd d:
+   65  cd Jonas/Google\ Drive/KULeuven5/PALISADE/palisade-release/build
+   66  make testall
+   67  export PATH=$PATH:lib
+   68  make testall
+   69  bin/examples/pke/simple-integers
+   70  bin/examples/binfhe/boolean.exe
+   71  d:
+   72  cd d
+   73  cd d:
+   74  cd Jonas/Google\ Drive/KULeuven5/PALISADE/palisade-release/
+   75  cd build
