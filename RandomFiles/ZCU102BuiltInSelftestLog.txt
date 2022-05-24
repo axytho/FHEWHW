@@ -1,0 +1,2270 @@
+Board: ZCU102
+Revision: 1.0
+Silicon: prod
+Serial Number: 881419981751-77939
+MAC Address: 00:0A:35:04:A1:C0
+Working in directory: ZCU102
+PRESSED: IDCODE/FW Check
+Starting IDCODE/FW Check at: 2021-02-21 20:03:59.531000
+Starting step tcl
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\vivado.bat" -mode batch -source "idcode\zcu102_idcode_check.tcl" -nojournal -nolog -tclargs COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+
+
+****** Vivado v2020.2 (64-bit)
+
+  **** SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+source {idcode\zcu102_idcode_check.tcl}
+
+# puts "There are $argc arguments to this script"
+
+There are 17 arguments to this script
+
+# puts "The name of this script is $argv0"
+
+The name of this script is idcode\zcu102_idcode_check.tcl
+
+# if {$argc > 0} {
+
+#     set i 0
+
+#     foreach arg $argv {
+
+#         puts "Argument $i is $arg"
+
+#         incr i
+
+#     }
+
+# }
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+Argument 7 is 0
+
+Argument 8 is 0
+
+Argument 9 is 7
+
+Argument 10 is True
+
+Argument 11 is L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 12 is L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 13 is L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 14 is <setmux:0:74:04>
+
+Argument 15 is <setmux:0:74:00>
+
+Argument 16 is 0
+
+# puts "There should be at least 7 arguments at all times (0-6):"
+
+There should be at least 7 arguments at all times (0-6):
+
+# puts "Argument 0 is [lindex $argv 0]"
+
+Argument 0 is COM6
+
+# puts "Argument 1 is [lindex $argv 1]"
+
+Argument 1 is ZCU102
+
+# puts "Argument 2 is [lindex $argv 2]"
+
+Argument 2 is 1.0
+
+# puts "Argument 3 is [lindex $argv 3]"
+
+Argument 3 is 881419981751-77939
+
+# puts "Argument 4 is [lindex $argv 4]"
+
+Argument 4 is 000A3504A1C0
+
+# puts "Argument 5 is [lindex $argv 5]"
+
+Argument 5 is prod
+
+# puts "Argument 6 is [lindex $argv 6]"
+
+Argument 6 is 2.6
+
+# set serial [lindex $argv 3]
+
+# set_param xicom.use_bitstream_version_check false
+
+# open_hw
+
+WARNING: 'open_hw' is deprecated, please use 'open_hw_manager' instead.
+
+open_hw_manager: Time (s): cpu = 00:00:03 ; elapsed = 00:00:11 . Memory (MB): peak = 922.340 ; gain = 0.000
+
+# connect_hw_server -url localhost:3121
+
+INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
+
+INFO: [Labtools 27-2222] Launching hw_server...
+
+INFO: [Labtools 27-2221] Launch Output:
+
+
+
+****** Xilinx hw_server v2020.2
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:3042
+
+INFO: [Labtools 27-3417] Launching cs_server...
+
+INFO: [Labtools 27-2221] Launch Output:
+
+
+
+
+
+******** Xilinx cs_server v2020.2
+
+  ****** Build date   : Nov 03 2020-22:02:56
+
+    **** Build number : 2020.2.1604437376
+
+      ** Copyright 2017-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+connect_hw_server: Time (s): cpu = 00:00:00 ; elapsed = 00:00:23 . Memory (MB): peak = 922.340 ; gain = 0.000
+
+# open_hw_target
+
+INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+# current_hw_target
+
+# refresh_hw_device [lindex [get_hw_devices] 0]
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+INFO: [Labtools 27-1435] Device xczu9 (JTAG device index = 0) is not programmed (DONE status = 0).
+
+refresh_hw_device: Time (s): cpu = 00:00:07 ; elapsed = 00:00:09 . Memory (MB): peak = 2124.176 ; gain = 1201.836
+
+# current_hw_device [get_hw_devices xczu9_0]
+
+# set IDCODE [get_property IDCODE_HEX [lindex [get_hw_device] 0]]
+
+# puts $IDCODE
+
+24738093
+
+# if { $IDCODE == "24738093"} {
+
+#    puts "IDCODE check PASSED"
+
+# } else {
+
+#    puts "IDCODE check FAILED" 
+
+# }
+
+IDCODE check PASSED
+
+# puts [lindex [split [version] "\n"] 0]
+
+Vivado v2020.2 (64-bit)
+
+# if {[lindex [split [version] "\n"] 0] == "Vivado v2019.1 (64-bit)" || [lindex [split [version] "\n"] 0] == "Vivado Lab Edition v2019.1 (64-bit)"} {
+
+#    puts "Vivado check PASSED"
+
+# } else {
+
+#    puts "Vivado check FAILED" 
+
+# }
+
+Vivado check FAILED
+
+# puts [lindex [split [version] "\n"] 1]
+
+SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+
+# if {[lindex [split [version] "\n"] 1] == "SW Build 2552052 on Fri May 24 14:49:42 MDT 2019"} {
+
+#    puts "SW Build check PASSED"
+
+# } else {
+
+#    puts "SW Build check FAILED" 
+
+# }
+
+SW Build check FAILED
+
+# close_hw_target [current_hw_target [get_hw_targets -regexp (?i).*/xilinx_tcf/.*/.*]]
+
+INFO: [Labtoolstcl 44-464] Closing hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75
+
+# disconnect_hw_server localhost:3121
+
+# close_hw
+
+WARNING: 'close_hw' is deprecated, please use 'close_hw_manager' instead.
+
+****** Webtalk v2020.2 (64-bit)
+
+  **** SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+source C:/zcu102_bit/BoardUI/tests/ZCU102/.Xil/Vivado-18340-LAPTOP-GV22BQAP/webtalk/labtool_webtalk.tcl -notrace
+
+INFO: [Common 17-186] 'C:/zcu102_bit/BoardUI/tests/ZCU102/.Xil/Vivado-18340-LAPTOP-GV22BQAP/webtalk/usage_statistics_ext_labtool.xml' has been successfully sent to Xilinx on Sun Feb 21 20:06:20 2021. For additional details about this file, please refer to the WebTalk help file at D:/Jonas/PROGRAMS/Vivado20222/Vivado/2020.2/doc/webtalk_introduction.html.
+
+INFO: [Common 17-206] Exiting Webtalk at Sun Feb 21 20:06:20 2021...
+
+close_hw_manager: Time (s): cpu = 00:00:00 ; elapsed = 00:00:14 . Memory (MB): peak = 2135.699 ; gain = 11.523
+
+INFO: [Common 17-206] Exiting Vivado at Sun Feb 21 20:06:21 2021...
+
+Found pass condition:
+^IDCODE check PASSED
+
+IDCODE STATUS: PASSED
+Starting step sysc
+==========
+
+u'\x08\r:R\r'
+u'\r:R\r~~~\r:P\r'
+SYSC Full Command: [('', 'VRN', '', '')]
+
+u'VRN\r:P\r'
+u'MSP v1.50 I2C Bridge v1.50\r~~~\r:P\r'
+u'~~~\r:P\r'
+
+SYSC Interpreted Command: [('', 'VRN', '', '')]
+SYSC RAW Command: u'VRN\r\t'
+SYSC Returned: u'\x08\r:R\r\r:R\r~~~\r:P\rVRN\r:P\rMSP v1.50 I2C Bridge v1.50\r~~~\r:P\r~~~\r:P\r'
+
+FIRMWARE VERSION: MSP v1.50 I2C Bridge v1.50
+PASSED IDCODE/FW Check at: 2021-02-21 20:06:22.101000
+Finished
+PRESSED: PING
+Starting PING at: 2021-02-21 20:06:37.633000
+Starting step xsdb
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\xsdb.bat" -eval source "ping\ping_download.tcl" COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+warning: -e option ignored when startup script is given
+
+There are 17 arguments to this script
+
+The name of this script is ping\ping_download.tcl
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+Argument 7 is 0
+
+Argument 8 is 0
+
+Argument 9 is 7
+
+Argument 10 is True
+
+Argument 11 is L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 12 is L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 13 is L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 14 is <setmux:0:74:04>
+
+Argument 15 is <setmux:0:74:00>
+
+Argument 16 is 0
+
+There should be at least 7 arguments at all times (0-6):
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+disconnect
+
+connect -url tcp:127.0.0.1:3121attempting to launch hw_server
+
+
+
+****** Xilinx hw_server v2020.2
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+INFO: hw_server application started
+
+INFO: Use Ctrl-C to exit hw_server application
+
+
+
+
+
+
+
+****** Xilinx hw_server v2020.2
+
+
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+INFO: hw_server application started
+
+
+
+INFO: Use Ctrl-C to exit hw_server application
+
+
+
+
+
+
+
+
+
+INFO: To connect to this hw_server instance use url: TCP:127.0.0.1:3121
+
+
+
+
+
+
+
+tcfchan#0
+
+no targets found with "name =~"*APU*"". available targets:
+
+  1  PS TAP (Cannot poll JTAG port: CBR not done, debug access not allowed)
+
+     2  PMU
+
+     3  PL
+
+  4  dummy_dap
+
+    while executing
+
+"error "no targets found with \"$params(filter)\". available targets:$target_list""
+
+    (procedure "targets" line 177)
+
+    invoked from within
+
+"targets -set -filter {name =~"*APU*"}"
+
+    invoked from within
+
+"puts [targets -set -filter {name =~"*APU*"}]"
+
+    (file "ping\ping_download.tcl" line 34)
+
+targets -set -filter {name =~"*APU*"}Could not find pass condition:
+(.*)Setting PC to Program Start Address 0x00000000
+
+Could not find pass condition:
+(.*)Successfully downloaded
+
+FAILED PING at: 2021-02-21 20:06:48.688000
+Finished
+PRESSED: PING
+Starting PING at: 2021-02-21 20:13:22.191000
+Starting step xsdb
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\xsdb.bat" -eval source "ping\ping_download.tcl" COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+warning: -e option ignored when startup script is given
+
+There are 17 arguments to this script
+
+The name of this script is ping\ping_download.tcl
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+Argument 7 is 0
+
+Argument 8 is 0
+
+Argument 9 is 7
+
+Argument 10 is True
+
+Argument 11 is L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 12 is L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 13 is L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 14 is <setmux:0:74:04>
+
+Argument 15 is <setmux:0:74:00>
+
+Argument 16 is 0
+
+There should be at least 7 arguments at all times (0-6):
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+disconnect
+
+connect -url tcp:127.0.0.1:3121attempting to launch hw_server
+
+
+
+****** Xilinx hw_server v2020.2
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+INFO: hw_server application started
+
+INFO: Use Ctrl-C to exit hw_server application
+
+
+
+
+
+
+
+****** Xilinx hw_server v2020.2
+
+
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+INFO: hw_server application started
+
+
+
+INFO: Use Ctrl-C to exit hw_server application
+
+
+
+
+
+
+
+
+
+INFO: To connect to this hw_server instance use url: TCP:127.0.0.1:3121
+
+
+
+
+
+
+
+tcfchan#0
+
+targets -set -filter {name =~"*APU*"}
+
+rst -srst
+
+fpga initialization failed
+
+    invoked from within
+
+"::tcf::eval -progress ::xsdb::print_progress {::tcf::cache_enter tcfchan#0 {tcf_cache_eval {process_tcf_actions_cache_client ::tcfclient#0::arg}}}"
+
+    (procedure "::tcf::cache_eval_with_progress" line 2)
+
+    invoked from within
+
+"::tcf::cache_eval_with_progress [dict get $arg chan]  [list process_tcf_actions_cache_client $argvar] $progress"
+
+    (procedure "process_tcf_actions" line 7)
+
+    invoked from within
+
+"process_tcf_actions $arg ::xsdb::print_progress"
+
+    (procedure "fpga" line 430)
+
+    invoked from within
+
+"fpga -file [pwd]/ping/zcu102_ipi.bit"
+
+    invoked from within
+
+"puts [fpga -file [pwd]/ping/zcu102_ipi.bit]"
+
+    (file "ping\ping_download.tcl" line 39)
+
+Could not find pass condition:
+(.*)Setting PC to Program Start Address 0x00000000
+
+Could not find pass condition:
+(.*)Successfully downloaded
+
+FAILED PING at: 2021-02-21 20:13:36.641000
+Finished
+PRESSED: Run All
+Starting IDCODE/FW Check at: 2021-02-21 20:18:02.736000
+Starting step tcl
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\vivado.bat" -mode batch -source "idcode\zcu102_idcode_check.tcl" -nojournal -nolog -tclargs COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+
+
+****** Vivado v2020.2 (64-bit)
+
+  **** SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+source {idcode\zcu102_idcode_check.tcl}
+
+# puts "There are $argc arguments to this script"
+
+There are 17 arguments to this script
+
+# puts "The name of this script is $argv0"
+
+The name of this script is idcode\zcu102_idcode_check.tcl
+
+# if {$argc > 0} {
+
+#     set i 0
+
+#     foreach arg $argv {
+
+#         puts "Argument $i is $arg"
+
+#         incr i
+
+#     }
+
+# }
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+Argument 7 is 0
+
+Argument 8 is 0
+
+Argument 9 is 7
+
+Argument 10 is True
+
+Argument 11 is L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 12 is L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 13 is L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 14 is <setmux:0:74:04>
+
+Argument 15 is <setmux:0:74:00>
+
+Argument 16 is 0
+
+# puts "There should be at least 7 arguments at all times (0-6):"
+
+There should be at least 7 arguments at all times (0-6):
+
+# puts "Argument 0 is [lindex $argv 0]"
+
+Argument 0 is COM6
+
+# puts "Argument 1 is [lindex $argv 1]"
+
+Argument 1 is ZCU102
+
+# puts "Argument 2 is [lindex $argv 2]"
+
+Argument 2 is 1.0
+
+# puts "Argument 3 is [lindex $argv 3]"
+
+Argument 3 is 881419981751-77939
+
+# puts "Argument 4 is [lindex $argv 4]"
+
+Argument 4 is 000A3504A1C0
+
+# puts "Argument 5 is [lindex $argv 5]"
+
+Argument 5 is prod
+
+# puts "Argument 6 is [lindex $argv 6]"
+
+Argument 6 is 2.6
+
+# set serial [lindex $argv 3]
+
+# set_param xicom.use_bitstream_version_check false
+
+# open_hw
+
+WARNING: 'open_hw' is deprecated, please use 'open_hw_manager' instead.
+
+# connect_hw_server -url localhost:3121
+
+INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
+
+INFO: [Labtools 27-2222] Launching hw_server...
+
+INFO: [Labtools 27-2221] Launch Output:
+
+
+
+****** Xilinx hw_server v2020.2
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:3042
+
+INFO: [Labtools 27-3417] Launching cs_server...
+
+INFO: [Labtools 27-2221] Launch Output:
+
+
+
+
+
+******** Xilinx cs_server v2020.2
+
+  ****** Build date   : Nov 03 2020-22:02:56
+
+    **** Build number : 2020.2.1604437376
+
+      ** Copyright 2017-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+connect_hw_server: Time (s): cpu = 00:00:01 ; elapsed = 00:00:20 . Memory (MB): peak = 1241.273 ; gain = 0.000
+
+# open_hw_target
+
+INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+# current_hw_target
+
+# refresh_hw_device [lindex [get_hw_devices] 0]
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+INFO: [Labtools 27-1435] Device xczu9 (JTAG device index = 0) is not programmed (DONE status = 0).
+
+refresh_hw_device: Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 2125.117 ; gain = 883.844
+
+# current_hw_device [get_hw_devices xczu9_0]
+
+# set IDCODE [get_property IDCODE_HEX [lindex [get_hw_device] 0]]
+
+# puts $IDCODE
+
+24738093
+
+# if { $IDCODE == "24738093"} {
+
+#    puts "IDCODE check PASSED"
+
+# } else {
+
+#    puts "IDCODE check FAILED" 
+
+# }
+
+IDCODE check PASSED
+
+# puts [lindex [split [version] "\n"] 0]
+
+Vivado v2020.2 (64-bit)
+
+# if {[lindex [split [version] "\n"] 0] == "Vivado v2019.1 (64-bit)" || [lindex [split [version] "\n"] 0] == "Vivado Lab Edition v2019.1 (64-bit)"} {
+
+#    puts "Vivado check PASSED"
+
+# } else {
+
+#    puts "Vivado check FAILED" 
+
+# }
+
+Vivado check FAILED
+
+# puts [lindex [split [version] "\n"] 1]
+
+SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+
+# if {[lindex [split [version] "\n"] 1] == "SW Build 2552052 on Fri May 24 14:49:42 MDT 2019"} {
+
+#    puts "SW Build check PASSED"
+
+# } else {
+
+#    puts "SW Build check FAILED" 
+
+# }
+
+SW Build check FAILED
+
+# close_hw_target [current_hw_target [get_hw_targets -regexp (?i).*/xilinx_tcf/.*/.*]]
+
+INFO: [Labtoolstcl 44-464] Closing hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75
+
+# disconnect_hw_server localhost:3121
+
+# close_hw
+
+WARNING: 'close_hw' is deprecated, please use 'close_hw_manager' instead.
+
+****** Webtalk v2020.2 (64-bit)
+
+  **** SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+source C:/zcu102_bit/BoardUI/tests/ZCU102/.Xil/Vivado-10816-LAPTOP-GV22BQAP/webtalk/labtool_webtalk.tcl -notrace
+
+INFO: [Common 17-186] 'C:/zcu102_bit/BoardUI/tests/ZCU102/.Xil/Vivado-10816-LAPTOP-GV22BQAP/webtalk/usage_statistics_ext_labtool.xml' has been successfully sent to Xilinx on Sun Feb 21 20:18:56 2021. For additional details about this file, please refer to the WebTalk help file at D:/Jonas/PROGRAMS/Vivado20222/Vivado/2020.2/doc/webtalk_introduction.html.
+
+INFO: [Common 17-206] Exiting Webtalk at Sun Feb 21 20:18:56 2021...
+
+close_hw_manager: Time (s): cpu = 00:00:00 ; elapsed = 00:00:10 . Memory (MB): peak = 2136.641 ; gain = 11.523
+
+INFO: [Common 17-206] Exiting Vivado at Sun Feb 21 20:18:56 2021...
+
+Found pass condition:
+^IDCODE check PASSED
+
+IDCODE STATUS: PASSED
+Starting step sysc
+==========
+
+u'\x08\r:R\r'
+u'\r:R\r~~~\r:P\r'
+SYSC Full Command: [('', 'VRN', '', '')]
+
+u'VRN\r:P\r'
+u'MSP v1.50 I2C Bridge v1.50\r~~~\r:P\r'
+u'~~~\r:P\r'
+
+SYSC Interpreted Command: [('', 'VRN', '', '')]
+SYSC RAW Command: u'VRN\r\t'
+SYSC Returned: u'\x08\r:R\r\r:R\r~~~\r:P\rVRN\r:P\rMSP v1.50 I2C Bridge v1.50\r~~~\r:P\r~~~\r:P\r'
+
+FIRMWARE VERSION: MSP v1.50 I2C Bridge v1.50
+PASSED IDCODE/FW Check at: 2021-02-21 20:18:57.636000
+Starting PMBUS/EFUSE at: 2021-02-21 20:18:57.639000
+Starting step sysc
+==========
+
+u'\x08\r:R\r'
+u'\r:R\r~~~\r:P\r'
+SYSC Full Command: [('<setmux:0:75:06>', '', '', ''), ('<setMAX15303voltage:0:18:1.8>', '', '', ''), ('<setmux:0:75:00>', '', '', '')]
+
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <setMAX15303voltage:0:18:1.8>
+u'IW0\r18\r2014\r:P\r'
+u'IW0\r18\r0140\r:P\r'
+u'DLY\rC350\r:P\r'
+u'IW0\r18\r21cd1c\r:P\r'
+u'DLY\rC350\r:P\r'
+u'IW0\r18\r0180\r:P\r'
+u'DLY\rC350\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+u'~~~\r:P\r'
+
+SYSC Interpreted Command: [('<setmux:0:75:06>', '', '', ''), ('<setMAX15303voltage:0:18:1.8>', '', '', ''), ('<setmux:0:75:00>', '', '', '')]
+SYSC RAW Command: u'IW0\r75\r06\r\tIW0\r18\r2014\r\tIW0\r18\r0140\r\tDLY\rC350\r\tIW0\r18\r21cd1c\r\tDLY\rC350\r\tIW0\r18\r0180\r\tDLY\rC350\r\tIW0\r75\r00\r\t'
+SYSC Returned: u'\x08\r:R\r\r:R\r~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIW0\r18\r2014\r:P\rIW0\r18\r0140\r:P\rDLY\rC350\r:P\rIW0\r18\r21cd1c\r:P\rDLY\rC350\r:P\rIW0\r18\r0180\r:P\rDLY\rC350\r:P\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\r~~~\r:P\r'
+
+Starting step sysc
+==========
+
+u'\x08\r:R\r'
+u'\r:R\r~~~\r:P\r'
+SYSC Full Command: [('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:0A>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:0B>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:10>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:1D>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:13>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:14>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:15>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:16>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:17>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:18>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:72>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage70>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:73>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage70>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:1A>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:1B>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', '')]
+
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:0A>
+u'IS0\r0A\r20\r1\r:P\r'
+u'14\rIS0\r0A\r8B\r2\r:P\r'
+u'990D\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[0.85 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:0B>
+u'IS0\r0B\r20\r1\r:P\r'
+u'14\rIS0\r0B\r8B\r2\r:P\r'
+u'9A0D\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[0.85 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:10>
+u'IS0\r10\r20\r1\r:P\r'
+u'14\rIS0\r10\r8B\r2\r:P\r'
+u'CC1C\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[1.80 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:1D>
+u'IS0\r1D\r20\r1\r:P\r'
+u'14\rIS0\r1D\r8B\r2\r:P\r'
+u'3413\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[1.20 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:13>
+u'IS0\r13\r20\r1\r:P\r'
+u'14\rIS0\r13\r8B\r2\r:P\r'
+u'990D\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[0.85 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:14>
+u'IS0\r14\r20\r1\r:P\r'
+u'14\rIS0\r14\r8B\r2\r:P\r'
+u'990D\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[0.85 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:15>
+u'IS0\r15\r20\r1\r:P\r'
+u'14\rIS0\r15\r8B\r2\r:P\r'
+u'CA1C\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[1.80 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:16>
+u'IS0\r16\r20\r1\r:P\r'
+u'14\rIS0\r16\r8B\r2\r:P\r'
+u'3113\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[1.20 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:17>
+u'IS0\r17\r20\r1\r:P\r'
+u'14\rIS0\r17\r8B\r2\r:P\r'
+u'D034\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[3.30 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:18>
+u'IS0\r18\r20\r1\r:P\r'
+u'14\rIS0\r18\r8B\r2\r:P\r'
+u'CB1C\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[1.80 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:72>
+u'IS0\r72\r20\r1\r:P\r'
+u'20\rIS0\r72\r8B\r2\r:P\r'
+u'8300\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage70>
+SYSC command returned: VOLTAGE[0.90 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:73>
+u'IS0\r73\r20\r1\r:P\r'
+u'20\rIS0\r73\r8B\r2\r:P\r'
+u'BF00\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage70>
+SYSC command returned: VOLTAGE[1.20 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:1A>
+u'IS0\r1A\r20\r1\r:P\r'
+u'14\rIS0\r1A\r8B\r2\r:P\r'
+u'CD34\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[3.30 Volts]
+
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <getvoltage:0:1B>
+u'IS0\r1B\r20\r1\r:P\r'
+u'14\rIS0\r1B\r8B\r2\r:P\r'
+u'0250\r~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcvoltage>
+SYSC command returned: VOLTAGE[5.00 Volts]
+
+u'~~~\r:P\r'
+u'~~~\r:P\r'
+
+SYSC Interpreted Command: [('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:0A>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:0B>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:10>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:1D>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:13>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:14>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:15>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:16>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:17>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:18>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:72>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage70>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:73>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage70>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:1A>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', ''), ('<setmux:0:75:06>', '', '', ''), ('<getvoltage:0:1B>', '', '', ''), ('<setmux:0:75:00>', '', '', ''), ('<calcvoltage>', '', '', '')]
+SYSC RAW Command: u'IW0\r75\r06\r\tIS0\r0A\r20\r1\r\tIS0\r0A\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r0B\r20\r1\r\tIS0\r0B\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r10\r20\r1\r\tIS0\r10\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r1D\r20\r1\r\tIS0\r1D\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r13\r20\r1\r\tIS0\r13\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r14\r20\r1\r\tIS0\r14\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r15\r20\r1\r\tIS0\r15\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r16\r20\r1\r\tIS0\r16\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r17\r20\r1\r\tIS0\r17\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r18\r20\r1\r\tIS0\r18\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r72\r20\r1\r\tIS0\r72\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r73\r20\r1\r\tIS0\r73\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r1A\r20\r1\r\tIS0\r1A\r8B\r2\r\tIW0\r75\r00\r\tIW0\r75\r06\r\tIS0\r1B\r20\r1\r\tIS0\r1B\r8B\r2\r\tIW0\r75\r00\r\t'
+SYSC Returned: u'\x08\r:R\r\r:R\r~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r0A\r20\r1\r:P\r14\rIS0\r0A\r8B\r2\r:P\r990D\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[0.85 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r0B\r20\r1\r:P\r14\rIS0\r0B\r8B\r2\r:P\r9A0D\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[0.85 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r10\r20\r1\r:P\r14\rIS0\r10\r8B\r2\r:P\rCC1C\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[1.80 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r1D\r20\r1\r:P\r14\rIS0\r1D\r8B\r2\r:P\r3413\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[1.20 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r13\r20\r1\r:P\r14\rIS0\r13\r8B\r2\r:P\r990D\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[0.85 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r14\r20\r1\r:P\r14\rIS0\r14\r8B\r2\r:P\r990D\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[0.85 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r15\r20\r1\r:P\r14\rIS0\r15\r8B\r2\r:P\rCA1C\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[1.80 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r16\r20\r1\r:P\r14\rIS0\r16\r8B\r2\r:P\r3113\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[1.20 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r17\r20\r1\r:P\r14\rIS0\r17\r8B\r2\r:P\rD034\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[3.30 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r18\r20\r1\r:P\r14\rIS0\r18\r8B\r2\r:P\rCB1C\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[1.80 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r72\r20\r1\r:P\r20\rIS0\r72\r8B\r2\r:P\r8300\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[0.90 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r73\r20\r1\r:P\r20\rIS0\r73\r8B\r2\r:P\rBF00\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[1.20 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r1A\r20\r1\r:P\r14\rIS0\r1A\r8B\r2\r:P\rCD34\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[3.30 Volts]~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIS0\r1B\r20\r1\r:P\r14\rIS0\r1B\r8B\r2\r:P\r0250\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\rVOLTAGE[5.00 Volts]~~~\r:P\r~~~\r:P\r'
+
+Starting step tcl
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\vivado.bat" -mode batch -source "efuse\vivado_read_fpga_efuse_status.tcl" -nojournal -nolog -tclargs COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+
+
+****** Vivado v2020.2 (64-bit)
+
+  **** SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+source {efuse\vivado_read_fpga_efuse_status.tcl}
+
+# puts "There are $argc arguments to this script"
+
+There are 17 arguments to this script
+
+# puts "The name of this script is $argv0"
+
+The name of this script is efuse\vivado_read_fpga_efuse_status.tcl
+
+# if {$argc > 0} {
+
+#     set i 0
+
+#     foreach arg $argv {
+
+#         puts "Argument $i is $arg"
+
+#         incr i
+
+#     }
+
+# }
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+Argument 7 is 0
+
+Argument 8 is 0
+
+Argument 9 is 7
+
+Argument 10 is True
+
+Argument 11 is L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 12 is L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 13 is L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 14 is <setmux:0:74:04>
+
+Argument 15 is <setmux:0:74:00>
+
+Argument 16 is 0
+
+# puts "There should be at least 7 arguments at all times (0-6):"
+
+There should be at least 7 arguments at all times (0-6):
+
+# puts "Argument 0 is [lindex $argv 0]"
+
+Argument 0 is COM6
+
+# puts "Argument 1 is [lindex $argv 1]"
+
+Argument 1 is ZCU102
+
+# puts "Argument 2 is [lindex $argv 2]"
+
+Argument 2 is 1.0
+
+# puts "Argument 3 is [lindex $argv 3]"
+
+Argument 3 is 881419981751-77939
+
+# puts "Argument 4 is [lindex $argv 4]"
+
+Argument 4 is 000A3504A1C0
+
+# puts "Argument 5 is [lindex $argv 5]"
+
+Argument 5 is prod
+
+# puts "Argument 6 is [lindex $argv 6]"
+
+Argument 6 is 2.6
+
+# set serial [lindex $argv 3]
+
+# set_param xicom.use_bitstream_version_check false
+
+# open_hw
+
+WARNING: 'open_hw' is deprecated, please use 'open_hw_manager' instead.
+
+# connect_hw_server -url localhost:3121
+
+INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
+
+INFO: [Labtools 27-2222] Launching hw_server...
+
+INFO: [Labtools 27-2221] Launch Output:
+
+
+
+****** Xilinx hw_server v2020.2
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:3042
+
+INFO: [Labtools 27-3417] Launching cs_server...
+
+INFO: [Labtools 27-2221] Launch Output:
+
+
+
+
+
+******** Xilinx cs_server v2020.2
+
+  ****** Build date   : Nov 03 2020-22:02:56
+
+    **** Build number : 2020.2.1604437376
+
+      ** Copyright 2017-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+connect_hw_server: Time (s): cpu = 00:00:00 ; elapsed = 00:00:21 . Memory (MB): peak = 1110.648 ; gain = 0.000
+
+# open_hw_target
+
+INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+# current_hw_target
+
+# refresh_hw_device [lindex [get_hw_devices] 0]
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+INFO: [Labtools 27-1435] Device xczu9 (JTAG device index = 0) is not programmed (DONE status = 0).
+
+refresh_hw_device: Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 2124.301 ; gain = 1013.652
+
+# current_hw_device [get_hw_devices xczu9_0]
+
+# refresh_hw_device -update_hw_probes false [lindex [get_hw_devices] 0]
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+INFO: [Labtools 27-1435] Device xczu9 (JTAG device index = 0) is not programmed (DONE status = 0).
+
+# report_property [lindex [get_hw_device] 0] REGISTER.EFUSE.FUSE_DNA
+
+Property                 Type    Read-only  Value
+
+REGISTER.EFUSE.FUSE_DNA  string  true       000000000000000000000000
+
+# close_hw_target [current_hw_target]
+
+INFO: [Labtoolstcl 44-464] Closing hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75
+
+# disconnect_hw_server localhost:3121
+
+# close_hw
+
+WARNING: 'close_hw' is deprecated, please use 'close_hw_manager' instead.
+
+****** Webtalk v2020.2 (64-bit)
+
+  **** SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+source C:/zcu102_bit/BoardUI/tests/ZCU102/.Xil/Vivado-11448-LAPTOP-GV22BQAP/webtalk/labtool_webtalk.tcl -notrace
+
+INFO: [Common 17-186] 'C:/zcu102_bit/BoardUI/tests/ZCU102/.Xil/Vivado-11448-LAPTOP-GV22BQAP/webtalk/usage_statistics_ext_labtool.xml' has been successfully sent to Xilinx on Sun Feb 21 20:19:54 2021. For additional details about this file, please refer to the WebTalk help file at D:/Jonas/PROGRAMS/Vivado20222/Vivado/2020.2/doc/webtalk_introduction.html.
+
+INFO: [Common 17-206] Exiting Webtalk at Sun Feb 21 20:19:54 2021...
+
+close_hw_manager: Time (s): cpu = 00:00:00 ; elapsed = 00:00:10 . Memory (MB): peak = 2135.953 ; gain = 11.523
+
+INFO: [Common 17-206] Exiting Vivado at Sun Feb 21 20:19:54 2021...
+
+Found pass condition:
+Property\s+Type\s+Read\-only\s+Value
+
+Found pass condition:
+REGISTER\.EFUSE\.FUSE_DNA\s+string\s+true\s+[0-9a-fA-F]+
+
+Found pass condition:
+INFO:\s+\[Common\s+17\-206\]\s+Exiting\s+[Vv]ivado
+
+EFUSE DNA: 000000000000000000000000
+PASSED PMBUS/EFUSE at: 2021-02-21 20:19:57.368000
+Starting ZCU102 RTC at: 2021-02-21 20:19:57.372000
+Starting step manc
+==========
+
+Starting step xsdb
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\xsdb.bat" -eval source "rtc_clock\zcu102_rtc_elf.tcl" COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+warning: -e option ignored when startup script is given
+
+There are 17 arguments to this script
+
+The name of this script is rtc_clock\zcu102_rtc_elf.tcl
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+Argument 7 is 0
+
+Argument 8 is 0
+
+Argument 9 is 7
+
+Argument 10 is True
+
+Argument 11 is L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 12 is L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 13 is L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 14 is <setmux:0:74:04>
+
+Argument 15 is <setmux:0:74:00>
+
+Argument 16 is 0
+
+There should be at least 7 arguments at all times (0-6):
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+disconnect
+
+connect -url tcp:127.0.0.1:3121
+
+attempting to launch hw_server
+
+
+
+****** Xilinx hw_server v2020.2
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+INFO: hw_server application started
+
+INFO: Use Ctrl-C to exit hw_server application
+
+
+
+
+
+
+
+****** Xilinx hw_server v2020.2
+
+
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+INFO: hw_server application started
+
+
+
+INFO: Use Ctrl-C to exit hw_server application
+
+
+
+
+
+
+
+
+
+INFO: To connect to this hw_server instance use url: TCP:127.0.0.1:3121
+
+
+
+
+
+
+
+tcfchan#0
+
+no targets found with "name =~"*APU*"". available targets:
+
+  1  PS TAP (Cannot poll JTAG port: CBR not done, debug access not allowed)
+
+     2  PMU
+
+     3  PL
+
+  4  dummy_dap
+
+    while executing
+
+"error "no targets found with \"$params(filter)\". available targets:$target_list""
+
+    (procedure "targets" line 177)
+
+    invoked from within
+
+"targets -set -filter {name =~"*APU*"}"
+
+    invoked from within
+
+"puts [targets -set -filter {name =~"*APU*"}]"
+
+    (file "rtc_clock\zcu102_rtc_elf.tcl" line 34)
+
+Could not find pass condition:
+(.*)Setting PC to Program Start Address 0x00000000
+
+Could not find pass condition:
+(.*)Successfully downloaded
+
+FAILED ZCU102 RTC at: 2021-02-21 20:20:31.558000
+Starting IPI APP Test at: 2021-02-21 20:20:31.560000
+Starting step sysc
+==========
+
+u':R\r'
+u'\r:R\r~~~\r:P\r'
+SYSC Full Command: [('<setmux:0:75:06>', '', '', ''), ('<setMAX15303voltage:0:18:1.8>', '', '', ''), ('<setmux:0:75:00>', '', '', '')]
+
+
+Running sysc func: <setmux:0:75:06>
+u'IW0\r75\r06\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <setMAX15303voltage:0:18:1.8>
+u'IW0\r18\r2014\r:P\r'
+u'IW0\r18\r0140\r:P\r'
+u'DLY\rC350\r:P\r'
+u'IW0\r18\r21cd1c\r:P\r'
+u'DLY\rC350\r:P\r'
+u'IW0\r18\r0180\r:P\r'
+u'DLY\rC350\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:0:75:00>
+u'IW0\r75\r00\r:P\r'
+u'~~~\r:P\r'
+u'~~~\r:P\r'
+
+SYSC Interpreted Command: [('<setmux:0:75:06>', '', '', ''), ('<setMAX15303voltage:0:18:1.8>', '', '', ''), ('<setmux:0:75:00>', '', '', '')]
+SYSC RAW Command: u'IW0\r75\r06\r\tIW0\r18\r2014\r\tIW0\r18\r0140\r\tDLY\rC350\r\tIW0\r18\r21cd1c\r\tDLY\rC350\r\tIW0\r18\r0180\r\tDLY\rC350\r\tIW0\r75\r00\r\t'
+SYSC Returned: u':R\r\r:R\r~~~\r:P\rIW0\r75\r06\r:P\r~~~\r:P\rIW0\r18\r2014\r:P\rIW0\r18\r0140\r:P\rDLY\rC350\r:P\rIW0\r18\r21cd1c\r:P\rDLY\rC350\r:P\rIW0\r18\r0180\r:P\rDLY\rC350\r:P\r~~~\r:P\rIW0\r75\r00\r:P\r~~~\r:P\r~~~\r:P\r'
+
+Starting step sysc
+==========
+
+u'\x08\r:R\r'
+u'\r:R\r~~~\r:P\r'
+SYSC Full Command: [('<setmux:1:74:10>', '', '', ''), ('<calcsi5328:1:69:156.25>', '', '', ''), ('<saveval:12:156.25>', '', '', ''), ('<setmux:1:74:00>', '', '', '')]
+
+
+Running sysc func: <setmux:1:74:10>
+u'IW1\r74\r10\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <calcsi5328:1:69:156.25>
+u'IW1\r69\r0054\r:P\r'
+u'IW1\r69\r01e1\r:P\r'
+u'IW1\r69\r0212\r:P\r'
+u'IW1\r69\r0355\r:P\r'
+u'IW1\r69\r0412\r:P\r'
+u'IW1\r69\r0a00\r:P\r'
+u'IW1\r69\r0b40\r:P\r'
+u'IW1\r69\r132c\r:P\r'
+u'IW1\r69\r143e\r:P\r'
+u'IW1\r69\r15fc\r:P\r'
+u'IW1\r69\r16df\r:P\r'
+u'IW1\r69\r171f\r:P\r'
+u'IW1\r69\r183f\r:P\r'
+u'IW1\r69\r1980\r:P\r'
+u'IW1\r69\r1f00\r:P\r'
+u'IW1\r69\r2000\r:P\r'
+u'IW1\r69\r2103\r:P\r'
+u'IW1\r69\r2200\r:P\r'
+u'IW1\r69\r2300\r:P\r'
+u'IW1\r69\r2403\r:P\r'
+u'IW1\r69\r2802\r:P\r'
+u'IW1\r69\r2970\r:P\r'
+u'IW1\r69\r2a1f\r:P\r'
+u'IW1\r69\r2b00\r:P\r'
+u'IW1\r69\r2c4e\r:P\r'
+u'IW1\r69\r2d03\r:P\r'
+u'IW1\r69\r2e00\r:P\r'
+u'IW1\r69\r2f39\r:P\r'
+u'IW1\r69\r300f\r:P\r'
+u'IW1\r69\r371b\r:P\r'
+u'IW1\r69\r8318\r:P\r'
+u'IW1\r69\r8400\r:P\r'
+u'IW1\r69\r8900\r:P\r'
+u'IW1\r69\r8a0F\r:P\r'
+u'IW1\r69\r8bFF\r:P\r'
+u'IW1\r69\r8e00\r:P\r'
+u'IW1\r69\r8f00\r:P\r'
+u'IW1\r69\r8840\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <saveval:12:156.25>
+u'MWS\r12\r4063880000000000\r:P\r'
+u'~~~\r:P\r'
+
+Running sysc func: <setmux:1:74:00>
+u'IW1\r74\r00\r:P\r'
+u'~~~\r:P\r'
+u'~~~\r:P\r'
+
+SYSC Interpreted Command: [('<setmux:1:74:10>', '', '', ''), ('<calcsi5328:1:69:156.25>', '', '', ''), ('<saveval:12:156.25>', '', '', ''), ('<setmux:1:74:00>', '', '', '')]
+SYSC RAW Command: u'IW1\r74\r10\r\tIW1\r69\r0054\r\tIW1\r69\r01e1\r\tIW1\r69\r0212\r\tIW1\r69\r0355\r\tIW1\r69\r0412\r\tIW1\r69\r0a00\r\tIW1\r69\r0b40\r\tIW1\r69\r132c\r\tIW1\r69\r143e\r\tIW1\r69\r15fc\r\tIW1\r69\r16df\r\tIW1\r69\r171f\r\tIW1\r69\r183f\r\tIW1\r69\r1980\r\tIW1\r69\r1f00\r\tIW1\r69\r2000\r\tIW1\r69\r2103\r\tIW1\r69\r2200\r\tIW1\r69\r2300\r\tIW1\r69\r2403\r\tIW1\r69\r2802\r\tIW1\r69\r2970\r\tIW1\r69\r2a1f\r\tIW1\r69\r2b00\r\tIW1\r69\r2c4e\r\tIW1\r69\r2d03\r\tIW1\r69\r2e00\r\tIW1\r69\r2f39\r\tIW1\r69\r300f\r\tIW1\r69\r371b\r\tIW1\r69\r8318\r\tIW1\r69\r8400\r\tIW1\r69\r8900\r\tIW1\r69\r8a0F\r\tIW1\r69\r8bFF\r\tIW1\r69\r8e00\r\tIW1\r69\r8f00\r\tIW1\r69\r8840\r\tMWS\r12\r4063880000000000\r\tIW1\r74\r00\r\t'
+SYSC Returned: u'\x08\r:R\r\r:R\r~~~\r:P\rIW1\r74\r10\r:P\r~~~\r:P\rIW1\r69\r0054\r:P\rIW1\r69\r01e1\r:P\rIW1\r69\r0212\r:P\rIW1\r69\r0355\r:P\rIW1\r69\r0412\r:P\rIW1\r69\r0a00\r:P\rIW1\r69\r0b40\r:P\rIW1\r69\r132c\r:P\rIW1\r69\r143e\r:P\rIW1\r69\r15fc\r:P\rIW1\r69\r16df\r:P\rIW1\r69\r171f\r:P\rIW1\r69\r183f\r:P\rIW1\r69\r1980\r:P\rIW1\r69\r1f00\r:P\rIW1\r69\r2000\r:P\rIW1\r69\r2103\r:P\rIW1\r69\r2200\r:P\rIW1\r69\r2300\r:P\rIW1\r69\r2403\r:P\rIW1\r69\r2802\r:P\rIW1\r69\r2970\r:P\rIW1\r69\r2a1f\r:P\rIW1\r69\r2b00\r:P\rIW1\r69\r2c4e\r:P\rIW1\r69\r2d03\r:P\rIW1\r69\r2e00\r:P\rIW1\r69\r2f39\r:P\rIW1\r69\r300f\r:P\rIW1\r69\r371b\r:P\rIW1\r69\r8318\r:P\rIW1\r69\r8400\r:P\rIW1\r69\r8900\r:P\rIW1\r69\r8a0F\r:P\rIW1\r69\r8bFF\r:P\rIW1\r69\r8e00\r:P\rIW1\r69\r8f00\r:P\rIW1\r69\r8840\r:P\r~~~\r:P\rMWS\r12\r4063880000000000\r:P\r~~~\r:P\rIW1\r74\r00\r:P\r~~~\r:P\r~~~\r:P\r'
+
+Starting step xsdb
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\xsdb.bat" -eval source "ipi_app\ipi_app_download.tcl" COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+warning: -e option ignored when startup script is given
+
+There are 17 arguments to this script
+
+The name of this script is ipi_app\ipi_app_download.tcl
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+Argument 7 is 0
+
+Argument 8 is 0
+
+Argument 9 is 7
+
+Argument 10 is True
+
+Argument 11 is L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 12 is L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 13 is L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 14 is <setmux:0:74:04>
+
+Argument 15 is <setmux:0:74:00>
+
+Argument 16 is 0
+
+There should be at least 7 arguments at all times (0-6):
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+disconnect
+
+connect -url tcp:127.0.0.1:3121
+
+attempting to launch hw_server
+
+
+
+****** Xilinx hw_server v2020.2
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+INFO: hw_server application started
+
+INFO: Use Ctrl-C to exit hw_server application
+
+
+
+
+
+
+
+****** Xilinx hw_server v2020.2
+
+
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+INFO: hw_server application started
+
+
+
+INFO: Use Ctrl-C to exit hw_server application
+
+
+
+
+
+
+
+
+
+INFO: To connect to this hw_server instance use url: TCP:127.0.0.1:3121
+
+
+
+
+
+
+
+tcfchan#0
+
+no targets found with "name =~"*APU*"". available targets:
+
+  1  PS TAP (Cannot poll JTAG port: CBR not done, debug access not allowed)
+
+     2  PMU
+
+     3  PL
+
+  4  dummy_dap
+
+    while executing
+
+"error "no targets found with \"$params(filter)\". available targets:$target_list""
+
+    (procedure "targets" line 177)
+
+    invoked from within
+
+"targets -set -filter {name =~"*APU*"}"
+
+    invoked from within
+
+"puts [targets -set -filter {name =~"*APU*"}]"
+
+    (file "ipi_app\ipi_app_download.tcl" line 34)
+
+Could not find pass condition:
+(.*)Setting PC to Program Start Address 0x00000000
+
+Could not find pass condition:
+(.*)Successfully downloaded
+
+FAILED IPI APP Test at: 2021-02-21 20:20:50.976000
+Starting MIG PS DDR4 at: 2021-02-21 20:20:50.981000
+Starting step xsdb
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\xsdb.bat" -eval source "ps_ddr\zcu102_mig_ps_ddr4.tcl" COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+warning: -e option ignored when startup script is given
+
+
+
+catch { disconnect }
+
+1
+
+
+
+connect -url tcp:127.0.0.1:3121
+
+tcfchan#0
+
+targets -set -filter {name =~"*APU*"}
+
+no targets found with "name =~"*APU*"". available targets:
+
+  1  PS TAP (Cannot poll JTAG port: CBR not done, debug access not allowed)
+
+     2  PMU
+
+     3  PL
+
+  4  dummy_dap
+
+    while executing
+
+"error "no targets found with \"$params(filter)\". available targets:$target_list""
+
+    (procedure "targets" line 177)
+
+    invoked from within
+
+"targets -set -filter {name =~"*APU*"}"
+
+    invoked from within
+
+"puts [targets -set -filter {name =~"*APU*"}]"
+
+    (file "ps_ddr\zcu102_mig_ps_ddr4.tcl" line 8)
+
+Could not find pass condition:
+Successfully\s+downloaded
+
+FAILED MIG PS DDR4 at: 2021-02-21 20:21:00.724000
+Starting MIG PL DDR4 at: 2021-02-21 20:21:00.726000
+Starting step tcl
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\vivado.bat" -mode batch -source "pl_ddr\zcu102_mig_pl_ddr4.tcl" -nojournal -nolog -tclargs COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+
+
+****** Vivado v2020.2 (64-bit)
+
+  **** SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+source {pl_ddr\zcu102_mig_pl_ddr4.tcl}
+
+# open_hw
+
+WARNING: 'open_hw' is deprecated, please use 'open_hw_manager' instead.
+
+# connect_hw_server -url localhost:3121
+
+INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
+
+INFO: [Labtools 27-2222] Launching hw_server...
+
+INFO: [Labtools 27-2221] Launch Output:
+
+
+
+****** Xilinx hw_server v2020.2
+
+  **** Build date : Nov 18 2020 at 10:01:48
+
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:3042
+
+INFO: [Labtools 27-3417] Launching cs_server...
+
+INFO: [Labtools 27-2221] Launch Output:
+
+
+
+
+
+******** Xilinx cs_server v2020.2
+
+  ****** Build date   : Nov 03 2020-22:02:56
+
+    **** Build number : 2020.2.1604437376
+
+      ** Copyright 2017-2020 Xilinx, Inc. All Rights Reserved.
+
+
+
+
+
+
+
+connect_hw_server: Time (s): cpu = 00:00:00 ; elapsed = 00:00:20 . Memory (MB): peak = 1107.320 ; gain = 0.000
+
+# current_hw_target [get_hw_targets */xilinx_tcf/Digilent/*]
+
+# set_property PARAM.FREQUENCY 15000000 [get_hw_targets */xilinx_tcf/Digilent/*]
+
+# open_hw_target -jtag_mode 1
+
+INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75
+
+INFO: [Labtoolstcl 44-467] Setting hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75 into jtag_mode
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+# scan_ir_hw_jtag 12 -tdi 0x90B
+
+# close_hw_target
+
+INFO: [Labtoolstcl 44-464] Closing hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75
+
+# open_hw_target
+
+INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210308A46C75
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+# current_hw_device [lindex [get_hw_devices] 0]
+
+# refresh_hw_device -update_hw_probes false [lindex [get_hw_devices] 0]
+
+CRITICAL WARNING: [Labtools 27-3421] xczu9_0 PL Power Status OFF, cannot connect PL TAP.  Check POR_B signal.
+
+INFO: [Labtools 27-1435] Device xczu9 (JTAG device index = 0) is not programmed (DONE status = 0).
+
+refresh_hw_device: Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 2125.496 ; gain = 1018.176
+
+# current_hw_device [lindex [get_hw_devices] 1]
+
+# refresh_hw_device -update_hw_probes false [lindex [get_hw_devices] 1]
+
+# current_hw_device [lindex [get_hw_devices] 0]
+
+# set_property PROGRAM.FILE [pwd]/pl_ddr/zcu102_mig_pl_ddr4.bit [lindex [get_hw_devices] 0]
+
+# program_hw_devices [lindex [get_hw_devices] 0]
+
+ERROR: [Labtools 27-3165] End of startup status: LOW
+
+ERROR: [Common 17-39] 'program_hw_devices' failed due to earlier errors.
+
+
+
+    while executing
+
+"program_hw_devices [lindex [get_hw_devices] 0]"
+
+    (file "pl_ddr\zcu102_mig_pl_ddr4.tcl" line 15)
+
+INFO: [Common 17-206] Exiting Vivado at Sun Feb 21 20:21:44 2021...
+
+Found pass condition:
+INFO: \[Common 17\-206\]\s+Exiting\s+[Vv]ivado
+
+Could not find pass condition:
+INFO: \[Labtools 27\-3164\] End of startup status: HIGH
+
+FAILED MIG PL DDR4 at: 2021-02-21 20:21:45.377000
+Starting PING at: 2021-02-21 20:21:45.381000
+Starting step xsdb
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\xsdb.bat" -eval source "ping\ping_download.tcl" COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+warning: -e option ignored when startup script is given
+
+There are 17 arguments to this script
+
+The name of this script is ping\ping_download.tcl
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+Argument 7 is 0
+
+Argument 8 is 0
+
+Argument 9 is 7
+
+Argument 10 is True
+
+Argument 11 is L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 12 is L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 13 is L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 14 is <setmux:0:74:04>
+
+Argument 15 is <setmux:0:74:00>
+
+Argument 16 is 0
+
+There should be at least 7 arguments at all times (0-6):
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+disconnect
+
+connect -url tcp:127.0.0.1:3121tcfchan#0
+
+no targets found with "name =~"*APU*"". available targets:
+
+  1  PS TAP (Cannot poll JTAG port: CBR not done, debug access not allowed)
+
+     2  PMU
+
+     3  PL
+
+  4  dummy_dap
+
+    while executing
+
+"error "no targets found with \"$params(filter)\". available targets:$target_list""
+
+    (procedure "targets" line 177)
+
+    invoked from within
+
+"targets -set -filter {name =~"*APU*"}"
+
+    invoked from within
+
+"puts [targets -set -filter {name =~"*APU*"}]"
+
+    (file "ping\ping_download.tcl" line 34)
+
+Could not find pass condition:
+(.*)Setting PC to Program Start Address 0x00000000
+
+Could not find pass condition:
+(.*)Successfully downloaded
+
+FAILED PING at: 2021-02-21 20:21:53.567000
+Starting UART 01/02 TEST at: 2021-02-21 20:21:53.569000
+Starting step xsdb
+==========
+
+To run this command manually open a shell in "C:\zcu102_bit\BoardUI\tests\ZCU102"
+
+then run "D:\Jonas\PROGRAMS\Vivado20222\Vivado\2020.2\bin\xsdb.bat" -eval source "uart\hello_uart_1_download.tcl" COM6 ZCU102 1.0 881419981751-77939 000A3504A1C0 prod 2.6 0 0 7 "True" "L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]" "L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]" "<setmux:0:74:04>" "<setmux:0:74:00>" "0"
+
+warning: -e option ignored when startup script is given
+
+There are 17 arguments to this script
+
+The name of this script is uart\hello_uart_1_download.tcl
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+Argument 7 is 0
+
+Argument 8 is 0
+
+Argument 9 is 7
+
+Argument 10 is True
+
+Argument 11 is L:\[.*?\.0\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 12 is L:\[.*?\.1\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 13 is L:\[.*?\.2\].*?\[.*?Quad.*?USB to UART .*?\]
+
+Argument 14 is <setmux:0:74:04>
+
+Argument 15 is <setmux:0:74:00>
+
+Argument 16 is 0
+
+There should be at least 7 arguments at all times (0-6):
+
+Argument 0 is COM6
+
+Argument 1 is ZCU102
+
+Argument 2 is 1.0
+
+Argument 3 is 881419981751-77939
+
+Argument 4 is 000A3504A1C0
+
+Argument 5 is prod
+
+Argument 6 is 2.6
+
+disconnect
+
+connect -url tcp:127.0.0.1:3121tcfchan#0
+
+no targets found with "name =~"*APU*"". available targets:
+
+  1  PS TAP (Cannot poll JTAG port: CBR not done, debug access not allowed)
+
+     2  PMU
+
+     3  PL
+
+  4  dummy_dap
+
+    while executing
+
+"error "no targets found with \"$params(filter)\". available targets:$target_list""
+
+    (procedure "targets" line 177)
+
+    invoked from within
+
+"targets -set -filter {name =~"*APU*"}"
+
+    invoked from within
+
+"puts [targets -set -filter {name =~"*APU*"}]"
+
+    (file "uart\hello_uart_1_download.tcl" line 34)
+
+Could not find pass condition:
+Setting PC to Program Start Address
+
+Could not find pass condition:
+Successfully downloaded
+
+FAILED UART 01/02 TEST at: 2021-02-21 20:22:01.439000
+Finished
