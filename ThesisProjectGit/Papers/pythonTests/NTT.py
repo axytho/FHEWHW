@@ -64,6 +64,7 @@ class NTT:
             t, new_t = new_t, (t - quotient * new_t)
             r, new_r = new_r, (r % new_r)
         if r > 1:
+            assert(False)
             return "x is not invertible."
         if t < 0:
             t = t + M
